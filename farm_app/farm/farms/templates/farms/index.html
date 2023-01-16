@@ -1,0 +1,34 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'farms/style.css' %}">
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Homepage</title>
+</head>
+<body>
+    <h1>Farming DB Accounting Software</h1>
+    <a href="{% url 'index' %}">Index</a>
+    <br>
+    <a href="{% url 'reporting' %}">Reporting in Shiny</a>
+    <br>
+    <a href="{% url 'transactions' %}">List of Transactions</a>
+    <br>
+    <a href="http://127.0.0.1:8000/admin/farms/fieldyeartransaction/">Update Transactions (links out)</a>
+    <br>
+    <a href="http://127.0.0.1:8000/admin/farms/fieldyearcrop/">Update Crops Acreage and Yields (links out)</a>
+    <br>
+<p> Current Transactions: {{ num_tx }}</p>
+<br>
+
+
+<img src="{% static 'farms/wheat.jpeg' %}" alt="My image">
+ 
+ 
+
+</body>
+</html>
