@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import os
 
+DB = os.getenv('DB')
+DBUSER = os.getenv('DBUSER')
+DBPW = os.getenv('DBPW')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -87,9 +91,9 @@ WSGI_APPLICATION = 'farm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'farmdb',
-        'USER': '',
-        'PASSWORD': '',
+        'NAME': DB,
+        'USER': DBUSER,
+        'PASSWORD': DBPW,
         'HOST': 'host.docker.internal',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }
