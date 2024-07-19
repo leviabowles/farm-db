@@ -1,1 +1,1 @@
-docker build farm_app --tag farm_dev 
+docker build farm_app --tag farm
