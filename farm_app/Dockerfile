@@ -13,9 +13,3 @@ RUN pip3 install tzdata
 RUN cd /var/
 RUN mkdir www
 RUN cd www
-### BELOW THIS LINE ARE ONE-OFF
-
-#RUN django-admin startproject django_app
-#RUN cd django_app
-#RUN python3 manage.py migrate
-
