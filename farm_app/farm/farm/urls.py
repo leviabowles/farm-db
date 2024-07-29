@@ -25,3 +25,4 @@ urlpatterns += [
 
 
 admin.site.site_header = 'Farm DB Accounting'
+
