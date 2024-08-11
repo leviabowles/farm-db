@@ -12,7 +12,7 @@ from farms.models import Vendor
 ## ADMIN CLASSES CUSTOM
 
 class FieldYearTransactionAdmin(admin.ModelAdmin):
-    list_display = ('field', 'year_key', 'trans_type', 'transaction_object', 'vendor', 'paid_amount', 'received_amount')
+    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor', 'paid_amount', 'received_amount')
     list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
 
 class LoanPaymentAdmin(admin.ModelAdmin):
