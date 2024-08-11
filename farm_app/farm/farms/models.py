@@ -1,10 +1,3 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
 
@@ -173,6 +166,9 @@ class Field(models.Model):
     create_date = models.DateTimeField(blank=True, null=True)
     update_date = models.DateTimeField(blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.field_name}, {str(self.field_county)}"
+
     class Meta:
         managed = False
         db_table = 'field'
@@ -214,7 +210,8 @@ class FieldYearTransaction(models.Model):
         (debit, 'debit'),
         (credit, 'credit'),
     ]
-    field_key = models.CharField(max_length=10, blank=True, null=True, choices = field_choices)
+    #field_key = models.CharField(max_length=10, blank=True, null=True, choices = field_choices)
+    field = models.ForeignKey('Field', models.DO_NOTHING, db_column = 'field', blank=True, null=True)
     year_key = models.IntegerField(blank=True, null=True)
     trans_type = models.CharField(max_length=10, blank=True, null=True, choices = tx_choices)
     #object_type = models.CharField(max_length=25, blank=True, null=True)
@@ -228,15 +225,16 @@ class FieldYearTransaction(models.Model):
     received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     create_date = models.DateTimeField(blank=True, null=True)
     update_date = models.DateTimeField(blank=True, null=True)
+    doc_file = models.FileField()
 
 
 
     def __str__(self):
-        return f"{self.field_key}, {str(self.year_key)}"
+        return f"{self.field}, {str(self.year_key)}"
 
 
     class Meta:
-        managed = False
+        #managed = False
         db_table = 'field_year_transaction'
 
 
