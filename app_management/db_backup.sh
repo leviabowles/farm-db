@@ -1,1 +1,1 @@
-mysqldump -u root -p farmdb > "dbbackup$(date +%Y%m%d).sql"
+0 3 * * * /usr/bin/mysqldump -u root farmdb > /home/username/db_backups/farmdb-$(date +\%Y\%m\%d).sql
