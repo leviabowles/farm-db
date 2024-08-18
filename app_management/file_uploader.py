@@ -1,6 +1,6 @@
 import os
 
-wd = '/home/users/lb/db_backups'
+wd = '/home/user/lb/db_backups'
 
 files = os.listdir(wd)
 files = files.sort(reverse = True)
