@@ -1,1 +1,1 @@
-copy app_management Z:\farming\ -force
+copy app_management Z:\farming\ 
