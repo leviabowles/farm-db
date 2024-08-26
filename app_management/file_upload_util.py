@@ -14,7 +14,6 @@ credentials = service_account.Credentials.from_service_account_file(
                               scopes=scope)
 service = build('drive', 'v3', credentials=credentials)
 
-
 file_metadata = {'name': 'bip.csv'}
 media = MediaFileUpload('bip.csv',
                         mimetype='text/csv')
