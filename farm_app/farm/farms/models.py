@@ -217,7 +217,6 @@ class FieldYearTransaction(models.Model):
     vendor = models.ForeignKey('Vendor', models.DO_NOTHING, db_column='vendor', blank=True, null=True)
     invoice_date = models.DateTimeField(blank=True, null=True)
     paid_date = models.DateTimeField(blank=True, null=True)
-    #vendor_name = models.CharField(max_length=255, blank=True, null=True)
     memo = models.CharField(max_length=255, blank=True, null=True)
     paid_amount = models.DecimalField(max_digits=15, decimal_places=2)
     received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
