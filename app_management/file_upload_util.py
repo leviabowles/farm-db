@@ -23,9 +23,9 @@ class upload_gdrive:
                               scopes=scope)
         self.service = build('drive', 'v3', credentials=self.credentials)
 
-    def upload_file(self, file_metadata, media):
-        media = MediaFileUpload('bip.csv',
-                        mimetype='text/csv')
+    def upload_file(self, file_metadata, filename, mimetype):
+        media = MediaFileUpload(filename,
+                        mimetype=mimetype)
         file = self.service.files().create(body=file_metadata, media_body=media,
                               fields='id').execute()
 
