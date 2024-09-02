@@ -210,16 +210,13 @@ class FieldYearTransaction(models.Model):
         (debit, 'debit'),
         (credit, 'credit'),
     ]
-    #field_key = models.CharField(max_length=10, blank=True, null=True, choices = field_choices)
     field = models.ForeignKey('Field', models.DO_NOTHING, db_column = 'field', blank=True, null=True)
     year_key = models.IntegerField(blank=True, null=True)
     trans_type = models.CharField(max_length=10, blank=True, null=True, choices = tx_choices)
-    #object_type = models.CharField(max_length=25, blank=True, null=True)
     transaction_object = models.ForeignKey('TransactionObject', models.DO_NOTHING, blank=True, null=True)
     vendor = models.ForeignKey('Vendor', models.DO_NOTHING, db_column='vendor', blank=True, null=True)
     invoice_date = models.DateTimeField(blank=True, null=True)
     paid_date = models.DateTimeField(blank=True, null=True)
-    #vendor_name = models.CharField(max_length=255, blank=True, null=True)
     memo = models.CharField(max_length=255, blank=True, null=True)
     paid_amount = models.DecimalField(max_digits=15, decimal_places=2)
     received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
