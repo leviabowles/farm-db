@@ -1,17 +1,19 @@
 import pandas as pd
-import io
 import os.path
-import base64
 from email.message import EmailMessage
 from google.oauth2 import service_account
-from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
+
+'''
+from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.errors import HttpError
 from oauth2client.service_account import ServiceAccountCredentials
-
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+import base64
+import io
+'''
 
 class upload_gdrive:
     # init creates an auth object 
@@ -22,23 +24,16 @@ class upload_gdrive:
                               filename=key, 
                               scopes=scope)
         self.service = build('drive', 'v3', credentials=self.credentials)
-
+        
     def upload_file(self, file_metadata, filename, mimetype):
-        media = MediaFileUpload(filename,
-                        mimetype=mimetype)
-        file = self.service.files().create(body=file_metadata, media_body=media,
-                              fields='id').execute()
+        media = MediaFileUpload(filename,mimetype=mimetype)
+        file = self.service.files().create(body=file_metadata, media_body=media,fields='id').execute()
         
     def get_latest_file(self, wd):
         files = os.listdir(wd)
         files.sort(reverse = True)
         self.lastest_file = files[0]
-
-
-
-
-
-
+        print(self.lastest_file)
 
 
 
