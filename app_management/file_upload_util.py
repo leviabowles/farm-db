@@ -26,7 +26,7 @@ class upload_gdrive:
         self.service = build('drive', 'v3', credentials=self.credentials)
         
     def upload_file(self, mimetype):
-        file_metadata = {'name': self.latest_file}
+        file_metadata = {'name': self.lastest_file}
         media = MediaFileUpload(self.lastest_file,mimetype=mimetype)
         file = self.service.files().create(body=file_metadata, media_body=media,fields='id').execute()
         
