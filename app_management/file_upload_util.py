@@ -12,20 +12,32 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 from oauth2client.service_account import ServiceAccountCredentials
 
-scope = ['https://www.googleapis.com/auth/drive']
-service_account_json_key = 'farm-db-key.json'
-credentials = service_account.Credentials.from_service_account_file(
-                              filename=service_account_json_key, 
+
+class upload_gdrive:
+    # init creates an auth object 
+    def __init__(self, scope, key):
+        self.scope = scope
+        self.key = key 
+        self.credentials = service_account.Credentials.from_service_account_file(
+                              filename=key, 
                               scopes=scope)
-service = build('drive', 'v3', credentials=credentials)
+        self.service = build('drive', 'v3', credentials=self.credentials)
 
-file_metadata = {'name': 'bip.csv'}
-media = MediaFileUpload('bip.csv',
+    def upload_file(self, file_metadata, media):
+        media = MediaFileUpload('bip.csv',
                         mimetype='text/csv')
-
-file = service.files().create(body=file_metadata, media_body=media,
+        file = self.service.files().create(body=file_metadata, media_body=media,
                               fields='id').execute()
 
+
+
+
+
+
+
+
+
+'''
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://mail.google.com/']
@@ -66,3 +78,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+'''
