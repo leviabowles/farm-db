@@ -28,6 +28,11 @@ class upload_gdrive:
                         mimetype=mimetype)
         file = self.service.files().create(body=file_metadata, media_body=media,
                               fields='id').execute()
+        
+    def get_latest_file(self, wd):
+        files = os.listdir(wd)
+        files.sort(reverse = True)
+        self.lastest_file = files[0]
 
 
 
