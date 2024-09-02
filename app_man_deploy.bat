@@ -1,1 +1,1 @@
-copy app_management Z:\farming\ 
+copy app_management Z:\farming\app_management\
