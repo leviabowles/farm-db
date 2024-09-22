@@ -222,7 +222,7 @@ class FieldYearTransaction(models.Model):
     paid_amount = models.DecimalField(max_digits=15, decimal_places=2)
     received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     create_date = models.DateTimeField(blank=True, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
+    update_date = models.DateField(blank=True, null=True)
     doc_file = models.FileField()
 
 
@@ -232,7 +232,7 @@ class FieldYearTransaction(models.Model):
 
 
     class Meta:
-        #managed = False
+        managed = False
         db_table = 'field_year_transaction'
 
 
