@@ -40,7 +40,7 @@ class VendorAdmin(admin.ModelAdmin):
     list_display = ('vendor_name','create_date')
 
 class FarmYearAdmin(admin.ModelAdmin):
-    list_display = ('year_key')
+    list_display = ('year_key','create_date')
 
 
 
