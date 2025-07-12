@@ -219,7 +219,7 @@ class FieldYearTransaction(models.Model):
     invoice_date = models.DateField(blank=True, null=True)
     paid_date = models.DateField(blank=True, null=True)
     memo = models.CharField(max_length=255, blank=True, null=True)
-    paid_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    paid_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     create_date = models.DateField(blank=True, null=True)
     update_date = models.DateField(blank=True, null=True)
