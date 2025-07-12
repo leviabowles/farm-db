@@ -208,10 +208,6 @@ class FieldYearCrop(models.Model):
 
 
 class FieldYearTransaction(models.Model):
-    STEG = 'STEG'
-    field_choices = [
-        (STEG, 'STEG'),
-    ]
     debit = 'debit'
     credit = 'credit'
     tx_choices = [
