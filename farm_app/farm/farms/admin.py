@@ -8,6 +8,7 @@ from farms.models import Loan
 from farms.models import Field
 from farms.models import TransactionObject
 from farms.models import Vendor
+from farms.models import FarmYear
 
 ## ADMIN CLASSES CUSTOM
 
@@ -38,6 +39,9 @@ class TransactionObjectAdmin(admin.ModelAdmin):
 class VendorAdmin(admin.ModelAdmin):
     list_display = ('vendor_name','create_date')
 
+class FarmYearAdmin(admin.ModelAdmin):
+    list_display = ('year_key')
+
 
 
 
@@ -50,6 +54,7 @@ admin.site.register(Loan, LoanAdmin)
 admin.site.register(Field, FieldAdmin)
 admin.site.register(TransactionObject, TransactionObjectAdmin)
 admin.site.register(Vendor, VendorAdmin)
+admin.site.register(FarmYear, FarmYearAdmin)
 
 # Faked this up just to pull in all models
 #models = apps.get_models()
