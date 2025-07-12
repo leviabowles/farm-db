@@ -1,0 +1,1 @@
+copy Z:\farming\farm_app\farm\farms\models.py farm_app\farm\farms\models.py 
