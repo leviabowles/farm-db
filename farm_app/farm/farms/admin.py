@@ -21,7 +21,7 @@ class LoanPaymentAdmin(admin.ModelAdmin):
 
 class FieldYearCropAdmin(admin.ModelAdmin):
     list_display = ('field', 'year_key', 'crop_key','acres_planted','total_bushels')
-    list_filter = ('field', 'year_key', 'crop_key')
+    list_filter = ('field', 'year_key', 'crop')
 
 class CropAdmin(admin.ModelAdmin):
     list_display = ('crop_key', 'crop_name')
