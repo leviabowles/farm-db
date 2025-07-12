@@ -196,9 +196,14 @@ class FieldYearCrop(models.Model):
     acres_planted = models.IntegerField(blank=True, null=True)
     total_bushels = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.field}, {str(self.year_key)}"
+
     class Meta:
         managed = False
         db_table = 'field_year_crop'
+
+
 
 
 class FieldYearTransaction(models.Model):
