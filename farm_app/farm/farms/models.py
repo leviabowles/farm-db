@@ -146,8 +146,8 @@ class DjangoSession(models.Model):
 
 class FarmYear(models.Model):
     year_key = models.CharField(max_length=10, blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True, default=datetime.now)
-    update_date = models.DateTimeField(blank=True, null=True, default=datetime.now)
+    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
     def __str__(self):
         return f"{str(self.year_key)}"
