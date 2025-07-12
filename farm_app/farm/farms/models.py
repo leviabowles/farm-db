@@ -254,8 +254,8 @@ class Loan(models.Model):
     amort_years = models.IntegerField(blank=True, null=True)
     term_years = models.IntegerField(blank=True, null=True)
     date_of_initiation = models.DateField(blank=True, null=True)
-    create_date = models.DateField(blank=True, null=True)
-    update_date = models.DateField(blank=True, null=True)
+    create_date = models.DateField(blank=True, null=True, default=datetime.date.today)
+    update_date = models.DateField(blank=True, null=True, default=datetime.date.today)
 
     class Meta:
         managed = False
