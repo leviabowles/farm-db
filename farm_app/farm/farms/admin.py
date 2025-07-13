@@ -48,7 +48,7 @@ class LedgerEntriesAdmin(admin.ModelAdmin):
     list_display = ('create_date', 'memo')
 
 class CapitalPaymentAdmin(admin.ModelAdmin):
-    list_display = ('create_date', 'payment_type_id', 'amount')
+    list_display = ('create_date', 'payment_type_id', 'total_payment')
 
 
 ## REGISTER SOME SHIT
