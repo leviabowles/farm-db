@@ -242,6 +242,32 @@ class FieldYearTransaction(models.Model):
         db_table = 'field_year_transaction'
 
 
+class LedgerEntries(models.Model):
+    debit = 'debit'
+    credit = 'credit'
+    tx_choices = [
+        (debit, 'debit'),
+        (credit, 'credit'),
+    ]
+    field = models.ForeignKey('Field', models.DO_NOTHING, db_column = 'field', blank=True, null=True)
+    year_key = models.IntegerField(blank=True, null=True)
+    trans_type = models.CharField(max_length=10, blank=True, null=True, choices = tx_choices)
+    memo = models.CharField(max_length=255, blank=True, null=True)
+    paid_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    create_date = models.DateField(blank=True, null=True, default=datetime.date.today)
+    update_date = models.DateField(blank=True, null=True, default=datetime.date.today)
+
+
+
+    def __str__(self):
+        return f"{self.field}, {str(self.year_key)}"
+
+
+    class Meta:
+        managed = False
+        db_table = 'field_year_transaction'
+
 class Loan(models.Model):
     loan_key = models.CharField(max_length=10, blank=True, null=True)
     field_key = models.CharField(max_length=10, blank=True, null=True)
