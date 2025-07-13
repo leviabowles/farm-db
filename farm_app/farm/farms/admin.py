@@ -43,7 +43,8 @@ class VendorAdmin(admin.ModelAdmin):
 class FarmYearAdmin(admin.ModelAdmin):
     list_display = ('year_key','create_date')
 
-
+class LedgerEntriesAdmin(admin.ModelAdmin):
+    list_display = ('create_date', 'memo')
 
 
 ## REGISTER SOME SHIT
@@ -56,6 +57,7 @@ admin.site.register(Field, FieldAdmin)
 admin.site.register(TransactionObject, TransactionObjectAdmin)
 admin.site.register(Vendor, VendorAdmin)
 admin.site.register(FarmYear, FarmYearAdmin)
+admin.site.register(LedgerEntries, LedgerEntriesAdmin)
 
 # Faked this up just to pull in all models
 #models = apps.get_models()
