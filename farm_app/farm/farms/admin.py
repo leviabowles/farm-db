@@ -9,6 +9,7 @@ from farms.models import Field
 from farms.models import TransactionObject
 from farms.models import Vendor
 from farms.models import FarmYear
+from farms.models import LedgerEntries
 
 ## ADMIN CLASSES CUSTOM
 
