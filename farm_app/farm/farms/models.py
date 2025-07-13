@@ -249,7 +249,6 @@ class LedgerEntries(models.Model):
         (debit, 'debit'),
         (credit, 'credit'),
     ]
-    field = models.ForeignKey('Field', models.DO_NOTHING, db_column = 'field', blank=True, null=True)
     year_key = models.IntegerField(blank=True, null=True)
     trans_type = models.CharField(max_length=10, blank=True, null=True, choices = tx_choices)
     memo = models.CharField(max_length=255, blank=True, null=True)
