@@ -258,15 +258,13 @@ class LedgerEntries(models.Model):
     create_date = models.DateField(blank=True, null=True, default=datetime.date.today)
     update_date = models.DateField(blank=True, null=True, default=datetime.date.today)
 
-
-
     def __str__(self):
-        return f"{self.field}, {str(self.year_key)}"
+        return f"{self.memo}, {str(self.create_date)}"
 
 
     class Meta:
         managed = False
-        db_table = 'field_year_transaction'
+        db_table = 'ledger_entries'
 
 class Loan(models.Model):
     loan_key = models.CharField(max_length=10, blank=True, null=True)
