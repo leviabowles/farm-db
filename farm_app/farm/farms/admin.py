@@ -62,6 +62,7 @@ admin.site.register(TransactionObject, TransactionObjectAdmin)
 admin.site.register(Vendor, VendorAdmin)
 admin.site.register(FarmYear, FarmYearAdmin)
 admin.site.register(LedgerEntries, LedgerEntriesAdmin)
+admin.site.register(CapitalPayment, CapitalPaymentAdmin)
 
 # Faked this up just to pull in all models
 #models = apps.get_models()
