@@ -10,6 +10,7 @@ from farms.models import TransactionObject
 from farms.models import Vendor
 from farms.models import FarmYear
 from farms.models import LedgerEntries
+from farms.models import CapitalPayment
 
 ## ADMIN CLASSES CUSTOM
 
@@ -45,6 +46,9 @@ class FarmYearAdmin(admin.ModelAdmin):
 
 class LedgerEntriesAdmin(admin.ModelAdmin):
     list_display = ('create_date', 'memo')
+
+class CapitalPaymentAdmin(admin.ModelAdmin):
+    list_display = ('create_date', 'payment_type_id', 'amount')
 
 
 ## REGISTER SOME SHIT
