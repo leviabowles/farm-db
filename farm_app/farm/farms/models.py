@@ -181,8 +181,8 @@ class Field(models.Model):
 class FieldYear(models.Model):
     field_key = models.CharField(max_length=10, blank=True, null=True)
     year_key = models.IntegerField(blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
+    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
     class Meta:
         managed = False
