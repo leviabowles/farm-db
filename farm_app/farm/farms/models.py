@@ -292,8 +292,8 @@ class LoanPayment(models.Model):
     total_payment = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     interest_payment = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     principal_payment = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
+    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
 
     def __str__(self):
