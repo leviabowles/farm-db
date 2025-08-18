@@ -167,8 +167,8 @@ class Field(models.Model):
     crop_acreage = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     pasture_acreage = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     crp_acreage = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
+    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
     def __str__(self):
         return f"{self.field_name}, {str(self.field_county)}"
