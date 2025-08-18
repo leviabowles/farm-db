@@ -77,8 +77,8 @@ class CapitalPayment(models.Model):
     payment_type_id = models.CharField(max_length=10, blank=True, null=True)
     payment_date = models.DateField(blank=True, null=True)
     total_payment = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
+    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
     class Meta:
         managed = False
