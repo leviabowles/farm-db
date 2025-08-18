@@ -195,8 +195,8 @@ class FieldYearCrop(models.Model):
     year_key = models.IntegerField(blank=True, null=True)
     crop_key = models.CharField(max_length=10, blank=True, null=True)
     crop = models.ForeignKey('Crop', models.DO_NOTHING, db_column = 'crop', blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
+    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     acres_planted = models.IntegerField(blank=True, null=True)
     total_bushels = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
 
