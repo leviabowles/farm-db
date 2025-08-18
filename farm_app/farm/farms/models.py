@@ -346,8 +346,8 @@ class StagingLegitTransactionObjects(models.Model):
 
 class TransactionObject(models.Model):
     object_name = models.CharField(max_length=10, blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
+    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
     def __str__(self):
         return f"{self.object_name}"
