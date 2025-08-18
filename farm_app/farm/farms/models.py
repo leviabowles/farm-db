@@ -218,6 +218,7 @@ class FieldYearTransaction(models.Model):
         (credit, 'credit'),
     ]
     field = models.ForeignKey('Field', models.DO_NOTHING, db_column = 'field', blank=True, null=True)
+    #field_year_crop = models.ForeignKey('FieldYearCrop', models.DO_NOTHING, db_column = 'field_year_crop', blank=True, null=True)
     year_key = models.IntegerField(blank=True, null=True)
     trans_type = models.CharField(max_length=10, blank=True, null=True, choices = tx_choices)
     transaction_object = models.ForeignKey('TransactionObject', models.DO_NOTHING, blank=True, null=True)
