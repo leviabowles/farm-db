@@ -336,14 +336,6 @@ class StagingFieldYearTransaction(models.Model):
         db_table = 'staging_field_year_transaction'
 
 
-class StagingLegitTransactionObjects(models.Model):
-    object_type = models.CharField(unique=True, max_length=25, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'staging_legit_transaction_objects'
-
-
 class TransactionObject(models.Model):
     object_name = models.CharField(max_length=10, blank=True, null=True)
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
