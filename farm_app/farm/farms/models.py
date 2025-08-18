@@ -316,25 +316,6 @@ class StagingFieldYearCrop(models.Model):
         db_table = 'staging_field_year_crop'
 
 
-class StagingFieldYearTransaction(models.Model):
-    field_key = models.CharField(max_length=10, blank=True, null=True)
-    year_key = models.IntegerField(blank=True, null=True)
-    trans_type = models.CharField(max_length=10, blank=True, null=True)
-    object_type = models.CharField(max_length=25, blank=True, null=True)
-    invoice_date = models.DateTimeField(blank=True, null=True)
-    paid_date = models.DateTimeField(blank=True, null=True)
-    vendor = models.CharField(max_length=255, blank=True, null=True)
-    expense_category = models.CharField(max_length=255, blank=True, null=True)
-    paid_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    pushed = models.IntegerField(blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'staging_field_year_transaction'
-
 
 class TransactionObject(models.Model):
     object_name = models.CharField(max_length=10, blank=True, null=True)
