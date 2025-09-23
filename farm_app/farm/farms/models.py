@@ -244,7 +244,7 @@ class FieldYearTransaction(models.Model):
         db_table = 'field_year_transaction'
 
 
-class FieldYearTransactionCrop(model.Model):
+class FieldYearTransactionCrop(models.Model):
     field_year_transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE)
     field_year_crop = models.ForeignKey(FieldYearCrop, on_delete=models.CASCADE)
 
