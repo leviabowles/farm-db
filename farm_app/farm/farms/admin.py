@@ -68,7 +68,7 @@ admin.site.register(Vendor, VendorAdmin)
 admin.site.register(FarmYear, FarmYearAdmin)
 admin.site.register(LedgerEntries, LedgerEntriesAdmin)
 admin.site.register(CapitalPayment, CapitalPaymentAdmin)
-admin.site.register(FieldYearTransactionCrop, FieldYearTransactionCropAdmin )
+admin.site.register(FieldYearTransactionCrop, FieldYearTransactionCropAdmin)
 
 
 
