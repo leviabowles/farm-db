@@ -15,9 +15,7 @@ from farms.models import FieldYearTransactionCrop
 
 ## ADMIN CLASSES CUSTOM
 
-class FieldYearTransactionAdmin(admin.ModelAdmin):
-    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor', 'paid_amount', 'received_amount')
-    list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
+
 
 class LoanPaymentAdmin(admin.ModelAdmin):
     list_display = ('loan_key','year_key')
@@ -54,6 +52,11 @@ class CapitalPaymentAdmin(admin.ModelAdmin):
 class FieldYearTransactionCropAdmin(admin.TabularInline):
     model = FieldYearTransactionCrop
     extra = 1
+
+class FieldYearTransactionAdmin(admin.ModelAdmin):
+    inlines = (FieldYearTransactionCropAdmin)
+    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor', 'paid_amount', 'received_amount')
+    list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
 
 
 ## REGISTER SOME SHIT
