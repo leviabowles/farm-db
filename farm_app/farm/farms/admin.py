@@ -11,7 +11,7 @@ from farms.models import Vendor
 from farms.models import FarmYear
 from farms.models import LedgerEntries
 from farms.models import CapitalPayment
-from farms.models import FarmYearTransactionCrop
+from farms.models import FieldYearTransactionCrop
 
 ## ADMIN CLASSES CUSTOM
 
