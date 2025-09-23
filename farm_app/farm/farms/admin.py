@@ -11,6 +11,7 @@ from farms.models import Vendor
 from farms.models import FarmYear
 from farms.models import LedgerEntries
 from farms.models import CapitalPayment
+from farms.models import FarmYearTransactionCrop
 
 ## ADMIN CLASSES CUSTOM
 
@@ -50,6 +51,9 @@ class LedgerEntriesAdmin(admin.ModelAdmin):
 class CapitalPaymentAdmin(admin.ModelAdmin):
     list_display = ('create_date', 'payment_type_id', 'total_payment')
 
+class FieldYearTransactionCropAdmin(admin.TabularInline):
+    model = FieldYearTransactionCrop
+
 
 ## REGISTER SOME SHIT
 admin.site.register(LoanPayment, LoanPaymentAdmin)
@@ -63,6 +67,7 @@ admin.site.register(Vendor, VendorAdmin)
 admin.site.register(FarmYear, FarmYearAdmin)
 admin.site.register(LedgerEntries, LedgerEntriesAdmin)
 admin.site.register(CapitalPayment, CapitalPaymentAdmin)
+admin.site.register(FieldYearTransactionCrop, FieldYearTransactionCropAdmin )
 
 
 
