@@ -53,6 +53,7 @@ class CapitalPaymentAdmin(admin.ModelAdmin):
 
 class FieldYearTransactionCropAdmin(admin.TabularInline):
     model = FieldYearTransactionCrop
+    extra = 1
 
 
 ## REGISTER SOME SHIT
