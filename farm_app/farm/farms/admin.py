@@ -72,6 +72,7 @@ admin.site.register(FieldYearTransactionCrop, FieldYearTransactionCropAdmin)
 
 
 
+
 # Faked this up just to pull in all models
 #models = apps.get_models()
 #print(models)
