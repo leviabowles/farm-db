@@ -230,6 +230,7 @@ class FieldYearTransaction(models.Model):
     received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     create_date = models.DateField(blank=True, null=True, default=datetime.date.today)
     update_date = models.DateField(blank=True, null=True, default=datetime.date.today)
+    field_year_crop = models.ManyToManyField(FieldYearCrop, through='FieldYearTransactionCrop')
     doc_file = models.FileField()
 
 
@@ -241,6 +242,15 @@ class FieldYearTransaction(models.Model):
     class Meta:
         managed = False
         db_table = 'field_year_transaction'
+
+
+class FieldYearTransactionCrop(model.Model):
+    field_year_transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE)
+    field_year_crop = models.ForeignKey(FieldYearCrop, on_delete=models.CASCADE)
+
+    class Meta:
+        managed = False
+        db_table = 'field_year_transaction_crop'
 
 
 class LedgerEntries(models.Model):
