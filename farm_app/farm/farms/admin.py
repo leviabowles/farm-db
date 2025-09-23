@@ -54,7 +54,7 @@ class FieldYearTransactionCropAdmin(admin.TabularInline):
     extra = 1
 
 class FieldYearTransactionAdmin(admin.ModelAdmin):
-    inlines = (FieldYearTransactionCropAdmin)
+    inlines = [FieldYearTransactionCropAdmin]
     list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor', 'paid_amount', 'received_amount')
     list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
 
