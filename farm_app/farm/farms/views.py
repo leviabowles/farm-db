@@ -1,11 +1,17 @@
 from django.shortcuts import render
 from django.views.generic import ListView
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views import View
 # Create your views here.
 from .models import FieldYearTransaction
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import CreateAPIView
 from rest_framework.generics import DestroyAPIView
 from rest_framework.generics import UpdateAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import status
 from .serializers import TxSerializer
 
 def index(request):
@@ -33,6 +39,12 @@ class ListTxAPIView(ListAPIView):
     """This endpoint list all of the available todos from the database"""
     queryset = FieldYearTransaction.objects.all()
     serializer_class = TxSerializer
+    pagination_class = PageNumberPagination
+    
+    def get_queryset(self):
+        queryset = FieldYearTransaction.objects.all()
+        # Add filtering options here if needed
+        return queryset
 
 class CreateTxAPIView(CreateAPIView):
     """This endpoint allows for creation of a todo"""
