@@ -16,6 +16,8 @@ import os
 DB = os.getenv('DB')
 DBUSER = os.getenv('DBUSER')
 DBPW = os.getenv('DBPW')
+# Database configuration – use MySQL if environment variables are set, otherwise fall back to a local SQLite file.
+# (The actual DATABASES dict is defined later after BASE_DIR is set.)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ ADMIN_SITE_HEADER = "Farm DB Accounting"
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = 'django-insecure-1234567890abcdefghijklmnopqrstuvwx'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -35,7 +37,7 @@ ALLOWED_HOSTS += ['127.0.0.1']
 ALLOWED_HOSTS += ['host.docker.internal']
 ALLOWED_HOSTS += ['localhost']
 ALLOWED_HOSTS += ['0.0.0.0']
-ALLOWED_HOSTS += ['farm-db']
+ALLOWED_HOSTS += ['farm-db', 'web', 'web:8000']
 # Application definition
 
 INSTALLED_APPS = [
@@ -48,8 +50,24 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_tables2',
     'rest_framework',
-    'dark',
 ]
+
+# ------------------------------------------------------------
+# First‑principles configuration: we manage the database schema
+# manually with the SQL script mounted at /docker-entrypoint-initdb.d.
+# Disable Django's migration system for all built‑in apps and our own
+# ``farms`` app so that the ORM works against the existing tables
+# without attempting to run migrations on container start.
+# Setting a module path to ``None`` tells Django that the app has no
+# migrations. This is safe because the schema is created externally.
+# ------------------------------------------------------------
+MIGRATION_MODULES = {
+    'admin': None,
+    'auth': None,
+    'contenttypes': None,
+    'sessions': None,
+    'farms': None,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -85,20 +103,26 @@ TEMPLATES = [
 WSGI_APPLICATION = 'farm.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': DB,
-        'USER': DBUSER,
-        'PASSWORD': DBPW,
-        'HOST': 'host.docker.internal',   # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
+# Database configuration moved to conditional block below (supports MySQL via env vars or fallback SQLite).
+# Database configuration – use MySQL if environment variables are set, otherwise fall back to a local SQLite file.
+if DB and DBUSER and DBPW:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': DB,
+            'USER': DBUSER,
+            'PASSWORD': DBPW,
+            'HOST': os.getenv('DBHOST', 'localhost'),   # Or an IP Address that your DB is hosted on
+            'PORT': '3306',
+        }
     }
-}
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

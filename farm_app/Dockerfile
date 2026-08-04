@@ -1,22 +1,23 @@
 FROM ubuntu:22.04
-RUN apt update
-RUN apt-get install python3 python3-pip -y
-RUN apt-get install vim -y
-RUN apt-get install mysql-client -y
-RUN apt-get install libmysqlclient-dev -y
-RUN apt-get install pkg-config -y
-RUN pip3 install Django
-RUN pip3 install mysqlclient
-RUN pip3 install django_tables2
-RUN pip3 install djangorestframework
-RUN pip3 install django-dark
-RUN pip3 install tzdata
-RUN cd /var/
-RUN mkdir www
-RUN cd www
-### BELOW THIS LINE ARE ONE-OFF
 
-#RUN django-admin startproject django_app
-#RUN cd django_app
-#RUN python3 manage.py migrate
-ENTRYPOINT bash -c 'cd /var/www/farm_app/farm ; python3 manage.py runserver 0.0.0.0:8000'
+# Install system dependencies required for Python and MySQL client libraries
+RUN apt-get update && \
+	apt-get install -y python3 python3-pip vim mysql-client libmysqlclient-dev pkg-config && \
+	rm -rf /var/lib/apt/lists/*
+
+# Set working directory inside the container where the Django project will live
+WORKDIR /app
+
+# Copy the Django application source code and requirements into the image
+# The build context will be set to the repository root, so we copy from there.
+COPY farm_app/farm/ ./
+COPY requirements.txt .
+
+# Install Python dependencies from requirements.txt (ensures versions match host)
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Expose the default Django development server port
+EXPOSE 8000
+
+# Default command runs the Django development server
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]

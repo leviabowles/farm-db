@@ -5,11 +5,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
 # Create your views here.
-from .models import FieldYearTransaction
-from rest_framework.generics import ListAPIView
-from rest_framework.generics import CreateAPIView
-from rest_framework.generics import DestroyAPIView
-from rest_framework.generics import UpdateAPIView
+from .models import FieldYearTransaction, Field, FieldYearCrop
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .serializers import TxSerializer
@@ -35,28 +34,40 @@ class transactions(ListView):
     model = FieldYearTransaction
     template_name = 'transactions.html'
 
-class ListTxAPIView(ListAPIView):
-    """This endpoint list all of the available todos from the database"""
+@method_decorator(csrf_exempt, name='dispatch')
+class ListTxAPIView(ListCreateAPIView):
+    """List all transactions (GET) or create a new transaction (POST).
+    Pagination is disabled to simplify the React client which expects an array.
+    CSRF exemption allows POST requests from the frontend without requiring a token.
+    """
     queryset = FieldYearTransaction.objects.all()
     serializer_class = TxSerializer
-    pagination_class = PageNumberPagination
-    
+    pagination_class = None
+
     def get_queryset(self):
-        queryset = FieldYearTransaction.objects.all()
         # Add filtering options here if needed
-        return queryset
+        return FieldYearTransaction.objects.all()
 
-class CreateTxAPIView(CreateAPIView):
-    """This endpoint allows for creation of a todo"""
+@method_decorator(csrf_exempt, name='dispatch')
+class TransactionDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete a transaction by its primary key.
+    CSRF exemption allows PUT/DELETE requests from the frontend.
+    """
     queryset = FieldYearTransaction.objects.all()
     serializer_class = TxSerializer
+# Import the newly created serializers
+from .serializers import FieldSerializer, FieldYearCropSerializer
 
-class UpdateTxAPIView(UpdateAPIView):
-    """This endpoint allows for updating a specific todo by passing in the id of the todo to update"""
-    queryset = FieldYearTransaction.objects.all()
-    serializer_class = TxSerializer
+# API for listing/creating Fields
+@method_decorator(csrf_exempt, name='dispatch')
+class FieldListCreateAPIView(ListCreateAPIView):
+    """Expose the Field model via GET (list) and POST (create)."""
+    queryset = Field.objects.all()
+    serializer_class = FieldSerializer
 
-class DeleteTxAPIView(DestroyAPIView):
-    """This endpoint allows for deletion of a specific Todo from the database"""
-    queryset = FieldYearTransaction.objects.all()
-    serializer_class = TxSerializer
+# API for listing/creating FieldYearCrop relationships
+@method_decorator(csrf_exempt, name='dispatch')
+class FieldYearCropListCreateAPIView(ListCreateAPIView):
+    """Expose the linking model between a field, year and crop."""
+    queryset = FieldYearCrop.objects.all()
+    serializer_class = FieldYearCropSerializer

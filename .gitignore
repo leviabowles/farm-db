@@ -1,0 +1,57 @@
+# Byte-compiled / optimized Python files
+__pycache__/
+*.py[cod]
+
+# SQLite database file (local development)
+db.sqlite3
+
+# Virtual environment directory
+myenv/
+
+# VS Code settings
+.vscode/
+
+# macOS system files
+.DS_Store
+
+# Node modules and logs (if any)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts for Docker / React frontend
+docker-react-frontend/build/
+Dockerfile.web
+docker-compose*.yml
+
+# React frontend generated files and dependencies
+react-frontend/node_modules/
+react-frontend/build/
+react-frontend/*.log
+
+# Entire directories that are not needed in source control
+docker-react-frontend/
+react-frontend/
+
+# ---------------------------------------------------------------------
+# Additional large artefacts that were inflating the change count
+# ---------------------------------------------------------------------
+# Python site‑packages installed under the repo (from the local include dir)
+include/lib/python3.14/site-packages/
+
+# Any stray __pycache__ folders inside the Django project tree (already covered globally,
+# but keeping explicit entry for clarity)
+farm_app/farm/**/__pycache__/
+
+# Docker‑compose generated override files (if any)
+docker-compose.override.yml
+
+# Temporary files
+temp_run/
+
+# Miscellaneous development helpers that should not be versioned
+cgi.py
+get-pip.py
+start-dev.sh
+requirements.txt
+local-dev/

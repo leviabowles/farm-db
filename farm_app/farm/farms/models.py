@@ -174,7 +174,8 @@ class Field(models.Model):
         return f"{self.field_name}, {str(self.field_county)}"
 
     class Meta:
-        managed = False
+        # Allow Django to manage this table (create migrations)
+        managed = True
         db_table = 'field'
 
 
@@ -195,6 +196,8 @@ class FieldYearCrop(models.Model):
     year_key = models.IntegerField(blank=True, null=True)
     crop_key = models.CharField(max_length=10, blank=True, null=True)
     crop = models.ForeignKey('Crop', models.DO_NOTHING, db_column = 'crop', blank=True, null=True)
+    acres_planted = models.IntegerField(blank=True, null=True)
+    total_bushels = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     acres_planted = models.IntegerField(blank=True, null=True)
@@ -204,7 +207,8 @@ class FieldYearCrop(models.Model):
         return f"{self.field}, {str(self.year_key)}"
 
     class Meta:
-        managed = False
+        # Allow Django to manage this table as well
+        managed = True
         db_table = 'field_year_crop'
 
 
@@ -228,10 +232,12 @@ class FieldYearTransaction(models.Model):
     memo = models.CharField(max_length=255, blank=True, null=True)
     paid_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    create_date = models.DateField(blank=True, null=True, default=datetime.date.today)
-    update_date = models.DateField(blank=True, null=True, default=datetime.date.today)
+    # Use DateTimeField to accept full ISO datetime strings from the frontend.
+    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     field_year_crop = models.ManyToManyField(FieldYearCrop, through='FieldYearTransactionCrop')
-    doc_file = models.FileField()
+    # Make the document upload optional so transactions can be created without a file.
+    doc_file = models.FileField(blank=True, null=True)
 
 
 
