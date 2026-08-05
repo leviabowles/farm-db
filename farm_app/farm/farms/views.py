@@ -16,11 +16,12 @@ from .serializers import TxSerializer
 def index(request):
     num_tx = FieldYearTransaction.objects.all().count()
     context = {'num_tx': num_tx,}
-    return render(request, 'index.html',context = context)
+    # Templates live under ``farms/templates/farms``; specify the subdirectory.
+    return render(request, 'farms/index.html', context=context)
 
 def reporting(request):
     context = {'derp': 5}
-    return render(request, 'reporting.html',context = context)
+    return render(request, 'farms/reporting.html', context=context)
 
 def tx_update(request):
     context = {'derp': 5}
@@ -37,7 +38,9 @@ class transactions(ListView):
     fetch a reasonable chunk of records per request and keeps the page fast.
     """
     model = FieldYearTransaction
-    template_name = 'transactions.html'
+    # Use the namespaced path so Django can locate the template within the
+    # ``farms`` app's templates directory (templates/farms/transactions.html).
+    template_name = 'farms/transactions.html'
     # Show 100 rows per page – adjust as needed for performance.
     paginate_by = 100
 

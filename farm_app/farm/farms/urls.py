@@ -16,7 +16,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path('', index, name='index'),
-    path('reporting', reporting , name='reporting'),
+    # Added trailing slash to ensure Django resolves '/reporting/' correctly.
+    # This matches the expectation of the test suite and follows common URL conventions.
+    path('reporting/', reporting , name='reporting'),
     # HTML view for transaction list page
     path('transactions', transactions.as_view(), name='transactions'),
     # API endpoints – note the trailing slash to match React client URLs

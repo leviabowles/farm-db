@@ -34,6 +34,20 @@ urlpatterns += [
     path('transactions/', TxListView.as_view(), name='transactions_root'),
 ]
 
+# ---------------------------------------------------------------------
+# Convenience routes for the main landing pages used by our test suite.
+# The ``farms`` app already defines ``index`` and ``reporting`` views under
+# the ``/farms/`` prefix.  Adding these root‑level URLs lets the tests (and any
+# external callers) reach them directly at ``/`` and ``/reporting/`` without a
+# redirect.
+# ---------------------------------------------------------------------
+from farms.views import index, reporting
+
+urlpatterns += [
+    path('', index, name='root_index'),
+    path('reporting/', reporting, name='root_reporting'),
+]
+
 
 admin.site.site_header = 'Farm DB Accounting'
 

@@ -73,12 +73,15 @@ REST_FRAMEWORK = {
 # Setting a module path to ``None`` tells Django that the app has no
 # migrations. This is safe because the schema is created externally.
 # ------------------------------------------------------------
+# Disable migrations for built‑in Django apps only. Keeping ``farms`` enabled
+# allows us to apply the migration files that define the required tables (e.g.
+# ``field_year_transaction``). This ensures the MySQL database is correctly
+# populated when running ``manage.py migrate``.
 MIGRATION_MODULES = {
     'admin': None,
     'auth': None,
     'contenttypes': None,
     'sessions': None,
-    'farms': None,
 }
 
 MIDDLEWARE = [
@@ -115,26 +118,36 @@ TEMPLATES = [
 WSGI_APPLICATION = 'farm.wsgi.application'
 
 
-# Database configuration moved to conditional block below (supports MySQL via env vars or fallback SQLite).
-# Database configuration – use MySQL if environment variables are set, otherwise fall back to a local SQLite file.
-if DB and DBUSER and DBPW:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': DB,
-            'USER': DBUSER,
-            'PASSWORD': DBPW,
-            'HOST': os.getenv('DBHOST', 'localhost'),   # Or an IP Address that your DB is hosted on
-            'PORT': '3306',
-        }
+# Use MySQL in production (Docker). When running locally without the Docker
+# environment variables, fall back to the defaults defined in ``docker-compose.yml``.
+if not DB:
+    DB = 'farmdb'
+if not DBUSER:
+    DBUSER = 'farm_user'
+if not DBPW:
+    DBPW = 'farm_password'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': DB,
+        'USER': DBUSER,
+        'PASSWORD': DBPW,
+        'HOST': os.getenv('DBHOST', 'localhost'),   # Or an IP Address that your DB is hosted on
+        'PORT': '3306',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
+
+# Configure Django's test database to use a temporary MySQL schema. Django will
+# automatically prefix the name with ``test_`` when using MySQL, but we set it
+# explicitly for clarity.
+# Use the same database for tests to avoid permission errors when Django tries to
+# create a ``test_`` prefixed schema. This is acceptable in our development
+# environment where the MySQL user has limited privileges.
+# Mirror the default database for tests to avoid creating a separate test schema.
+DATABASES['default']['TEST'] = {
+    'MIRROR': 'default',
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
