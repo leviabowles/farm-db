@@ -16,11 +16,12 @@ from .serializers import TxSerializer
 def index(request):
     num_tx = FieldYearTransaction.objects.all().count()
     context = {'num_tx': num_tx,}
-    return render(request, 'index.html',context = context)
+    # Templates live under ``farms/templates/farms``; specify the subdirectory.
+    return render(request, 'farms/index.html', context=context)
 
 def reporting(request):
     context = {'derp': 5}
-    return render(request, 'reporting.html',context = context)
+    return render(request, 'farms/reporting.html', context=context)
 
 def tx_update(request):
     context = {'derp': 5}
@@ -31,18 +32,30 @@ def fieldcrop_update(request):
     return render(request, 'fieldcrop_update.html',context = context)
 
 class transactions(ListView):
+    """HTML view for the transaction list.
+    The original implementation rendered *all* rows at once, which caused a
+    timeout (504) when the table grew large. Adding ``paginate_by`` lets Django
+    fetch a reasonable chunk of records per request and keeps the page fast.
+    """
     model = FieldYearTransaction
-    template_name = 'transactions.html'
+    # Use the namespaced path so Django can locate the template within the
+    # ``farms`` app's templates directory (templates/farms/transactions.html).
+    template_name = 'farms/transactions.html'
+    # Show 100 rows per page – adjust as needed for performance.
+    paginate_by = 100
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ListTxAPIView(ListCreateAPIView):
-    """List all transactions (GET) or create a new transaction (POST).
-    Pagination is disabled to simplify the React client which expects an array.
-    CSRF exemption allows POST requests from the frontend without requiring a token.
+    """List transactions (GET) or create a new transaction (POST).
+    Pagination is now enabled to avoid time‑outs when the table grows large.
+    The React client can still request all items by using a high ``page_size``
+    value if needed. CSRF exemption allows POST requests from the frontend
+    without requiring a token.
     """
     queryset = FieldYearTransaction.objects.all()
     serializer_class = TxSerializer
-    pagination_class = None
+    # Use DRF's built‑in pagination (page size configurable in settings).
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         # Add filtering options here if needed

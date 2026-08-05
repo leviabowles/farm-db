@@ -21,7 +21,32 @@ urlpatterns = [
  ]
 urlpatterns += [
     path('farms/', include('farms.urls')),
-    ]
+]
+
+# ---------------------------------------------------------------------
+# Convenience route: expose the transaction list HTML page at the top level
+# (e.g., http://localhost:8000/transactions/) so users don’t need to prepend
+# ``farms/``. This also ensures the trailing‑slash version works even if
+# APPEND_SLASH is disabled.
+# ---------------------------------------------------------------------
+from farms.views import transactions as TxListView
+urlpatterns += [
+    path('transactions/', TxListView.as_view(), name='transactions_root'),
+]
+
+# ---------------------------------------------------------------------
+# Convenience routes for the main landing pages used by our test suite.
+# The ``farms`` app already defines ``index`` and ``reporting`` views under
+# the ``/farms/`` prefix.  Adding these root‑level URLs lets the tests (and any
+# external callers) reach them directly at ``/`` and ``/reporting/`` without a
+# redirect.
+# ---------------------------------------------------------------------
+from farms.views import index, reporting
+
+urlpatterns += [
+    path('', index, name='root_index'),
+    path('reporting/', reporting, name='root_reporting'),
+]
 
 
 admin.site.site_header = 'Farm DB Accounting'
