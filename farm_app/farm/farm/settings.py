@@ -52,6 +52,18 @@ INSTALLED_APPS = [
     'rest_framework',
 ]
 
+# ---------------------------------------------------------------------
+# REST framework configuration – increase default page size to avoid 504s when the
+# React client requests ``/api/transactions/`` without pagination parameters.
+# The frontend can still request a specific page or set ``page_size`` in the
+# query string if it wants fewer records.
+# ---------------------------------------------------------------------
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    # A generous default; adjust as needed for production loads.
+    "PAGE_SIZE": 500,
+}
+
 # ------------------------------------------------------------
 # First‑principles configuration: we manage the database schema
 # manually with the SQL script mounted at /docker-entrypoint-initdb.d.

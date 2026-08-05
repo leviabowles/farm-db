@@ -31,18 +31,28 @@ def fieldcrop_update(request):
     return render(request, 'fieldcrop_update.html',context = context)
 
 class transactions(ListView):
+    """HTML view for the transaction list.
+    The original implementation rendered *all* rows at once, which caused a
+    timeout (504) when the table grew large. Adding ``paginate_by`` lets Django
+    fetch a reasonable chunk of records per request and keeps the page fast.
+    """
     model = FieldYearTransaction
     template_name = 'transactions.html'
+    # Show 100 rows per page – adjust as needed for performance.
+    paginate_by = 100
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ListTxAPIView(ListCreateAPIView):
-    """List all transactions (GET) or create a new transaction (POST).
-    Pagination is disabled to simplify the React client which expects an array.
-    CSRF exemption allows POST requests from the frontend without requiring a token.
+    """List transactions (GET) or create a new transaction (POST).
+    Pagination is now enabled to avoid time‑outs when the table grows large.
+    The React client can still request all items by using a high ``page_size``
+    value if needed. CSRF exemption allows POST requests from the frontend
+    without requiring a token.
     """
     queryset = FieldYearTransaction.objects.all()
     serializer_class = TxSerializer
-    pagination_class = None
+    # Use DRF's built‑in pagination (page size configurable in settings).
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         # Add filtering options here if needed

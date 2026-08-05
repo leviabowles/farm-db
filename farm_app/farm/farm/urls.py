@@ -21,7 +21,18 @@ urlpatterns = [
  ]
 urlpatterns += [
     path('farms/', include('farms.urls')),
-    ]
+]
+
+# ---------------------------------------------------------------------
+# Convenience route: expose the transaction list HTML page at the top level
+# (e.g., http://localhost:8000/transactions/) so users don’t need to prepend
+# ``farms/``. This also ensures the trailing‑slash version works even if
+# APPEND_SLASH is disabled.
+# ---------------------------------------------------------------------
+from farms.views import transactions as TxListView
+urlpatterns += [
+    path('transactions/', TxListView.as_view(), name='transactions_root'),
+]
 
 
 admin.site.site_header = 'Farm DB Accounting'
