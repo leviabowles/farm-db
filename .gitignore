@@ -55,3 +55,12 @@ get-pip.py
 start-dev.sh
 requirements.txt
 local-dev/
+
+# Python virtual environment created by `python -m venv`
+venv/
+
+# ---------------------------------------------------------------------
+# Large third‑party libraries that live under the repo but are not source code
+# ---------------------------------------------------------------------
+include/
+lib/
