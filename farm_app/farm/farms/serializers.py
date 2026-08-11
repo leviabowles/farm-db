@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import FieldYearTransaction, Field, FieldYearCrop
+from .models import Farm
 
 
 class TxSerializer(serializers.ModelSerializer):
@@ -31,5 +32,11 @@ class FieldYearCropSerializer(serializers.ModelSerializer):
     # Include related objects if desired – here we keep simple IDs.
     class Meta:
         model = FieldYearCrop
+        fields = '__all__'
+
+# Serializer for the newly added Farm model – exposes all columns.
+class FarmSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Farm
         fields = '__all__'
         
