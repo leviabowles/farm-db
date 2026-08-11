@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
 # Create your views here.
-from .models import FieldYearTransaction, Field, FieldYearCrop
+from .models import FieldYearTransaction, Field, FieldYearCrop, Farm
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
