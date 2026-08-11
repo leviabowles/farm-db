@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .serializers import TxSerializer
+from .serializers import FieldSerializer, FieldYearCropSerializer, FarmSerializer
 
 def index(request):
     num_tx = FieldYearTransaction.objects.all().count()
@@ -84,3 +85,10 @@ class FieldYearCropListCreateAPIView(ListCreateAPIView):
     """Expose the linking model between a field, year and crop."""
     queryset = FieldYearCrop.objects.all()
     serializer_class = FieldYearCropSerializer
+
+# API for listing/creating Farms
+@method_decorator(csrf_exempt, name='dispatch')
+class FarmListCreateAPIView(ListCreateAPIView):
+    """Expose the Farm model via GET (list) and POST (create)."""
+    queryset = Farm.objects.all()
+    serializer_class = FarmSerializer
