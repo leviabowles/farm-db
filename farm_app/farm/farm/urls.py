@@ -16,11 +16,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+# Import the Farm API view to expose it at the root level without the "farms/" prefix.
+from farms.views import FarmListCreateAPIView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
- ]
+]
+
+# Core application URLs and the root‑level Farm API endpoint.
 urlpatterns += [
+    # Include all farm‑app specific routes under the ``farms/`` prefix.
     path('farms/', include('farms.urls')),
+    # Expose the Farm list/create view directly at ``/api/farms/`` for
+    # external callers that do not need the ``farms/`` namespace.
+    path('api/farms/', FarmListCreateAPIView.as_view(), name='api_farms_root'),
 ]
 
 # ---------------------------------------------------------------------
