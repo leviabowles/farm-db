@@ -253,10 +253,28 @@ class FieldYearTransaction(models.Model):
 class FieldYearTransactionCrop(models.Model):
     field_year_transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE)
     field_year_crop = models.ForeignKey(FieldYearCrop, on_delete=models.CASCADE)
-
     class Meta:
         managed = False
         db_table = 'field_year_transaction_crop'
+
+# --------------------------------------------------------
+# Django model for the `farm` table added via init_db.sql
+# --------------------------------------------------------
+class Farm(models.Model):
+    farm_name = models.CharField(max_length=255)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    create_date = models.DateTimeField(blank=True, null=True,
+                                      default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True,
+                                      default=datetime.datetime.now)
+
+    def __str__(self):
+        return self.farm_name
+
+    class Meta:
+        # The table already exists via the init script; Django should not manage it.
+        managed = False
+        db_table = 'farm'
 
 
 class LedgerEntries(models.Model):
