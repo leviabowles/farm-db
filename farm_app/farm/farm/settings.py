@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_tables2',
     'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 # ---------------------------------------------------------------------
@@ -62,6 +64,10 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     # A generous default; adjust as needed for production loads.
     "PAGE_SIZE": 500,
+    # Use token authentication by default for API endpoints.
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
 }
 
 # ------------------------------------------------------------
@@ -87,6 +93,7 @@ MIGRATION_MODULES = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -133,10 +140,18 @@ DATABASES = {
         'NAME': DB,
         'USER': DBUSER,
         'PASSWORD': DBPW,
-        'HOST': os.getenv('DBHOST', 'localhost'),   # Or an IP Address that your DB is hosted on
+        # Default to Docker service name 'db' so Django can connect when running
+        # inside the container or during tests without requiring an env var.
+        'HOST': os.getenv('DBHOST', 'db'),   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }
 }
+
+# ---------------------------------------------------------------------
+# CORS configuration – allow all origins for local development. In a real
+# deployment you would restrict this to your frontend domain.
+# ---------------------------------------------------------------------
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Configure Django's test database to use a temporary MySQL schema. Django will
 # automatically prefix the name with ``test_`` when using MySQL, but we set it
