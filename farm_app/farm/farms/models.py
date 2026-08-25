@@ -249,6 +249,26 @@ class FieldYearTransaction(models.Model):
         managed = False
         db_table = 'field_year_transaction'
 
+# New model to support multiple file attachments per transaction.
+# Each attachment is linked to a FieldYearTransaction via a foreign key.
+class TransactionAttachment(models.Model):
+    """Stores individual document files related to a transaction.
+
+    Using a separate model enables a one‑to‑many relationship, allowing any
+    number of documents (e.g., insurance bill, receipt) to be attached to a
+    single ``FieldYearTransaction`` instance.
+    """
+    transaction = models.ForeignKey(
+        FieldYearTransaction,
+        related_name='attachments',
+        on_delete=models.CASCADE,
+    )
+    # Store the uploaded file. Blank is not allowed – an attachment must have a file.
+    doc_file = models.FileField()
+
+    def __str__(self):
+        return f"Attachment for {self.transaction.id}: {self.doc_file.name}"
+
 
 class FieldYearTransactionCrop(models.Model):
     field_year_transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE)
