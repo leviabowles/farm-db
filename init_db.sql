@@ -365,6 +365,34 @@ CREATE TABLE `field_year_transaction` (
 ) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+-- Table structure for table `transaction_attachment`
+CREATE TABLE IF NOT EXISTS `transaction_attachment` (
+  `id` int AUTO_INCREMENT PRIMARY KEY,
+  `field_year_transaction_id` int DEFAULT NULL,
+  `doc_file` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `create_date` datetime NOT NULL,
+  `update_date` datetime NOT NULL,
+  FOREIGN KEY (`field_year_transaction_id`) REFERENCES `field_year_transaction` (`id`)
+);
+
+-- Table structure for table `transaction_attachment_crop`
+CREATE TABLE IF NOT EXISTS `transaction_attachment_crop` (
+  `id` int AUTO_INCREMENT PRIMARY KEY,
+  `transaction_attachment_id` int DEFAULT NULL,
+  `field_year_crop_id` int DEFAULT NULL,
+  FOREIGN KEY (`transaction_attachment_id`) REFERENCES `transaction_attachment` (`id`),
+  FOREIGN KEY (`field_year_crop_id`) REFERENCES `field_year_crop` (`id`)
+);
+
+-- Optional: Update the view to include attachment count
+CREATE OR REPLACE VIEW `transaction_full_solve` AS SELECT
+    -- Columns from field_year_transaction
+    t.*,
+    -- Count of attachments
+    (SELECT COUNT(*) FROM transaction_attachment WHERE field_year_transaction_id = t.id) AS attachment_count,
+    -- Other fields as needed
+FROM `field_year_transaction` t;
+
 --
 -- Table structure for table `field_year_transaction_crop`
 --
