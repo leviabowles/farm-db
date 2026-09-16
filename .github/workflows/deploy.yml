@@ -6,27 +6,27 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ~/farm-db
-            # Dynamically create .env file from GitHub Secrets
-            echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-            echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env
+      - name: Deploy to local environment
+        run: |
+          # Navigate to the app directory (assuming runner is installed in home)
+          cd ~/farm-db
+          
+          # Dynamically create .env file from GitHub Secrets
+          echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env
 
-            git fetch origin main
-            git reset --hard origin/main
-            docker compose -f docker-compose.prod.yml up -d --build web frontend
-            docker image prune -f
+          # Update the code from GitHub - force match remote to avoid local conflicts
+          git fetch origin main
+          git reset --hard origin/main
+          
+          # Restart only the web and frontend services using the prod config
+          docker compose -f docker-compose.prod.yml up -d --build web frontend
+          docker image prune -f
