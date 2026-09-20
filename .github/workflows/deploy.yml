@@ -13,8 +13,8 @@ jobs:
 
       - name: Deploy to local environment
         run: |
-          # Navigate to the app directory (assuming runner is installed in home)
-          cd ~/farm-db
+          # Navigate to the app directory using absolute path for server structure
+          cd /farm-db/farm-db
           
           # Dynamically create .env file from GitHub Secrets
           echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
