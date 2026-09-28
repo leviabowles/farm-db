@@ -27,6 +27,10 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
           
+          echo "Current working directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          
           # Restart only the web and frontend services using the prod config
           docker compose -f docker-compose.prod.yml up -d --build web frontend
           docker image prune -f
