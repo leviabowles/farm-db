@@ -13,8 +13,7 @@ jobs:
 
       - name: Deploy to local environment
         run: |
-          # Navigate to the app directory using absolute path relative to home
-          cd /home/lb/farm-db/farm-db
+          # We are already in the workspace root thanks to actions/checkout@v3
           
           # Dynamically create .env file from GitHub Secrets
           echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
@@ -23,14 +22,6 @@ jobs:
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
           echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env
 
-          # Update the code from GitHub - force match remote to avoid local conflicts
-          git fetch origin main
-          git reset --hard origin/main
-          
-          echo "Current working directory: $(pwd)"
-          echo "Directory contents:"
-          ls -la
-          
-          # Restart only the web and frontend services using the prod config
+          # Use the checked-out code directly
           docker compose -f docker-compose.prod.yml up -d --build web frontend
           docker image prune -f
