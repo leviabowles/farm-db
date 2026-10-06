@@ -20,16 +20,11 @@ jobs:
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
           echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env
 
-          # Move the project to /tmp for Docker access
+          # Move the project to /tmp for Docker access, excluding the .git folder 
+          # to avoid permission issues and reduce context size.
           mkdir -p /tmp/farm-db-deploy
-          cp -R . /tmp/farm-db-deploy
+          tar -C . --exclude='.git' -cf - . | tar -C /tmp/farm-db-deploy -xf -
           cd /tmp/farm-db-deploy
-          
-          echo "--- DEBUG: Verifying files in deployment directory ---"
-          ls -la
-          ls -d react-frontend || echo "REACT-FRONTEND FOLDER MISSING"
-          find . -maxdepth 2 -not -path '*/.*'
-          echo "------------------------------------------------------"
 
           docker compose -f docker-compose.prod.yml up -d --build web frontend
           docker image prune -f
