@@ -13,19 +13,23 @@ jobs:
 
       - name: Deploy to local environment
         run: |
-          # Create .env file from GitHub Secrets
+          # Create .env file the GitHub Secrets
           echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
           echo "DB_USER=${{ secrets.DB_USER }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
           echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env
 
-          # Fix for Docker Snap confinement: 
-          # Move the project to a location Docker can access if it's restricted.
-          # We use /tmp as a fallback since Docker Snap usually has access there.
+          # Move the project to /tmp for Docker access
           mkdir -p /tmp/farm-db-deploy
           cp -R . /tmp/farm-db-deploy
           cd /tmp/farm-db-deploy
+          
+          echo "--- DEBUG: Verifying files in deployment directory ---"
+          ls -la
+          ls -d react-frontend || echo "REACT-FRONTEND FOLDER MISSING"
+          find . -maxdepth 2 -not -path '*/.*'
+          echo "------------------------------------------------------"
 
           docker compose -f docker-compose.prod.yml up -d --build web frontend
           docker image prune -f
