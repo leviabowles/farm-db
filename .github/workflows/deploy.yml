@@ -26,7 +26,12 @@ jobs:
           tar -C . --exclude='.git' -cf - . | tar -C /tmp/farm-db-deploy -xf -
           cd /tmp/farm-db-deploy
 
-          docker compose -f docker-compose.prod.yml up -d --build web frontend
+          # Build images manually to bypass Compose context issues
+          docker build -t farm-db-web:latest .
+          docker build -t farm-db-frontend:latest ./react-frontend
+          
+          # Restart services using the pre-built images
+          docker compose -f docker-compose.prod.yml up -d
           docker image prune -f
           
           # Cleanup temporary deployment directory
