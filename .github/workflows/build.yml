@@ -32,14 +32,14 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: Dockerfile.web
+          file: ./Dockerfile.web
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:latest
 
       - name: Build and push Frontend image
         uses: docker/build-push-action@v4
         with:
-          context: ./react-frontend
-          file: react-frontend/Dockerfile
+          context: .
+          file: ./react-frontend/Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
