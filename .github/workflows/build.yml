@@ -1,0 +1,45 @@
+name: Build and Push Images
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_WEB: leviabowles/farm-db-web
+  IMAGE_NAME_FRONTEND: leviabowles/farm-db-frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile.web
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:latest
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./react-frontend
+          file: react-frontend/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
