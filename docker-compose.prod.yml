@@ -10,7 +10,7 @@ services:
       - DB=${DB_NAME}
       - DBUSER=${DB_USER}
       - DBPW=${DB_PASSWORD}
-      - DBHOST=localhost
+      - DBHOST=127.0.0.1
     restart: unless-stopped
 
   frontend:
