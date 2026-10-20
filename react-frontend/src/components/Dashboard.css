@@ -1,0 +1,59 @@
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Heading inherits theme text color */
+.dashboard h2 {
+  color: var(--card-text);
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Use dark‑mode aware card background */
+.chart-container {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chart-container h3 {
+  margin-top: 0;
+  color: #34495e;
+}
+
+/* Summary panel also uses card background */
+.dashboard-summary {
+  background: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.dashboard-summary ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.dashboard-summary li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #bdc3c7;
+}
+
+.dashboard-summary li:last-child {
+  border-bottom: none;
+}
+
+.dashboard-loading, .dashboard-error {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.dashboard-error {
+  color: #e74c3c;
+}

@@ -1,0 +1,22 @@
+/* Basic styling for the field list component */
+.field-list {
+  padding: 1rem;
+}
+
+.field-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.field-table th,
+.field-table td {
+  border: 1px solid var(--row-border, #ddd);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.field-list-loading,
+.field-list-error {
+  color: var(--text-color);
+  margin-top: 1rem;
+}
