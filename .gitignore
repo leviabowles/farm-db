@@ -20,9 +20,9 @@ npm-debug.log
 yarn-error.log
 
 # Build artifacts for Docker / React frontend
-docker-react-frontend/build/
-Dockerfile.web
-docker-compose*.yml
+# docker-react-frontend/build/  # Removed - not needed
+# Dockerfile.web  # Removed - needed for builds
+# docker-compose*.yml  # Removed - needed for deployments
 
 # React frontend generated files and dependencies
 react-frontend/node_modules/
@@ -31,7 +31,7 @@ react-frontend/*.log
 
 # Entire directories that are not needed in source control
 docker-react-frontend/
-react-frontend/
+# react-frontend/  # REMOVED - needed for builds!
 
 # ---------------------------------------------------------------------
 # Additional large artefacts that were inflating the change count
