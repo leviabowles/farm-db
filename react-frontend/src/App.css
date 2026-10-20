@@ -1,0 +1,42 @@
+/* Theme variables – light by default */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #222222;
+  --link-color: #1a73e8;
+  /* Card/background colors for inner panels (tables, charts, summaries) */
+  --card-bg: #ffffff;
+  --card-text: #222222;
+}
+
+/* Dark theme overrides */
+body.dark {
+  --bg-color: #121212;
+  --text-color: #eeeeee;
+  --link-color: #8ab4f8;
+  --card-bg: #1e1e1e; /* dark gray for panels */
+  --card-text: #eeeeee;
+  /* Hover and border colors for dark mode */
+  --row-hover: #2a2a2a;
+  --list-border: #444444;
+}
+
+/* Light‑mode equivalents (fallback) */
+body {
+  --row-hover: #f8f9fa;   /* light hover for tables */
+  --list-border: #bdc3c7; /* light border for lists */
+}
+
+.App {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+a {
+  color: var(--link-color);
+}
+
+header {
+  margin-bottom: 20px;
+}
