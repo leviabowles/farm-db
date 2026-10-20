@@ -39,14 +39,8 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
 
       - name: Trigger deploy workflow
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'deploy.yml',
-              ref: 'main'
-            });
+        env:
+          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          gh workflow run deploy.yml
 
