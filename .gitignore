@@ -60,6 +60,11 @@ local-dev/
 venv/
 
 # ---------------------------------------------------------------------
+# Files required for GitHub Actions builds (must NOT be ignored)
+# ---------------------------------------------------------------------
+# requirements.txt  # REMOVED FROM IGNORE - needed for builds
+
+# ---------------------------------------------------------------------
 # Large third‑party libraries that live under the repo but are not source code
 # ---------------------------------------------------------------------
 include/
