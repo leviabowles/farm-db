@@ -28,24 +28,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug Filesystem
+      - name: Build and push Web image
         run: |
-          echo "Current working directory: $(pwd)"
-          echo "Listing root files:"
-          ls -la
-          echo "Checking Dockerfile.web specifically:"
-          ls -l Dockerfile.web || echo "NOT FOUND"
-          echo "Contents of Dockerfile.web:"
-          cat Dockerfile.web || echo "CANNOT READ"
-          echo "Checking react-frontend directory:"
-          ls -la react-frontend || echo "NOT FOUND"
-          ls -l react-frontend/Dockerfile || echo "NOT FOUND"
-          echo "Contents of react-frontend/Dockerfile:"
-          cat react-frontend/Dockerfile || echo "CANNOT READ"
-          echo "---------------------------------------"
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:latest -f Dockerfile.web .
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:latest
 
       - name: Build and push Frontend image
         run: |
           docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest -f react-frontend/Dockerfile ./react-frontend
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
+
+      - name: Trigger deploy workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              ref: 'main'
+            });
 
