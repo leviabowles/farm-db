@@ -30,6 +30,9 @@ jobs:
           # We use a token from secrets since GITHUB_TOKEN might not have pull access for private packages on self-hosted runners
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+          # Stop existing containers first
+          docker compose -f docker-compose.prod.yml down || true
+          
           # Pull latest images from registry
           docker compose -f docker-compose.prod.yml pull
 
