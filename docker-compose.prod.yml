@@ -20,7 +20,7 @@ services:
       - "8300:3000"
       - "8888:80"
     environment:
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
+      - REACT_APP_API_URL=http://172.17.0.1:8800/farms
     depends_on:
       - web
     restart: unless-stopped
