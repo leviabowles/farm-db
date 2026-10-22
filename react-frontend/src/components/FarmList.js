@@ -11,7 +11,7 @@ const FarmList = () => {
   useEffect(() => {
     const fetchFarms = async () => {
       try {
-        const response = await api.get('/api/farms/');
+        const response = await api.get('/api/fields/');
         // API returns list of farm objects; map fields to expected keys
         const data = response.data.results || response.data;
         const normalized = data.map(f => ({
