@@ -18,6 +18,7 @@ from django.urls import path, include
 
 # Import the Farm API view to expose it at the root level without the "farms/" prefix.
 from farms.views import FarmListCreateAPIView
+from farms.views import FieldListCreateAPIView
 # Token authentication view provided by DRF
 from rest_framework.authtoken.views import obtain_auth_token
 
@@ -32,6 +33,9 @@ urlpatterns += [
     # Expose the Farm list/create view directly at ``/api/farms/`` for
     # external callers that do not need the ``farms/`` namespace.
     path('api/farms/', FarmListCreateAPIView.as_view(), name='api_farms_root'),
+    # Expose the Field list/create view directly at ``/api/fields/`` for
+    # external callers that do not need the ``farms/`` namespace.
+    path('api/fields/', FieldListCreateAPIView.as_view(), name='api_fields_root'),
     # Endpoint for obtaining a token (POST username/password)
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]
