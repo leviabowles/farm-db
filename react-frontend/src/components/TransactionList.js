@@ -41,7 +41,18 @@ const TransactionList = () => {
         console.log('Fetched transactions, status', response.status, 'data', response.data);
         // DRF pagination returns an object with a "results" array. Use that for the list.
         const txList = Array.isArray(response.data) ? response.data : (response.data.results || []);
-        setTransactions(txList);
+        
+        // Process and enhance transaction data for better display
+        const enhancedTransactions = txList.map(tx => ({
+          ...tx,
+          field_name: tx.field?.field_name || tx.field || 'Unknown Field',
+          create_date_formatted: new Date(tx.create_date).toLocaleDateString(),
+          update_date_formatted: new Date(tx.update_date).toLocaleDateString(),
+          paid_amount_display: tx.paid_amount ? `$${tx.paid_amount.toLocaleString()}` : '$0',
+          received_amount_display: tx.received_amount ? `$${tx.received_amount.toLocaleString()}` : '$0'
+        }));
+        
+        setTransactions(enhancedTransactions);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching transactions:', err);
@@ -81,21 +92,14 @@ const TransactionList = () => {
       <Typography variant="h5" gutterBottom>
         Transaction Management
       </Typography>
-      <Button
-        component={Link}
-        to="/transactions/new"
-        variant="contained"
-        color="primary"
-        sx={{ mb: 2 }}
-      >
-        Add New Transaction
-      </Button>
       <TableContainer component={Paper}>
         <Table aria-label="transaction table">
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
+              <TableCell>Field</TableCell>
               <TableCell>Memo</TableCell>
+              <TableCell>Paid</TableCell>
+              <TableCell>Received</TableCell>
               <TableCell>Create Date</TableCell>
               <TableCell>Update Date</TableCell>
               <TableCell align="right">Actions</TableCell>
@@ -104,10 +108,12 @@ const TransactionList = () => {
           <TableBody>
             {transactions.map((transaction) => (
               <TableRow key={transaction.id} hover>
-                <TableCell>{transaction.id}</TableCell>
+                <TableCell>{transaction.field_name}</TableCell>
                 <TableCell>{transaction.memo}</TableCell>
-                <TableCell>{new Date(transaction.create_date).toLocaleDateString()}</TableCell>
-                <TableCell>{new Date(transaction.update_date).toLocaleDateString()}</TableCell>
+                <TableCell>{transaction.paid_amount_display}</TableCell>
+                <TableCell>{transaction.received_amount_display}</TableCell>
+                <TableCell>{transaction.create_date_formatted}</TableCell>
+                <TableCell>{transaction.update_date_formatted}</TableCell>
                 <TableCell align="right">
                   <Tooltip title="Edit">
                     <IconButton
@@ -132,6 +138,15 @@ const TransactionList = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Button
+        component={Link}
+        to="/transactions/new"
+        variant="contained"
+        color="primary"
+        sx={{ mt: 2 }}
+      >
+        Add New Transaction
+      </Button>
     </Paper>
   );
 };
