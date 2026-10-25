@@ -1,104 +1,147 @@
 import React, { useState, useEffect } from 'react';
-import { Line, Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
-import './Dashboard.css';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import { styled } from '@mui/material/styles';
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+const Item = styled(Paper)(({ theme }) => ({
+  ...theme.typography.body2,
+  padding: theme.spacing(2),
+  textAlign: 'center',
+  color: theme.palette.text.secondary,
+}));
 
 const Dashboard = () => {
-  const [farmData, setFarmData] = useState(null);
+  const [fieldsCount, setFieldsCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchFarmData = async () => {
+    // Try to fetch basic data count for main model
+    const fetchFieldCount = async () => {
       try {
-        // In a real app, you would connect to your Django API
-        // For now, using mock data for demonstration
-        
-        // Mock data for demonstration
-        const mockData = {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-          datasets: [
-            {
-              label: 'Crop Production (tons)',
-              data: [12, 19, 3, 5, 2, 3],
-              borderColor: 'rgb(75, 192, 192)',
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            },
-            {
-              label: 'Revenue ($)',
-              data: [12000, 19000, 3000, 5000, 2000, 3000],
-              borderColor: 'rgb(255, 99, 132)',
-              backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            }
-          ]
-        };
-        
-        setFarmData(mockData);
-        setLoading(false);
+        const response = await fetch('/api/fields/');
+        if (response.ok) {
+          const data = await response.json();
+          const count = Array.isArray(data) ? data.length : (data.count || 0);
+          setFieldsCount(count);
+        }
       } catch (err) {
-        setError('Failed to fetch farm data');
+        console.log('Could not fetch field count:', err);
+      } finally {
         setLoading(false);
       }
     };
-
-    fetchFarmData();
+    
+    fetchFieldCount();
   }, []);
 
-  if (loading) return <div className="dashboard-loading">Loading dashboard...</div>;
-  if (error) return <div className="dashboard-error">{error}</div>;
-
   return (
-    <div className="dashboard">
-      <h2>Farm Data Dashboard</h2>
+    <div>
+      <Typography variant="h4" gutterBottom>
+        Farm Database Dashboard
+      </Typography>
       
-      <div className="dashboard-summary">
-        <h3>Quick Summary</h3>
-        <ul>
-          <li>Total Farms: 4</li>
-          <li>Total Transactions: 0</li>
-          <li>Last Updated: Today</li>
-        </ul>
-      </div>
-      
-      <div className="chart-container">
-        <h3>Crop Production & Revenue Trends</h3>
-        <Line data={farmData} />
-      </div>
-      
-      <div className="chart-container">
-        <h3>Production by Month</h3>
-        <Bar data={farmData} />
-      </div>
-      
-      <div className="dashboard-actions">
-        <h3>Quick Actions</h3>
-        <Link to="/farms" className="btn btn-primary">Manage Farms</Link>
-        <Link to="/transactions" className="btn btn-primary">Manage Transactions</Link>
-      </div>
+      <Grid container spacing={3} sx={{ mt: 2 }}>
+        <Grid item xs={12}>
+          <Item>
+            <Typography variant="h6" gutterBottom>
+              Data Overview
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              Manage your farm data through the following sections:
+            </Typography>
+            {loading ? (
+              <Typography variant="body2">Loading data summary...</Typography>
+            ) : (
+              <Typography variant="body2">
+                Currently managing {fieldsCount} fields
+              </Typography>
+            )}
+          </Item>
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <Item>
+            <Typography variant="h6" gutterBottom>
+              Fields
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              View and manage land parcels in your farm.
+            </Typography>
+            <Button 
+              component={Link} 
+              to="/fields" 
+              variant="contained" 
+              color="primary"
+              sx={{ mt: 1 }}
+            >
+              View Fields
+            </Button>
+          </Item>
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <Item>
+            <Typography variant="h6" gutterBottom>
+              Transactions
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              Manage financial transactions related to your farm operations.
+            </Typography>
+            <Button 
+              component={Link} 
+              to="/transactions" 
+              variant="contained" 
+              color="primary"
+              sx={{ mt: 1 }}
+            >
+              View Transactions
+            </Button>
+          </Item>
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <Item>
+            <Typography variant="h6" gutterBottom>
+              Field Year Crops
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              Track crop planting and harvest information by field and year.
+            </Typography>
+            <Button 
+              component={Link} 
+              to="/fieldyearcrops" 
+              variant="contained" 
+              color="primary"
+              sx={{ mt: 1 }}
+            >
+              View Field Year Crops
+            </Button>
+          </Item>
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <Item>
+            <Typography variant="h6" gutterBottom>
+              Farms
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              Manage information about your farms and operations.
+            </Typography>
+            <Button 
+              component={Link} 
+              to="/farms" 
+              variant="contained" 
+              color="primary"
+              sx={{ mt: 1 }}
+            >
+              View Farms
+            </Button>
+          </Item>
+        </Grid>
+      </Grid>
     </div>
   );
 };
