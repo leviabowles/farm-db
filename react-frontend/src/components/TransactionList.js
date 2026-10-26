@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { Link } from 'react-router-dom';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -23,21 +23,12 @@ const TransactionList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-    // Use a relative path for API calls during development; the proxy defined in
-    // `setupProxy.js` will forward `/api/...` to the Django backend under the
-    // ``/farms`` namespace. In production builds we rely on the same relative
-    // path because the container serves both frontend and backend behind the
-    // same host, and the proxy is not used.
-    const API_BASE = '';
-
-  // Debug: log the request URL being used
-  console.log('TransactionList - fetching from', `${API_BASE}/api/transactions/`);
-
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        // Use environment variable for API URL when running in Docker
-        const response = await axios.get(`${API_BASE}/api/transactions/`);
+        // Use the 'api' service instance to ensure correct baseURL for dev/prod
+        console.log('Fetching transactions from API...');
+        const response = await api.get('/api/transactions/');
         console.log('Fetched transactions, status', response.status, 'data', response.data);
         // DRF pagination returns an object with a "results" array. Use that for the list.
         const txList = Array.isArray(response.data) ? response.data : (response.data.results || []);
@@ -68,7 +59,7 @@ const TransactionList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
-        await axios.delete(`${API_BASE}/api/transactions/${id}/`);
+        await api.delete(`/api/transactions/${id}/`);
         // Remove from local state
         setTransactions(transactions.filter(tx => tx.id !== id));
       } catch (err) {

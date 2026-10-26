@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -19,8 +19,8 @@ const FieldYearCropList = () => {
   useEffect(() => {
     const fetchFieldYearCrops = async () => {
       try {
-        console.log('Fetching field year crops from /api/fieldyearcrops/');
-        const response = await axios.get('/api/fieldyearcrops/');
+        console.log('Fetching field year crops from API...');
+        const response = await api.get('/api/fieldyearcrops/');
         
         // Handle DRF pagination wrapper format
         const fieldYearCropArray = Array.isArray(response.data) ? 

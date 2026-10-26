@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import './FieldList.css';
 
 /**
@@ -16,9 +16,10 @@ const FieldList = () => {
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        // Make direct API call to the backend to get real data
+        // Use the 'api' service instance instead of raw axios
+        // This ensures REACT_APP_API_URL is used in production
         console.log('Fetching fields from API...');
-        const response = await axios.get('/api/fields/');
+        const response = await api.get('/api/fields/');
         
         // Handle different response formats depending on DRF configuration
         let fieldArray = [];
