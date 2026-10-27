@@ -47,7 +47,8 @@ const TransactionList = () => {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching transactions:', err);
-        const msg = err.response?.data?.detail || err.message || 'Failed to fetch transactions';
+        const failedUrl = err.config?.url || 'the API';
+        const msg = err.response?.data?.detail || err.message || `Failed to fetch transactions from ${failedUrl}`;
         setError(msg);
         setLoading(false);
       }

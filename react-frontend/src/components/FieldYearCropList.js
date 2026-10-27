@@ -39,7 +39,8 @@ const FieldYearCropList = () => {
         setError(null);
       } catch (err) {
         console.error('Error fetching field year crops:', err);
-        setError(`Failed to load field year crops: ${err.message || 'Network error'}`);
+        const failedUrl = err.config?.url || 'the API';
+        setError(`Failed to load field year crops from ${failedUrl}: ${err.message || 'Network error'}`);
         setLoading(false);
       } finally {
         setLoading(false);
