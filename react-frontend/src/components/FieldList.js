@@ -44,7 +44,8 @@ const FieldList = () => {
         // Only show mock data if we're certain API connection failed and no real data
         if (err.response?.status === 404 || err.request) {
           // Backend is reachable but endpoint not found, or network issues - still show a meaningful error
-          setError('Could not connect to backend data service. Please check the server status.');
+          const failedUrl = err.config?.url || 'the API';
+          setError(`Could not connect to backend data service at ${failedUrl}. Please check the server status.`);
         } else {
           // If we're in dev mode and can't access API, use mock for demo purposes
           console.warn('Using mock data as backup');
