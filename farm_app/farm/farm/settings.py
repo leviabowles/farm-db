@@ -32,12 +32,7 @@ SECRET_KEY = 'django-insecure-1234567890abcdefghijklmnopqrstuvwx'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.{}.{}'.format(i,j) for i in range(256) for j in range(256)]
-ALLOWED_HOSTS += ['127.0.0.1']
-ALLOWED_HOSTS += ['host.docker.internal']
-ALLOWED_HOSTS += ['localhost']
-ALLOWED_HOSTS += ['0.0.0.0']
-ALLOWED_HOSTS += ['farm-db', 'web', 'web:8000']
+ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
