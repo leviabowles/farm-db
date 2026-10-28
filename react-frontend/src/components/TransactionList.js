@@ -47,9 +47,18 @@ const TransactionList = () => {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching transactions:', err);
+        
+        let detailedError = '';
+        if (err.response) {
+          detailedError = `Backend responded with status ${err.response.status}.`;
+        } else if (err.request) {
+          detailedError = 'No response received from server (network error or CORS).';
+        } else {
+          detailedError = `Request error: ${err.message}`;
+        }
+
         const failedUrl = err.config?.url || 'the API';
-        const msg = err.response?.data?.detail || err.message || `Failed to fetch transactions from ${failedUrl}`;
-        setError(msg);
+        setError(`Could not connect to backend data service at ${failedUrl}. ${detailedError} Please check the server status.`);
         setLoading(false);
       }
     };

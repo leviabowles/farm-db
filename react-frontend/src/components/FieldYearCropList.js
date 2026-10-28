@@ -39,8 +39,18 @@ const FieldYearCropList = () => {
         setError(null);
       } catch (err) {
         console.error('Error fetching field year crops:', err);
+        
+        let detailedError = '';
+        if (err.response) {
+          detailedError = `Backend responded with status ${err.response.status}.`;
+        } else if (err.request) {
+          detailedError = 'No response received from server (network error or CORS).';
+        } else {
+          detailedError = `Request error: ${err.message}`;
+        }
+
         const failedUrl = err.config?.url || 'the API';
-        setError(`Failed to load field year crops from ${failedUrl}: ${err.message || 'Network error'}`);
+        setError(`Could not connect to backend data service at ${failedUrl}. ${detailedError} Please check the server status.`);
         setLoading(false);
       } finally {
         setLoading(false);
