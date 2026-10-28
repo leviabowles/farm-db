@@ -39,15 +39,24 @@ const FieldList = () => {
         setError(null);
       } catch (err) {
         console.error('Failed to fetch fields from API:', err);
-        setError(`Failed to load fields: ${err.message || 'Network error'}`);
+        
+        let detailedError = '';
+        if (err.response) {
+          // The server responded with a status code outside the 2xx range
+          detailedError = `Backend responded with status ${err.response.status}.`;
+        } else if (err.request) {
+          // The request was made but no response was received
+          detailedError = 'No response received from server (network error or CORS).';
+        } else {
+          // something happened in setting up the request
+          detailedError = `Request error: ${err.message}`;
+        }
+
+        const failedUrl = err.config?.url || 'the API';
+        setError(`Could not connect to backend data service at ${failedUrl}. ${detailedError} Please check the server status.`);
         
         // Only show mock data if we're certain API connection failed and no real data
         if (err.response?.status === 404 || err.request) {
-          // Backend is reachable but endpoint not found, or network issues - still show a meaningful error
-          const failedUrl = err.config?.url || 'the API';
-          setError(`Could not connect to backend data service at ${failedUrl}. Please check the server status.`);
-        } else {
-          // If we're in dev mode and can't access API, use mock for demo purposes
           console.warn('Using mock data as backup');
           const mockFields = [
             { id: 1, field_name: 'North Field', field_state: 'CA', field_county: 'Alameda', crop_acreage: 120 },
