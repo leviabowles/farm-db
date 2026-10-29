@@ -198,10 +198,11 @@ class FieldYearCrop(models.Model):
     crop = models.ForeignKey('Crop', models.DO_NOTHING, db_column = 'crop', blank=True, null=True)
     acres_planted = models.IntegerField(blank=True, null=True)
     total_bushels = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    planting_date = models.DateField(blank=True, null=True)
+    harvest_date = models.DateField(blank=True, null=True)
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
-    acres_planted = models.IntegerField(blank=True, null=True)
-    total_bushels = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+
 
     def __str__(self):
         return f"{self.field}, {str(self.year_key)}"
