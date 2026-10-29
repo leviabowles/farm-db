@@ -4,7 +4,15 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import CircularProgress from '@mui/material/CircularProgress';
 import { styled } from '@mui/material/styles';
+import api from '../services/api';
 
 const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
@@ -14,131 +22,126 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const Dashboard = () => {
-  const [fieldsCount, setFieldsCount] = useState(0);
+  const [currentCrops, setCurrentCrops] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Try to fetch basic data count for main model
-    const fetchFieldCount = async () => {
+    const fetchLatestCrops = async () => {
       try {
-        const response = await fetch('/api/fields/');
-        if (response.ok) {
-          const data = await response.json();
-          const count = Array.isArray(data) ? data.length : (data.count || 0);
-          setFieldsCount(count);
-        }
+        console.log('Fetching crop data for dashboard...');
+        const response = await api.get('/api/fieldyearcrops/');
+        
+        let allCrops = Array.isArray(response.data) ? response.data : (response.data.results || []);
+        
+        // Filter for most recent planting per field
+        // Logic: Group by field and pick the one with the maximum year_key
+        const latestMap = {};
+        allCrops.forEach(crop => {
+          const fieldId = crop.field; // Assuming field is the ID or object with ID
+          const fieldIdStr = typeof fieldId === 'object' ? fieldId.id : fieldId;
+          
+          if (!latestMap[fieldIdStr] || crop.year_key > latestMap[fieldIdStr].year_key) {
+            latestMap[fieldIdStr] = crop;
+          }
+        });
+
+        const latestCrops = Object.values(latestMap).map(crop => ({
+          ...crop,
+          field_name: crop.field?.field_name || 'Unknown Field',
+          crop_name: crop.crop?.crop_name || 'Unknown Crop'
+        }));
+
+        setCurrentCrops(latestCrops);
+        setError(null);
       } catch (err) {
-        console.log('Could not fetch field count:', err);
+        console.error('Error fetching dashboard crops:', err);
+        setError('Failed to load current crop status.');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchFieldCount();
+    fetchLatestCrops();
   }, []);
 
   return (
-    <div>
+    <div style={{ padding: '20px' }}>
       <Typography variant="h4" gutterBottom>
         Farm Database Dashboard
       </Typography>
-      
-      <Grid container spacing={3} sx={{ mt: 2 }}>
+
+      <Grid container spacing={3}>
+        {/* Main Section: Currently Planted Crops */}
         <Grid item xs={12}>
-          <Item>
+          <Paper sx={{ p: 3 }} elevation={3}>
             <Typography variant="h6" gutterBottom>
-              Data Overview
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Manage your farm data through the following sections:
+              CURRENTLY PLANTED CROPS (Latest Year)
             </Typography>
             {loading ? (
-              <Typography variant="body2">Loading data summary...</Typography>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                <CircularProgress />
+              </div>
+            ) : error ? (
+              <Typography color="error">{error}</Typography>
             ) : (
-              <Typography variant="body2">
-                Currently managing {fieldsCount} fields
-              </Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Field</TableCell>
+                      <TableCell>Year</TableCell>
+                      <TableCell>Crop</TableCell>
+                      <TableCell align="right">Acres</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {currentCrops.length > 0 ? (
+                      currentCrops.map((crop, index) => (
+                        <TableRow key={index} hover>
+                          <TableCell>{crop.field_name}</TableCell>
+                          <TableCell>{crop.year_key}</TableCell>
+                          <TableCell>{crop.crop_name}</TableCell>
+                          <TableCell align="right">{crop.acres_planted || 0}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} align="center">
+                          No crop data available for the current year.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             )}
-          </Item>
+          </Paper>
         </Grid>
 
-        <Grid item xs={12} sm={6}>
+        {/* Bottom Section: Navigation Links */}
+        <Grid item xs={12} sm={3}>
           <Item>
-            <Typography variant="h6" gutterBottom>
-              Fields
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              View and manage land parcels in your farm.
-            </Typography>
-            <Button 
-              component={Link} 
-              to="/fields" 
-              variant="contained" 
-              color="primary"
-              sx={{ mt: 1 }}
-            >
-              View Fields
-            </Button>
+            <Typography variant="subtitle1" fontWeight="bold">Fields</Typography>
+            <Button component={Link} to="/fields" variant="outlined" sx={{ mt: 1 }}>Manage</Button>
           </Item>
         </Grid>
-
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={3}>
           <Item>
-            <Typography variant="h6" gutterBottom>
-              Transactions
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              Manage financial transactions related to your farm operations.
-            </Typography>
-            <Button 
-              component={Link} 
-              to="/transactions" 
-              variant="contained" 
-              color="primary"
-              sx={{ mt: 1 }}
-            >
-              View Transactions
-            </Button>
+            <Typography variant="subtitle1" fontWeight="bold">Transactions</Typography>
+            <Button component={Link} to="/transactions" variant="outlined" sx={{ mt: 1 }}>Manage</Button>
           </Item>
         </Grid>
-
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={3}>
           <Item>
-            <Typography variant="h6" gutterBottom>
-              Field Year Crops
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              Track crop planting and harvest information by field and year.
-            </Typography>
-            <Button 
-              component={Link} 
-              to="/fieldyearcrops" 
-              variant="contained" 
-              color="primary"
-              sx={{ mt: 1 }}
-            >
-              View Field Year Crops
-            </Button>
+            <Typography variant="subtitle1" fontWeight="bold">Crop History</Typography>
+            <Button component={Link} to="/fieldyearcrops" variant="outlined" sx={{ mt: 1 }}>Manage</Button>
           </Item>
         </Grid>
-
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={3}>
           <Item>
-            <Typography variant="h6" gutterBottom>
-              Farms
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              Manage information about your farms and operations.
-            </Typography>
-            <Button 
-              component={Link} 
-              to="/farms" 
-              variant="contained" 
-              color="primary"
-              sx={{ mt: 1 }}
-            >
-              View Farms
-            </Button>
+            <Typography variant="subtitle1" fontWeight="bold">Farms</Typography>
+            <Button component={Link} to="/farms" variant="outlined" sx={{ mt: 1 }}>Manage</Button>
           </Item>
         </Grid>
       </Grid>
