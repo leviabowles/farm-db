@@ -9,6 +9,7 @@ import TransactionForm from './components/TransactionForm';
 import Header from './components/Header';
 import FieldList from './components/FieldList';
 import FieldYearCropList from './components/FieldYearCropList';
+import FieldYearCropDetail from './components/FieldYearCropDetail';
 import './App.css';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import theme from './theme';
@@ -32,6 +33,7 @@ function App() {
               {/* New route for Fields */}
               <Route path="/fields" element={<FieldList />} />
               <Route path="/fieldyearcrops" element={<FieldYearCropList />} />
+              <Route path="/fieldyearcrops/:id" element={<FieldYearCropDetail />} />
               <Route path="/login" element={<Login />} />
             </Routes>
           </main>

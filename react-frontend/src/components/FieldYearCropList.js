@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -10,8 +11,17 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import { styled } from '@mui/material/styles';
+
+const ClickableRow = styled(TableRow)(({ theme }) => ({
+  cursor: 'pointer',
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover,
+  },
+}));
 
 const FieldYearCropList = () => {
+  const navigate = useNavigate();
   const [fieldYearCrops, setFieldYearCrops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,13 +32,9 @@ const FieldYearCropList = () => {
         console.log('Fetching field year crops from API...');
         const response = await api.get('/api/fieldyearcrops/');
         
-        // Handle DRF pagination wrapper format
         const fieldYearCropArray = Array.isArray(response.data) ? 
           response.data : (response.data.results || []);
         
-        console.log('Fetched field year crops:', fieldYearCropArray);
-        
-        // Enhance data for better display - include fallbacks for missing related fields
         const enhancedData = fieldYearCropArray.map(fyc => ({
           ...fyc,
           field_name: fyc.field?.field_name || fyc.field || 'Unknown Field',
@@ -41,7 +47,6 @@ const FieldYearCropList = () => {
         console.error('Error fetching field year crops:', err);
         const failedUrl = err.config?.url || 'the API';
         setError(`Failed to load field year crops from ${failedUrl}: ${err.message || 'Network error'}`);
-        setLoading(false);
       } finally {
         setLoading(false);
       }
@@ -53,7 +58,6 @@ const FieldYearCropList = () => {
   if (loading) return <CircularProgress />;
   if (error) return <Alert severity="error">{error}</Alert>;
 
-  // Show a message when no data is available
   if (fieldYearCrops.length === 0) {
     return (
       <Paper sx={{ p: 3 }} elevation={2}>
@@ -85,13 +89,16 @@ const FieldYearCropList = () => {
           </TableHead>
           <TableBody>
             {fieldYearCrops.map((fyc) => (
-              <TableRow key={fyc.id} hover>
+              <ClickableRow 
+                key={fyc.id} 
+                onClick={() => navigate(`/fieldyearcrops/${fyc.id}`)}
+              >
                 <TableCell>{fyc.field_name}</TableCell>
                 <TableCell>{fyc.year_key}</TableCell>
                 <TableCell>{fyc.crop_name}</TableCell>
                 <TableCell>{fyc.acres_planted || 0}</TableCell>
                 <TableCell>{fyc.total_bushels ? fyc.total_bushels.toLocaleString() : '0'}</TableCell>
-              </TableRow>
+              </ClickableRow>
             ))}
           </TableBody>
         </Table>
