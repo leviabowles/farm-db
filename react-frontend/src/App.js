@@ -10,15 +10,8 @@ import Header from './components/Header';
 import FieldList from './components/FieldList';
 import FieldYearCropList from './components/FieldYearCropList';
 import './App.css';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-
-// Determine initial mode from localStorage (same logic as Header)
-const prefersDark = window.localStorage.getItem('theme') === 'dark';
-const theme = createTheme({
-  palette: {
-    mode: prefersDark ? 'dark' : 'light',
-  },
-});
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import theme from './theme';
 
 function App() {
   return (
