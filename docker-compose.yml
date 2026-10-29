@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: farm-db-mysql-local
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: farmdb
+      MYSQL_USER: farm_user
+      MYSQL_PASSWORD: farm_password
+    volumes:
+      # Persist MySQL data between container restarts
+      - db_data:/var/lib/mysql
+      # Run manual DDL on first start using the init script you maintain
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  web:
+    # Build the Django image from the repository root so that Dockerfile can access both the source code and requirements.txt.
+    build:
+      context: .
+      dockerfile: farm_app/Dockerfile
+    container_name: farm-db-web
+    # Ensure the MySQL container is healthy before starting Django.
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - DB=farmdb
+      - DBUSER=farm_user
+      - DBPW=farm_password
+      # Hostname for the MySQL container; needed for both runtime and test execution.
+      - DBHOST=db
+      - DBHOST=db
+    # Apply migrations before starting the development server to ensure DB schema exists.
+    # The Django image already starts the development server via its Dockerfile CMD.
+    # We rely on the MySQL init script for schema creation, so no automatic migrations here.
+
+  # Frontend service – React development server
+  react:
+    build:
+      context: ./react-frontend
+      dockerfile: Dockerfile
+    container_name: farm-db-react
+    ports:
+      - "3000:80"
+    environment:
+      # Use localhost for API when accessing the frontend from the host machine.
+      # The Docker internal hostname "web" is not reachable from the browser.
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - web
+
+volumes:
+  db_data:

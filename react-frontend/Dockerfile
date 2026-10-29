@@ -1,16 +1,15 @@
-FROM node:18-alpine
-
+# Build stage
+FROM node:18-alpine as build-stage
 WORKDIR /app
-
 COPY package*.json ./
-# Install dependencies (npm install works without lock file) and cache layers.
 RUN npm install
-
-# Copy the rest of the source code.
 COPY . .
+# Build the React app for production
+RUN npm run build
 
-EXPOSE 3000
-
-
-
-CMD ["npm", "start"]
+# Production stage
+FROM nginx:stable-alpine as production-stage
+# Copy the build output from the build stage to the nginx html folder
+COPY --from=build-stage /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
