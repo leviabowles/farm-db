@@ -30,45 +30,115 @@ const Item = styled(Paper)(({ theme }) => ({
 
 const Dashboard = () => {
   const [currentCrops, setCurrentCrops] = useState([]);
+  const [harvestedCrops, setHarvestedCrops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchLatestCrops = async () => {
+    const fetchCropData = async () => {
       try {
         console.log('Fetching crop data for dashboard...');
         const response = await api.get('/api/fieldyearcrops/');
         
         let allCrops = Array.isArray(response.data) ? response.data : (response.data.results || []);
         
-        const latestMap = {};
+        const now = new Date();
+        const oneAndHalfYearsAgo = new Date();
+        oneAndHalfYearsAgo.setMonth(now.getMonth() - 18);
+
+        const active = [];
+        const harvested = [];
+
         allCrops.forEach(crop => {
-          const fieldId = crop.field; 
-          const fieldIdStr = typeof fieldId === 'object' ? fieldId.id : fieldId;
-          
-          if (!latestMap[fieldIdStr] || crop.year_key > latestMap[fieldIdStr].year_key) {
-            latestMap[fieldIdStr] = crop;
+          const cropData = {
+            ...crop,
+            field_name: crop.field?.field_name || 'Unknown Field',
+            crop_name: crop.crop?.crop_name || 'Unknown Crop'
+          };
+
+          if (!crop.harvest_date) {
+            active.push(cropData);
+          } else {
+            const hDate = new Date(crop.harvest_date);
+            if (hDate >= oneAndHhalfYearsAgo) {
+              harvested.push(cropData);
+            }
           }
         });
 
-        const latestCrops = Object.values(latestMap).map(crop => ({
-          ...crop,
-          field_name: crop.field?.field_name || 'Unknown Field',
-          crop_name: crop.crop?.crop_name || 'Unknown Crop'
-        }));
-
-        setCurrentCrops(latestCrops);
+        // Sort both by year descending
+        const sortByYear = (a, b) => (b.year_key || 0) - (a.year_key || 0);
+        
+        setCurrentCrops(active.sort(sortByYear));
+        setHarvestedCrops(harvested.sort(sortByYear));
         setError(null);
       } catch (err) {
         console.error('Error fetching dashboard crops:', err);
-        setError('Failed to load current crop status.');
+        setError('Failed to load crop status.');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchLatestCrops();
+    fetchCropData();
   }, []);
+
+  const renderCropTable = (title, data, isHarvested = false) => (
+    <Paper sx={{ p: 3, borderRadius: 4, mb: 4 }} elevation={0}>
+      <Typography variant="h6" gutterBottom sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+        <Box component="span" sx={{ width: 4, height: 24, bgcolor: isHarvested ? 'secondary.main' : 'primary.main', mr: 2, borderRadius: 1 }} />
+        {title}
+      </Typography>
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+          <CircularProgress />
+        </Box>
+      ) : data.length === 0 ? (
+        <Box sx={{ py: 4, textAlign: 'center', color: 'text.secondary' }}>
+          No {isHarvested ? 'recent harvests' : 'active crops'} found.
+        </Box>
+      ) : (
+        <TableContainer>
+          <Table size="medium">
+            <TableHead>
+              <TableRow sx={{ '& th': { fontWeight: 'bold', color: 'text.secondary' } }}>
+                <TableCell>Field</TableCell>
+                <TableCell>Year</TableCell>
+                <TableCell>Crop</TableCell>
+                <TableCell align="right">Acres</TableCell>
+                <TableCell align="center">{isHarvested ? 'Harvest Date' : 'Planting Date'}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((crop, index) => (
+                <TableRow key={index} hover>
+                  <TableCell sx={{ fontWeight: 500 }}>{crop.field_name}</TableCell>
+                  <TableCell>{crop.year_key}</TableCell>
+                  <TableCell>
+                    <Box 
+                      component="span" 
+                      sx={{ 
+                        px: 1.5, py: 0.5, 
+                        borderRadius: '20px', 
+                        bgcolor: isHarvested ? 'secondary.light' : 'primary.light', 
+                        color: isHarvested ? 'secondary.dark' : 'primary.dark', 
+                        fontSize: '0.85rem',
+                        fontWeight: 600 
+                      }}
+                    >
+                      {crop.crop_name}
+                    </Box>
+                  </TableCell>
+                  <TableCell align="right">{crop.acres_planted || 0}</TableCell>
+                  <TableCell align="center">{isHarvested ? crop.harvest_date : crop.planting_date || 'N/A'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </Paper>
+  );
 
   return (
     <Box>
@@ -76,70 +146,13 @@ const Dashboard = () => {
       
       <Box sx={{ padding: '40px 20px', maxWidth: 'lg', margin: '0 auto' }}>
         <Typography variant="h4" gutterBottom sx={{ mb: 4, textAlign: 'center' }}>
-          Farm Overview
+          Farm Status
         </Typography>
 
         <Grid container spacing={4}>
-          {/* Main Section: Currently Planted Crops */}
           <Grid item xs={12}>
-            <Paper sx={{ p: 3, borderRadius: 4 }} elevation={0}>
-              <Typography variant="h6" gutterBottom sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-                <Box component="span" sx={{ width: 4, height: 24, bgcolor: 'primary.main', mr: 2, borderRadius: 1 }} />
-                CURRENTLY PLANTED CROPS
-              </Typography>
-              {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
-                  <CircularProgress />
-                </Box>
-              ) : error ? (
-                <Typography color="error">{error}</Typography>
-              ) : (
-                <TableContainer>
-                  <Table size="medium">
-                    <TableHead>
-                      <TableRow sx={{ '& th': { fontWeight: 'bold', color: 'text.secondary' } }}>
-                        <TableCell>Field</TableCell>
-                        <TableCell>Year</TableCell>
-                        <TableCell>Crop</TableCell>
-                        <TableCell align="right">Acres</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {currentCrops.length > 0 ? (
-                        currentCrops.map((crop, index) => (
-                          <TableRow key={index} hover>
-                            <TableCell sx={{ fontWeight: 500 }}>{crop.field_name}</TableCell>
-                            <TableCell>{crop.year_key}</TableCell>
-                            <TableCell>
-                              <Box 
-                                component="span" 
-                                sx={{ 
-                                  px: 1.5, py: 0.5, 
-                                  borderRadius: '20px', 
-                                  bgcolor: 'secondary.light', 
-                                  color: 'secondary.dark', 
-                                  fontSize: '0.85rem',
-                                  fontWeight: 600 
-                                }}
-                              >
-                                {crop.crop_name}
-                              </Box>
-                            </TableCell>
-                            <TableCell align="right">{crop.acres_planted || 0}</TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
-                            No crop data available for the current year.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </Paper>
+            {renderCropTable('CURRENTLY PLANTED CROPS', currentCrops)}
+            {renderCropTable('RECENTLY HARVESTED CROPS', harvestedCrops, true)}
           </Grid>
 
           {/* Bottom Section: Navigation Links */}
