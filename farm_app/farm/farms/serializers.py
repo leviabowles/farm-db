@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FieldYearTransaction, Field, FieldYearCrop
+from .models import FieldYearTransaction, Field, FieldYearCrop, Crop
 from .models import Farm
 
 
@@ -27,12 +27,23 @@ class FieldSerializer(serializers.ModelSerializer):
         model = Field
         fields = '__all__'
 
+class CropSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Crop
+        fields = '__all__'
+
 # Serializer for linking a field to a specific year and crop.
 class FieldYearCropSerializer(serializers.ModelSerializer):
-    # Include related objects if desired – here we keep simple IDs.
     class Meta:
         model = FieldYearCrop
         fields = '__all__'
+
+    def to_representation(self, instance):
+        """Nest the field and crop serializers for GET requests."""
+        representation = super().to_representation(instance)
+        representation['field'] = FieldSerializer(instance.field).data if instance.field else None
+        representation['crop'] = CropSerializer(instance.crop).data if instance.crop else None
+        return representation
 
 # Serializer for the newly added Farm model – exposes all columns.
 class FarmSerializer(serializers.ModelSerializer):
