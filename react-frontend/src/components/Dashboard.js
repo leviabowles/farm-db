@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
@@ -16,6 +16,13 @@ import { styled } from '@mui/material/styles';
 import api from '../services/api';
 import Banner from './Banner';
 
+const ClickableRow = styled(TableRow)(({ theme }) => ({
+  cursor: 'pointer',
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover,
+  },
+}));
+
 const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
   padding: theme.spacing(3),
@@ -29,6 +36,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [currentCrops, setCurrentCrops] = useState([]);
   const [harvestedCrops, setHarvestedCrops] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,13 +68,12 @@ const Dashboard = () => {
             active.push(cropData);
           } else {
             const hDate = new Date(crop.harvest_date);
-            if (hDate >= oneAndHhalfYearsAgo) {
+            if (hDate >= oneAndHalfYearsAgo) {
               harvested.push(cropData);
             }
           }
         });
 
-        // Sort both by year descending
         const sortByYear = (a, b) => (b.year_key || 0) - (a.year_key || 0);
         
         setCurrentCrops(active.sort(sortByYear));
@@ -111,7 +118,11 @@ const Dashboard = () => {
             </TableHead>
             <TableBody>
               {data.map((crop, index) => (
-                <TableRow key={index} hover>
+                <ClickableRow 
+                  key={index} 
+                  hover 
+                  onClick={() => navigate(`/fieldyearcrops/${crop.id}`)}
+                >
                   <TableCell sx={{ fontWeight: 500 }}>{crop.field_name}</TableCell>
                   <TableCell>{crop.year_key}</TableCell>
                   <TableCell>
@@ -131,7 +142,7 @@ const Dashboard = () => {
                   </TableCell>
                   <TableCell align="right">{crop.acres_planted || 0}</TableCell>
                   <TableCell align="center">{isHarvested ? crop.harvest_date : crop.planting_date || 'N/A'}</TableCell>
-                </TableRow>
+                </ClickableRow>
               ))}
             </TableBody>
           </Table>

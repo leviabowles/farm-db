@@ -59,8 +59,11 @@ class ListTxAPIView(ListCreateAPIView):
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        # Add filtering options here if needed
-        return FieldYearTransaction.objects.all()
+        queryset = FieldYearTransaction.objects.all()
+        field_year_crop_id = self.request.query_params.get('field_year_crop')
+        if field_year_crop_id:
+            queryset = queryset.filter(field_year_crop__id=field_year_crop_id)
+        return queryset
 
 @method_decorator(csrf_exempt, name='dispatch')
 class TransactionDetailAPIView(RetrieveUpdateDestroyAPIView):
@@ -85,6 +88,13 @@ class FieldYearCropListCreateAPIView(ListCreateAPIView):
     """Expose the linking model between a field, year and crop."""
     queryset = FieldYearCrop.objects.all()
     serializer_class = FieldYearCropSerializer
+
+@method_decorator(csrf_exempt, name='dispatch')
+class FieldYearCropDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete a FieldYearCrop relationship."""
+    queryset = FieldYearCrop.objects.all()
+    serializer_class = FieldYearCropSerializer
+
 
 # API for listing/creating Farms
 @method_decorator(csrf_exempt, name='dispatch')
