@@ -6,6 +6,7 @@ from .models import Farm
 class TxSerializer(serializers.ModelSerializer):
     # Make the document upload optional; front‑end can omit it.
     doc_file = serializers.FileField(required=False, allow_null=True)
+    transaction_object_name = serializers.CharField(source='transaction_object.object_name', read_only=True)
 
     class Meta:
         model = FieldYearTransaction

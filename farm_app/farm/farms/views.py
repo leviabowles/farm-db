@@ -61,8 +61,13 @@ class ListTxAPIView(ListCreateAPIView):
     def get_queryset(self):
         queryset = FieldYearTransaction.objects.all()
         field_year_crop_id = self.request.query_params.get('field_year_crop')
+        year_key = self.request.query_params.get('year_key')
+        
         if field_year_crop_id:
             queryset = queryset.filter(field_year_crop__id=field_year_crop_id)
+        if year_key:
+            queryset = queryset.filter(year_key=year_key)
+            
         return queryset
 
 @method_decorator(csrf_exempt, name='dispatch')
