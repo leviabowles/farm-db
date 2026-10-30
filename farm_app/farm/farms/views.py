@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.db import models
+from django.utils import timezone
 # Create your views here.
 from .models import FieldYearTransaction, Field, FieldYearCrop, Farm
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -68,15 +69,22 @@ class ListTxAPIView(ListCreateAPIView):
             queryset = queryset.filter(field_year_crop__id=field_year_crop_id)
             
         if year_key_raw:
-            try:
-                year_val = int(year_key_raw)
-                queryset = queryset.filter(
-                    models.Q(year_key=year_val) | 
-                    models.Q(paid_date__year=year_val) | 
-                    models.Q(invoice_date__year=year_val)
-                )
-            except (ValueError, TypeError):
-                pass
+            # Handle "current" keyword or cast provided year to int
+            if year_key_raw.lower() == 'current':
+                year_val = timezone.now().year
+            else:
+                try:
+                    year_val = int(year_key_raw)
+                except (ValueError, TypeError):
+                    return queryset # Return all if year is invalid
+                
+            # Broad filter: check transaction fields AND linked crop fields
+            queryset = queryset.filter(
+                models.Q(year_key=year_val) | 
+                models.Q(paid_date__year=year_val) | 
+                models.Q(invoice_date__year=year_val) |
+                models.Q(field_year_crop__year_key=year_val)
+            ).distinct()
                 
         return queryset
 
