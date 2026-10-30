@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.db import models
 # Create your views here.
 from .models import FieldYearTransaction, Field, FieldYearCrop, Farm
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -66,7 +67,10 @@ class ListTxAPIView(ListCreateAPIView):
         if field_year_crop_id:
             queryset = queryset.filter(field_year_crop__id=field_year_crop_id)
         if year_key:
-            queryset = queryset.filter(year_key=year_key)
+            # Try to filter by the numeric year_key column first
+            queryset = queryset.filter(models.Q(year_key=year_key) | 
+                                       models.Q(paid_date__year=year_key) | 
+                                       models.Q(invoice_date__year=year_key))
             
         return queryset
 
