@@ -62,16 +62,22 @@ class ListTxAPIView(ListCreateAPIView):
     def get_queryset(self):
         queryset = FieldYearTransaction.objects.all()
         field_year_crop_id = self.request.query_params.get('field_year_crop')
-        year_key = self.request.query_params.get('year_key')
+        year_key_raw = self.request.query_params.get('year_key')
         
         if field_year_crop_id:
             queryset = queryset.filter(field_year_crop__id=field_year_crop_id)
-        if year_key:
-            # Try to filter by the numeric year_key column first
-            queryset = queryset.filter(models.Q(year_key=year_key) | 
-                                       models.Q(paid_date__year=year_key) | 
-                                       models.Q(invoice_date__year=year_key))
             
+        if year_key_raw:
+            try:
+                year_val = int(year_key_raw)
+                queryset = queryset.filter(
+                    models.Q(year_key=year_val) | 
+                    models.Q(paid_date__year=year_val) | 
+                    models.Q(invoice_date__year=year_val)
+                )
+            except (ValueError, TypeError):
+                pass
+                
         return queryset
 
 @method_decorator(csrf_exempt, name='dispatch')
