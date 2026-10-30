@@ -69,7 +69,6 @@ class ListTxAPIView(ListCreateAPIView):
             queryset = queryset.filter(field_year_crop__id=field_year_crop_id)
             
         if year_key_raw:
-            # Handle "current" keyword or cast provided year to int
             if year_key_raw.lower() == 'current':
                 year_val = timezone.now().year
             else:
@@ -78,12 +77,14 @@ class ListTxAPIView(ListCreateAPIView):
                 except (ValueError, TypeError):
                     return queryset # Return all if year is invalid
                 
-            # Broad filter: check transaction fields AND linked crop fields
+            year_str = str(year_val)
             queryset = queryset.filter(
                 models.Q(year_key=year_val) | 
+                models.Q(year_key=year_str) | 
                 models.Q(paid_date__year=year_val) | 
                 models.Q(invoice_date__year=year_val) |
-                models.Q(field_year_crop__year_key=year_val)
+                models.Q(field_year_crop__year_key=year_val) |
+                models.Q(field_year_crop__year_key=year_str)
             ).distinct()
                 
         return queryset
