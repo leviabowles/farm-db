@@ -15,23 +15,12 @@ import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 import api from '../services/api';
 import Banner from './Banner';
+import ExpenditureWaterfall from './ExpenditureWaterfall';
 
 const ClickableRow = styled(TableRow)(({ theme }) => ({
   cursor: 'pointer',
   '&:hover': {
     backgroundColor: theme.palette.action.hover,
-  },
-}));
-
-const Item = styled(Paper)(({ theme }) => ({
-  ...theme.typography.body2,
-  padding: theme.spacing(3),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-4px)',
-    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.12)',
   },
 }));
 
@@ -161,35 +150,15 @@ const Dashboard = () => {
         </Typography>
 
         <Grid container spacing={4}>
-          <Grid item xs={12}>
+          {/* Left Column: Crop Tables */}
+          <Grid item xs={12} md={8}>
             {renderCropTable('CURRENTLY PLANTED CROPS', currentCrops)}
             {renderCropTable('RECENTLY HARVESTED CROPS', harvestedCrops, true)}
           </Grid>
 
-          {/* Bottom Section: Navigation Links */}
-          <Grid item xs={12} sm={3}>
-            <Item>
-              <Typography variant="subtitle1" fontWeight="bold" color="primary">Fields</Typography>
-              <Button component={Link} to="/fields" variant="contained" disableElevation sx={{ mt: 2 }}>Manage</Button>
-            </Item>
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <Item>
-              <Typography variant="subtitle1" fontWeight="bold" color="primary">Transactions</Typography>
-              <Button component={Link} to="/transactions" variant="contained" disableElevation sx={{ mt: 2 }}>Manage</Button>
-            </Item>
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <Item>
-              <Typography variant="subtitle1" fontWeight="bold" color="primary">Crop History</Typography>
-              <Button component={Link} to="/fieldyearcrops" variant="contained" disableElevation sx={{ mt: 2 }}>Manage</Button>
-            </Item>
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <Item>
-              <Typography variant="subtitle1" fontWeight="bold" color="primary">Farms</Typography>
-              <Button component={Link} to="/farms" variant="contained" disableElevation sx={{ mt: 2 }}>Manage</Button>
-            </Item>
+          {/* Right Column: Financial Intelligence */}
+          <Grid item xs={12} md={4}>
+            <ExpenditureWaterfall />
           </Grid>
         </Grid>
       </Box>
