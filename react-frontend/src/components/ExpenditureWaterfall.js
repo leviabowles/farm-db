@@ -28,8 +28,8 @@ const ExpenditureWaterfall = () => {
   useEffect(() => {
     const fetchExpenditures = async () => {
       try {
-        const currentYear = new Date().getFullYear();
-        const response = await api.get(`/api/transactions/?year_key=${currentYear}`);
+        // Use 'current' keyword to let the server determine the YTD year
+        const response = await api.get(`/api/transactions/?year_key=current`);
         const transactions = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
         const categoryTotals = {};
