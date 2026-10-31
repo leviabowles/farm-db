@@ -11,6 +11,18 @@ class TxSerializer(serializers.ModelSerializer):
     class Meta:
         model = FieldYearTransaction
         fields = '__all__'
+
+    def to_representation(self, instance):
+        """Coerce datetime objects to date objects to prevent DRF AssertionError."""
+        ret = super().to_representation(instance)
+        
+        # Handle invoice_date and paid_date coercion
+        for field_name in ['invoice_date', 'paid_date']:
+            value = ret.get(field_name)
+            if value and hasattr(value, 'date'):
+                ret[field_name] = value.date()
+        
+        return ret
         
     def validate_paid_amount(self, value):
         if value is not None and value < 0:
