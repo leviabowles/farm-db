@@ -118,7 +118,7 @@ const TransactionList = () => {
                   <Tooltip title="Edit">
                     <IconButton
                       component="a"
-                      href={`${process.env.REACT_APP_API_URL}/admin/farms/fieldyeartransaction/${transaction.id}/change/`}
+                      href={`${process.env.REACT_APP_API_URL.replace(/\/farms\/?$/, '')}/admin/farms/fieldyeartransaction/${transaction.id}/change/`}
                       target="_blank"
                       rel="noopener noreferrer"
                       color="primary"
@@ -142,7 +142,7 @@ const TransactionList = () => {
       </TableContainer>
       <Button
         component="a"
-        href={`${process.env.REACT_APP_API_URL}/admin/farms/fieldyeartransaction/add/`}
+        href={`${process.env.REACT_APP_API_URL.replace(/\/farms\/?$/, '')}/admin/farms/fieldyeartransaction/add/`}
         target="_blank"
         rel="noopener noreferrer"
         variant="contained"

@@ -142,7 +142,7 @@ const FieldYearCropDetail = () => {
             <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
               <Button
                 component="a"
-                href={`${process.env.REACT_APP_API_URL}/admin/farms/fieldyeartransaction/add/`}
+                href={`${process.env.REACT_APP_API_URL.replace(/\/farms\/?$/, '')}/admin/farms/fieldyeartransaction/add/`}
                 target="_blank"
                 rel="noopener noreferrer"
                 variant="outlined"
