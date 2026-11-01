@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, Grid, Paper, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, CircularProgress, 
-  Divider, Breadcrumbs, Link as MuiLink, Chip, Button 
-} from '@mui/material';
+  Divider, Breadcrumbs, Link as MuiLink, Chip, Button } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import api from '../services/api';
 
@@ -24,30 +24,31 @@ const FieldYearCropDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch both crop details and associated transactions in parallel
-        const [cropRes, txRes] = await Promise.all([
-          api.get(`/api/fieldyearcrops/${id}/`),
-          api.get(`/api/transactions/?field_year_crop=${id}`)
-        ]);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Fetch both crop details and associated transactions in parallel
+      const [cropRes, txRes] = await Promise.all([
+        api.get(`/api/fieldyearcrops/${id}/`),
+        api.get(`/api/transactions/?field_year_crop=${id}`)
+      ]);
 
-        setCrop(cropRes.data);
-        setTransactions(Array.isArray(txRes.data) ? txRes.data : (txRes.data.results || []));
-      } catch (err) {
-        console.error('Error fetching detail data:', err);
-        setError('Failed to load crop information.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      setCrop(cropRes.data);
+      setTransactions(Array.isArray(txRes.data) ? txRes.data : (txRes.data.results || []));
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching detail data:', err);
+      setError('Failed to load crop information.');
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  if (loading) {
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  if (loading && !crop) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
         <CircularProgress />
@@ -75,9 +76,19 @@ const FieldYearCropDetail = () => {
         <Typography color="text.primary">Crop Detail</Typography>
       </Breadcrumbs>
 
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 4 }}>
-        {crop.field?.field_name || 'Unknown Field'} — {crop.year_key}
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
+          {crop.field?.field_name || 'Unknown Field'} — {crop.year_key}
+        </Typography>
+        <Button 
+          variant="outlined" 
+          startIcon={<RefreshIcon />} 
+          onClick={fetchData}
+          disabled={loading}
+        >
+          {loading ? 'Refreshing...' : 'Refresh Data'}
+        </Button>
+      </Box
 
       <Grid container spacing={4}>
         {/* Left Column: Core Information */}
