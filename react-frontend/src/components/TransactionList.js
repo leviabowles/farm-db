@@ -109,8 +109,10 @@ const TransactionList = () => {
                 <TableCell align="right">
                   <Tooltip title="Edit">
                     <IconButton
-                      component={Link}
-                      to={`/transactions/${transaction.id}/edit`}
+                      component="a"
+                      href={`${process.env.REACT_APP_API_URL}/admin/farms/fieldyeartransaction/${transaction.id}/change/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       color="primary"
                     >
                       <EditIcon />
@@ -131,8 +133,10 @@ const TransactionList = () => {
         </Table>
       </TableContainer>
       <Button
-        component={Link}
-        to="/transactions/new"
+        component="a"
+        href={`${process.env.REACT_APP_API_URL}/admin/farms/fieldyeartransaction/add/`}
+        target="_blank"
+        rel="noopener noreferrer"
         variant="contained"
         color="primary"
         sx={{ mt: 2 }}

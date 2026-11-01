@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Box, Typography, Grid, Paper, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, CircularProgress, 
-  Divider, Breadcrumbs, Link as MuiLink, Chip 
+  Divider, Breadcrumbs, Link as MuiLink, Chip, Button 
 } from '@mui/material';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import api from '../services/api';
@@ -128,6 +128,18 @@ const FieldYearCropDetail = () => {
         {/* Right Column: Associated Transactions */}
         <Grid item xs={12} md={8}>
           <DetailSection title="Associated Transactions">
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                component="a"
+                href={`${process.env.REACT_APP_API_URL}/admin/farms/fieldyeartransaction/add/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="outlined"
+                size="small"
+              >
+                Add Transaction
+              </Button>
+            </Box>
             {transactions.length === 0 ? (
               <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 4, color: 'text.secondary' }} elevation={0}>
                 No transactions associated with this crop.
