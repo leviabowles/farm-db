@@ -32,40 +32,67 @@ const ExpenditureWaterfall = () => {
         const response = await api.get(`/api/transactions/?year_key=current`);
         const transactions = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
-        const categoryTotals = {};
-        let totalExpensed = 0;
+        const currentYear = new Date().getFullYear();
+        
+        // 1. Filter strictly by PAID DATE of current year on the client side
+        // (since the API might be broader)
+        const currentYearTxs = transactions.filter(tx => {
+          if (!tx.paid_date) return false;
+          const paidYear = new Date(tx.paid_date).getFullYear();
+          return paidYear === currentYear;
+        });
 
-        transactions.forEach(tx => {
+        const categoryTotals = {};
+        let totalReceived = 0;
+
+        currentYearTxs.forEach(tx => {
           const category = tx.transaction_object_name || 'Other';
-          const amount = parseFloat(tx.paid_amount || 0);
-          if (amount > 0) {
-            categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+          const paid = parseFloat(tx.paid_amount || 0);
+          const received = parseFloat(tx.received_amount || 0);
+
+          // Sum up total income (received)
+          if (received > 0) {
+            totalReceived += received;
+          }
+
+          // Sum up expenditures by category
+          if (paid > 0) {
+            categoryTotals[category] = (categoryTotals[category] || 0) + paid;
           }
         });
 
         const labels = [];
         const dataPoints = [];
-        let currentRunningTotal = 0;
+        
+        // START: Total Received (The positive baseline)
+        labels.push('TOTAL RECEIVED');
+        dataPoints.push([0, totalReceived]);
+        
+        let currentRunningTotal = totalReceived;
 
+        // MIDDLE: Each expense category drops the total
         Object.entries(categoryTotals).forEach(([category, amount]) => {
           labels.push(category);
           const start = currentRunningTotal;
-          currentRunningTotal -= amount; // expenses go down
+          currentRunningTotal -= amount;
           dataPoints.push([start, currentRunningTotal]);
         });
 
-        labels.push('TOTAL YTD');
+        // END: Final Net Position
+        labels.push('NET BALANCE');
         dataPoints.push([0, currentRunningTotal]);
 
         setChartData({
           labels,
           datasets: [
             {
-              label: 'Expenditure',
+              label: 'Cash Flow',
               data: dataPoints,
-              backgroundColor: labels.map((l, i) => 
-                i === labels.length - 1 ? '#FBC02D' : '#EF5350'
-              ),
+              backgroundColor: labels.map((l, i) => {
+                if (l === 'TOTAL RECEIVED') return '#4CAF50'; // Green for income
+                if (l === 'NET BALANCE') return currentRunningTotal >= 0 ? '#4CAF50' : '#EF5350'; // Green if profit, Red if loss
+                return '#EF5350'; // Red for expenses
+              }),
               borderRadius: 4,
             },
           ],
@@ -86,7 +113,7 @@ const ExpenditureWaterfall = () => {
   return (
     <Paper sx={{ p: 3, borderRadius: 4, height: '100%', minHeight: '500px' }} elevation={0}>
       <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 3 }}>
-        YTD EXPENDITURE WATERFALL
+        YTD CASH FLOW WATERFALL
       </Typography>
       <Box sx={{ height: '400px', position: 'relative' }}>
         <Bar 
@@ -125,10 +152,10 @@ const ExpenditureWaterfall = () => {
       </Box>
       <Box sx={{ mt: 3, textAlign: 'center' }}>
         <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
-          Total: ${Math.abs(chartData.datasets[0].data[chartData.datasets[0].data.length - 1][1]).toFixed(2)}
+          Net Balance: ${chartData.datasets[0].data[chartData.datasets[0].data.length - 1][1].toFixed(2)}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          Aggregated from all categories for {new Date().getFullYear()}
+          Aggregated from all transactions for {new Date().getFullYear()}
         </Typography>
       </Box>
     </Paper>
