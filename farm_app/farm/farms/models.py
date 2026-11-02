@@ -237,7 +237,24 @@ class Account(models.Model):
         db_table = 'farms_account'
 
 
+class LedgerEntry(models.Model):
+    transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE, related_name='ledger_entries')
+    account = models.ForeignKey('Account', on_delete=models.CASCADE)
+    debit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    credit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    create_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Ledger for {self.transaction.id} - {self.account.name}: D{self.debit}/C{self.credit}"
+
+    class Meta:
+        managed = True
+        db_table = 'farms_ledgerentry'
+
+
 class TransactionLineItem(models.Model):
+
     transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE, related_name='line_items')
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     field_year_crop = models.ForeignKey('FieldYearCrop', on_delete=models.CASCADE, blank=True, null=True)
