@@ -215,6 +215,28 @@ class FieldYearCrop(models.Model):
 
 
 
+class Account(models.Model):
+    ACCOUNT_TYPES = [
+        ('ASSET', 'Asset'),
+        ('LIABILITY', 'Liability'),
+        ('EQUITY', 'Equity'),
+        ('REVENUE', 'Revenue'),
+        ('EXPENSE', 'Expense'),
+    ]
+    name = models.CharField(max_length=255, unique=True)
+    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    create_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.account_type})"
+
+    class Meta:
+        managed = True
+        db_table = 'farms_account'
+
+
 class FieldYearTransaction(models.Model):
     debit = 'debit'
     credit = 'credit'
@@ -227,6 +249,7 @@ class FieldYearTransaction(models.Model):
     year_key = models.IntegerField(blank=True, null=True)
     trans_type = models.CharField(max_length=10, blank=True, null=True, choices = tx_choices)
     transaction_object = models.ForeignKey('TransactionObject', models.DO_NOTHING, blank=True, null=True)
+    account = models.ForeignKey('Account', models.SET_NULL, blank=True, null=True, db_column='account_id')
     vendor = models.ForeignKey('Vendor', models.DO_NOTHING, db_column='vendor', blank=True, null=True)
     invoice_date = models.DateField(blank=True, null=True)
     paid_date = models.DateField(blank=True, null=True)
