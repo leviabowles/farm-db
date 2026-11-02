@@ -87,6 +87,7 @@ const FieldYearCropDetail = () => {
           disabled={loading}
         >
           {loading ? 'Refreshing...' : 'Refresh Data'}
+        </Button>
       </Box>
 
       <Grid container spacing={4}>
