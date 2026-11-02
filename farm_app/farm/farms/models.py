@@ -237,6 +237,22 @@ class Account(models.Model):
         db_table = 'farms_account'
 
 
+class TransactionLineItem(models.Model):
+    transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE, related_name='line_items')
+    account = models.ForeignKey('Account', on_delete=models.CASCADE)
+    field_year_crop = models.ForeignKey('FieldYearCrop', on_delete=models.CASCADE, blank=True, null=True)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    create_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Line for {self.transaction.id} - {self.account.name}: {self.amount}"
+
+    class Meta:
+        managed = True
+        db_table = 'farms_transactionlineitem'
+
+
 class FieldYearTransaction(models.Model):
     debit = 'debit'
     credit = 'credit'
@@ -254,8 +270,9 @@ class FieldYearTransaction(models.Model):
     invoice_date = models.DateField(blank=True, null=True)
     paid_date = models.DateField(blank=True, null=True)
     memo = models.CharField(max_length=255, blank=True, null=True)
-    paid_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    # Amounts moved to TransactionLineItem
+    # paid_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    # received_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     # Use DateTimeField to accept full ISO datetime strings from the frontend.
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
