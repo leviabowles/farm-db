@@ -12,6 +12,7 @@ from farms.models import FarmYear
 from farms.models import LedgerEntries
 from farms.models import CapitalPayment
 from farms.models import FieldYearTransactionCrop
+from farms.models import Account, TransactionLineItem
 
 ## ADMIN CLASSES CUSTOM
 
@@ -53,13 +54,24 @@ class FieldYearTransactionCropAdmin(admin.TabularInline):
     model = FieldYearTransactionCrop
     extra = 1
 
+class TransactionLineItemAdmin(admin.TabularInline):
+    model = TransactionLineItem
+    extra = 1
+
 class FieldYearTransactionAdmin(admin.ModelAdmin):
-    inlines = [FieldYearTransactionCropAdmin]
-    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor', 'paid_amount', 'received_amount')
+    inlines = [FieldYearTransactionCropAdmin, TransactionLineItemAdmin]
+    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor')
     list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
 
 
+class AccountAdmin(admin.ModelAdmin):
+    list_display = ('name', 'account_type', 'parent', 'create_date')
+    list_filter = ('account_type', 'create_date')
+    search_fields = ('name', 'account_type')
+    ordering = ('account_type', 'name')
+
 ## REGISTER SOME SHIT
+admin.site.register(Account, AccountAdmin)
 admin.site.register(LoanPayment, LoanPaymentAdmin)
 admin.site.register(FieldYearTransaction, FieldYearTransactionAdmin)
 admin.site.register(FieldYearCrop, FieldYearCropAdmin)
