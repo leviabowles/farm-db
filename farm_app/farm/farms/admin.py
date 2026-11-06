@@ -58,17 +58,17 @@ class TransactionLineItemAdmin(admin.TabularInline):
     model = TransactionLineItem
     extra = 1
 
-class FieldYearTransactionAdmin(admin.ModelAdmin):
-    inlines = [FieldYearTransactionCropAdmin, TransactionLineItemAdmin]
-    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor')
-    list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
-
-
 class AccountAdmin(admin.ModelAdmin):
     list_display = ('name', 'account_type', 'parent', 'create_date')
     list_filter = ('account_type', 'create_date')
     search_fields = ('name', 'account_type')
     ordering = ('account_type', 'name')
+
+class FieldYearTransactionAdmin(admin.ModelAdmin):
+    inlines = [FieldYearTransactionCropAdmin, TransactionLineItemAdmin]
+    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor')
+    list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
+
 
 ## REGISTER SOME SHIT
 admin.site.register(Account, AccountAdmin)
@@ -96,6 +96,3 @@ admin.site.register(CapitalPayment, CapitalPaymentAdmin)
      #   admin.site.register(model)
     #except admin.sites.AlreadyRegistered:
      #   pass
-
-
-
