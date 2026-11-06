@@ -9,9 +9,10 @@ from farms.models import Field
 from farms.models import TransactionObject
 from farms.models import Vendor
 from farms.models import FarmYear
-from farms.models import LedgerEntries
+from farms.models import LedgerEntry
 from farms.models import CapitalPayment
 from farms.models import FieldYearTransactionCrop
+from farms.models import Account, TransactionLineItem
 
 ## ADMIN CLASSES CUSTOM
 
@@ -43,8 +44,11 @@ class VendorAdmin(admin.ModelAdmin):
 class FarmYearAdmin(admin.ModelAdmin):
     list_display = ('year_key','create_date')
 
-class LedgerEntriesAdmin(admin.ModelAdmin):
-    list_display = ('create_date', 'memo')
+class LedgerEntryAdmin(admin.ModelAdmin):
+    list_display = ('transaction', 'account', 'debit', 'credit', 'create_date')
+    list_filter = ('account', 'create_date')
+    search_fields = ('account__name',)
+    ordering = ('create_date',)
 
 class CapitalPaymentAdmin(admin.ModelAdmin):
     list_display = ('create_date', 'payment_type_id', 'total_payment')
@@ -53,13 +57,28 @@ class FieldYearTransactionCropAdmin(admin.TabularInline):
     model = FieldYearTransactionCrop
     extra = 1
 
+class TransactionLineItemAdmin(admin.TabularInline):
+    model = TransactionLineItem
+    extra = 1
+
+class LedgerEntryInlineAdmin(admin.TabularInline):
+    model = LedgerEntry
+    extra = 1
+
+class AccountAdmin(admin.ModelAdmin):
+    list_display = ('name', 'account_type', 'parent', 'create_date')
+    list_filter = ('account_type', 'create_date')
+    search_fields = ('name', 'account_type')
+    ordering = ('account_type', 'name')
+
 class FieldYearTransactionAdmin(admin.ModelAdmin):
-    inlines = [FieldYearTransactionCropAdmin]
-    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor', 'paid_amount', 'received_amount')
+    inlines = [FieldYearTransactionCropAdmin, TransactionLineItemAdmin, LedgerEntryInlineAdmin]
+    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor')
     list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
 
 
 ## REGISTER SOME SHIT
+admin.site.register(Account, AccountAdmin)
 admin.site.register(LoanPayment, LoanPaymentAdmin)
 admin.site.register(FieldYearTransaction, FieldYearTransactionAdmin)
 admin.site.register(FieldYearCrop, FieldYearCropAdmin)
@@ -69,7 +88,7 @@ admin.site.register(Field, FieldAdmin)
 admin.site.register(TransactionObject, TransactionObjectAdmin)
 admin.site.register(Vendor, VendorAdmin)
 admin.site.register(FarmYear, FarmYearAdmin)
-admin.site.register(LedgerEntries, LedgerEntriesAdmin)
+admin.site.register(LedgerEntry, LedgerEntryAdmin)
 admin.site.register(CapitalPayment, CapitalPaymentAdmin)
 #admin.site.register(FieldYearTransactionCrop, FieldYearTransactionCropAdmin)
 
@@ -84,6 +103,3 @@ admin.site.register(CapitalPayment, CapitalPaymentAdmin)
      #   admin.site.register(model)
     #except admin.sites.AlreadyRegistered:
      #   pass
-
-
-
