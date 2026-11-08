@@ -84,6 +84,7 @@ MIGRATION_MODULES = {
     'auth': None,
     'contenttypes': None,
     'sessions': None,
+    'farms': None,
 }
 
 MIDDLEWARE = [
