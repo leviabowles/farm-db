@@ -293,7 +293,7 @@ class FieldYearTransaction(models.Model):
     # Use DateTimeField to accept full ISO datetime strings from the frontend.
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
-    field_year_crop = models.ManyToManyField(FieldYearCrop, through='FieldYearTransactionCrop')
+    field_year_crop = models.ManyToManyField('FieldYearCrop', through='FieldYearTransactionCrop')
     # Make the document upload optional so transactions can be created without a file.
     doc_file = models.FileField(blank=True, null=True)
 
