@@ -8,8 +8,8 @@ from .views import (
     ListTxAPIView,
     TransactionDetailAPIView,
     FieldListCreateAPIView,
-    FieldYearCropListCreateAPIView,
-    FieldYearCropDetailAPIView,
+    AnnualCropListCreateAPIView,
+    AnnualCropDetailAPIView,
     FarmListCreateAPIView,
 )
 
@@ -27,8 +27,8 @@ urlpatterns = [
     path('api/transactions/', ListTxAPIView.as_view(), name='api_transactions'),
     path('api/transactions/<int:pk>/', TransactionDetailAPIView.as_view(), name='api_transaction_detail'),
     path('api/fields/', FieldListCreateAPIView.as_view(), name='api_fields'),
-    path('api/fieldyearcrops/', FieldYearCropListCreateAPIView.as_view(), name='api_fieldyearcrops'),
-    path('api/fieldyearcrops/<int:pk>/', FieldYearCropDetailAPIView.as_view(), name='api_fieldyearcrop_detail'),
+    path('api/annualcrops/', AnnualCropListCreateAPIView.as_view(), name='api_annualcrops'),
+    path('api/annualcrops/<int:pk>/', AnnualCropDetailAPIView.as_view(), name='api_annualcrop_detail'),
     path('api/farms/', FarmListCreateAPIView.as_view(), name='api_farms'),
     path('fieldcrop_update', fieldcrop_update, name='fieldcrop_update'),
     path('update_transactions', tx_update, name='update_transactions'),

@@ -7,17 +7,17 @@ from django.views import View
 from django.db import models
 from django.utils import timezone
 # Create your views here.
-from .models import FieldYearTransaction, Field, FieldYearCrop, Farm
+from .models import Transaction, Field, AnnualCrop, Farm
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .serializers import TxSerializer
-from .serializers import FieldSerializer, FieldYearCropSerializer, FarmSerializer
+from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer
 
 def index(request):
-    num_tx = FieldYearTransaction.objects.all().count()
+    num_tx = Transaction.objects.all().count()
     context = {'num_tx': num_tx,}
     # Templates live under ``farms/templates/farms``; specify the subdirectory.
     return render(request, 'farms/index.html', context=context)
@@ -40,7 +40,7 @@ class transactions(ListView):
     timeout (504) when the table grew large. Adding ``paginate_by`` lets Django
     fetch a reasonable chunk of records per request and keeps the page fast.
     """
-    model = FieldYearTransaction
+    model = Transaction
     # Use the namespaced path so Django can locate the template within the
     # ``farms`` app's templates directory (templates/farms/transactions.html).
     template_name = 'farms/transactions.html'
@@ -55,19 +55,19 @@ class ListTxAPIView(ListCreateAPIView):
     value if needed. CSRF exemption allows POST requests from the frontend
     without requiring a token.
     """
-    queryset = FieldYearTransaction.objects.all()
+    queryset = Transaction.objects.all()
     serializer_class = TxSerializer
     # Use DRF's built‑in pagination (page size configurable in settings).
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
-        queryset = FieldYearTransaction.objects.all()
+        queryset = Transaction.objects.all()
         field_year_crop_id = self.request.query_params.get('field_year_crop')
         year_key_raw = self.request.query_params.get('year_key')
-        
+
         if field_year_crop_id:
             queryset = queryset.filter(field_year_crop__id=field_year_crop_id)
-            
+
         if year_key_raw:
             if year_key_raw.lower() == 'current':
                 year_val = timezone.now().year
@@ -76,17 +76,17 @@ class ListTxAPIView(ListCreateAPIView):
                     year_val = int(year_key_raw)
                 except (ValueError, TypeError):
                     return queryset # Return all if year is invalid
-                
+
             year_str = str(year_val)
             queryset = queryset.filter(
-                models.Q(year_key=year_val) | 
-                models.Q(year_key=year_str) | 
-                models.Q(paid_date__year=year_val) | 
+                models.Q(year_key=year_val) |
+                models.Q(year_key=year_str) |
+                models.Q(paid_date__year=year_val) |
                 models.Q(invoice_date__year=year_val) |
                 models.Q(field_year_crop__year_key=year_val) |
                 models.Q(field_year_crop__year_key=year_str)
             ).distinct()
-                
+
         return queryset
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -94,10 +94,10 @@ class TransactionDetailAPIView(RetrieveUpdateDestroyAPIView):
     """Retrieve, update or delete a transaction by its primary key.
     CSRF exemption allows PUT/DELETE requests from the frontend.
     """
-    queryset = FieldYearTransaction.objects.all()
+    queryset = Transaction.objects.all()
     serializer_class = TxSerializer
 # Import the newly created serializers
-from .serializers import FieldSerializer, FieldYearCropSerializer
+from .serializers import FieldSerializer, AnnualCropSerializer
 
 # API for listing/creating Fields
 @method_decorator(csrf_exempt, name='dispatch')
@@ -106,18 +106,18 @@ class FieldListCreateAPIView(ListCreateAPIView):
     queryset = Field.objects.all()
     serializer_class = FieldSerializer
 
-# API for listing/creating FieldYearCrop relationships
+# API for listing/creating AnnualCrop relationships
 @method_decorator(csrf_exempt, name='dispatch')
-class FieldYearCropListCreateAPIView(ListCreateAPIView):
+class AnnualCropListCreateAPIView(ListCreateAPIView):
     """Expose the linking model between a field, year and crop."""
-    queryset = FieldYearCrop.objects.all()
-    serializer_class = FieldYearCropSerializer
+    queryset = AnnualCrop.objects.all()
+    serializer_class = AnnualCropSerializer
 
 @method_decorator(csrf_exempt, name='dispatch')
-class FieldYearCropDetailAPIView(RetrieveUpdateDestroyAPIView):
-    """Retrieve, update or delete a FieldYearCrop relationship."""
-    queryset = FieldYearCrop.objects.all()
-    serializer_class = FieldYearCropSerializer
+class AnnualCropDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete an AnnualCrop relationship."""
+    queryset = AnnualCrop.objects.all()
+    serializer_class = AnnualCropSerializer
 
 
 # API for listing/creating Farms
