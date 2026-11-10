@@ -238,7 +238,7 @@ class Account(models.Model):
 
 
 class LedgerEntry(models.Model):
-    transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE, related_name='ledger_entries')
+    transaction = models.ForeignKey('FieldYearTransaction', on_delete=models.CASCADE, related_name='ledger_entries')
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     debit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     credit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
@@ -255,7 +255,7 @@ class LedgerEntry(models.Model):
 
 class TransactionLineItem(models.Model):
 
-    transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE, related_name='line_items')
+    transaction = models.ForeignKey('FieldYearTransaction', on_delete=models.CASCADE, related_name='line_items')
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     field_year_crop = models.ForeignKey('FieldYearCrop', on_delete=models.CASCADE, blank=True, null=True)
     amount = models.DecimalField(max_digits=15, decimal_places=2)
@@ -293,7 +293,7 @@ class FieldYearTransaction(models.Model):
     # Use DateTimeField to accept full ISO datetime strings from the frontend.
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
-    field_year_crop = models.ManyToManyField(FieldYearCrop, through='FieldYearTransactionCrop')
+    field_year_crop = models.ManyToManyField('FieldYearCrop', through='FieldYearTransactionCrop')
     # Make the document upload optional so transactions can be created without a file.
     doc_file = models.FileField(blank=True, null=True)
 
@@ -317,7 +317,7 @@ class TransactionAttachment(models.Model):
     single ``FieldYearTransaction`` instance.
     """
     transaction = models.ForeignKey(
-        FieldYearTransaction,
+        'FieldYearTransaction',
         related_name='attachments',
         on_delete=models.CASCADE,
     )
@@ -329,8 +329,8 @@ class TransactionAttachment(models.Model):
 
 
 class FieldYearTransactionCrop(models.Model):
-    field_year_transaction = models.ForeignKey(FieldYearTransaction, on_delete=models.CASCADE)
-    field_year_crop = models.ForeignKey(FieldYearCrop, on_delete=models.CASCADE)
+    field_year_transaction = models.ForeignKey('FieldYearTransaction', on_delete=models.CASCADE)
+    field_year_crop = models.ForeignKey('FieldYearCrop', on_delete=models.CASCADE)
     class Meta:
         managed = False
         db_table = 'field_year_transaction_crop'
