@@ -289,7 +289,7 @@ class Transaction(models.Model):
 
 
     def __str__(self):
-        return f"{self.field}, {str(self.year_key)}"
+        return f"Transaction {self.id}: field={self.field}, year={self.year_key}"
 
 
     class Meta:
