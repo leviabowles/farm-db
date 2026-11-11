@@ -312,8 +312,8 @@ class TransactionAttachment(models.Model):
 
 
 class TransactionAnnualCrop(models.Model):
-    transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE)
-    annual_crop = models.ForeignKey('AnnualCrop', on_delete=models.CASCADE)
+    transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE, db_column='field_year_transaction_id')
+    annual_crop = models.ForeignKey('AnnualCrop', on_delete=models.CASCADE, db_column='field_year_crop_id')
     class Meta:
         managed = False
         db_table = 'field_year_transaction_crop'
