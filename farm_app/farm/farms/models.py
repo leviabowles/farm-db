@@ -187,7 +187,7 @@ class Year(models.Model):
 
 class AnnualCrop(models.Model):
     field = models.ForeignKey('Field', on_delete=models.CASCADE, db_column='field')
-    year_key = models.ForeignKey('Year', on_delete=models.CASCADE, db_column='year_key')
+    year_key = models.IntegerField(blank=True, null=True)
     crop = models.ForeignKey('Crop', on_delete=models.CASCADE, db_column='crop')
     acres_planted = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_bushels = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
@@ -197,7 +197,7 @@ class AnnualCrop(models.Model):
     def __str__(self):
         field_name = getattr(self.field, 'field_name', f'ID {self.field_id}') if self.field else 'Unknown Field'
         crop_name = getattr(self.crop, 'crop_name', f'ID {self.crop_id}') if self.crop else 'Unknown Crop'
-        year_str = str(self.year_key.year_key) if self.year_key else 'Unknown Year'
+        year_str = str(self.year_key) if self.year_key else 'Unknown Year'
         return f"{field_name} - {crop_name} ({year_str})"
 
     class Meta:
