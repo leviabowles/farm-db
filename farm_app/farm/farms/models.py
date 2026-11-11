@@ -288,7 +288,7 @@ class Transaction(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'transaction'
+        db_table = 'field_year_transaction'
 
 # New model to support multiple file attachments per transaction.
 # Each attachment is linked to a Transaction via a foreign key.
