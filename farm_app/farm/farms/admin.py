@@ -21,6 +21,11 @@ class LoanPaymentAdmin(admin.ModelAdmin):
     list_display = ('loan_key','year_key')
     list_filter = ('loan_key','year_key')
 
+class YearAdmin(admin.ModelAdmin):
+    list_display = ('year_key', 'field_key', 'create_date', 'update_date')
+    list_filter = ('field_key','year_key')
+    search_fields = ('year_key', 'field_key')
+
 class AnnualCropAdmin(admin.ModelAdmin):
     list_display = ('field', 'year_key', 'crop','acres_planted','total_bushels')
     list_filter = ('field', 'year_key', 'crop')
@@ -83,7 +88,7 @@ admin.site.register(Loan, LoanAdmin)
 admin.site.register(Field, FieldAdmin)
 admin.site.register(TransactionObject, TransactionObjectAdmin)
 admin.site.register(Vendor, VendorAdmin)
-# admin.site.register(Year, FarmYearAdmin)
+admin.site.register(Year, YearAdmin)
 admin.site.register(LedgerEntry, LedgerEntryAdmin)
 admin.site.register(CapitalPayment, CapitalPaymentAdmin)
 #admin.site.register(TransactionAnnualCrop, AnnualCropInlineAdmin)

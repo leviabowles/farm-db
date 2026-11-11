@@ -173,7 +173,7 @@ class Year(models.Model):
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
     def __str__(self):
-        return f"{str(self.year_key)}"
+        return f"{str(self.year_key) if self.year_key else 'Unknown Year'}"
 
     class Meta:
         managed = False
@@ -195,7 +195,10 @@ class AnnualCrop(models.Model):
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
     def __str__(self):
-        return f"{self.field.field_name} - {self.crop.crop_name} ({self.year_key})"
+        field_name = getattr(self.field, 'field_name', f'ID {self.field_id}') if self.field else 'Unknown Field'
+        crop_name = getattr(self.crop, 'crop_name', f'ID {self.crop_id}') if self.crop else 'Unknown Crop'
+        year_str = str(self.year_key.year_key) if self.year_key else 'Unknown Year'
+        return f"{field_name} - {crop_name} ({year_str})"
 
     class Meta:
         managed = False
