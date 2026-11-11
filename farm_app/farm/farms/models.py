@@ -144,19 +144,6 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
-class FarmYear(models.Model):
-    year_key = models.CharField(max_length=10, blank=True, null=True)
-    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
-    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
-
-    def __str__(self):
-        return f"{str(self.year_key)}"
-
-    class Meta:
-        managed = False
-        db_table = 'farm_year'
-
-
 class Field(models.Model):
     field_key = models.CharField(max_length=10, blank=True, null=True)
     field_name = models.CharField(max_length=255, blank=True, null=True)
@@ -179,7 +166,7 @@ class Field(models.Model):
         db_table = 'field'
 
 
-class FieldYear(models.Model):
+class Year(models.Model):
     field_key = models.CharField(max_length=10, blank=True, null=True)
     year_key = models.IntegerField(blank=True, null=True)
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
@@ -190,28 +177,26 @@ class FieldYear(models.Model):
         db_table = 'field_year'
 
 
-class FieldYearCrop(models.Model):
-    field_key = models.CharField(max_length=10, blank=True, null=True)
-    field = models.ForeignKey('Field', models.DO_NOTHING, db_column = 'field', blank=True, null=True)
-    year_key = models.IntegerField(blank=True, null=True)
-    crop_key = models.CharField(max_length=10, blank=True, null=True)
-    crop = models.ForeignKey('Crop', models.DO_NOTHING, db_column = 'crop', blank=True, null=True)
-    acres_planted = models.IntegerField(blank=True, null=True)
-    total_bushels = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    planting_date = models.DateField(blank=True, null=True)
-    harvest_date = models.DateField(blank=True, null=True)
+
+
+
+
+
+class AnnualCrop(models.Model):
+    field = models.ForeignKey('Field', on_delete=models.CASCADE)
+    year_key = models.ForeignKey('Year', on_delete=models.CASCADE)
+    crop = models.ForeignKey('Crop', on_delete=models.CASCADE)
+    acres_planted = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    total_bushels = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
-
     def __str__(self):
-        return f"{self.field}, {str(self.year_key)}"
+        return f"{self.field.field_name} - {self.crop.crop_name} ({self.year_key.year_key})"
 
     class Meta:
-        # Allow Django to manage this table as well
-        managed = True
+        managed = False
         db_table = 'field_year_crop'
-
 
 
 
@@ -238,7 +223,7 @@ class Account(models.Model):
 
 
 class LedgerEntry(models.Model):
-    transaction = models.ForeignKey('FieldYearTransaction', on_delete=models.CASCADE, related_name='ledger_entries')
+    transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE, related_name='ledger_entries')
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     debit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     credit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
@@ -255,9 +240,9 @@ class LedgerEntry(models.Model):
 
 class TransactionLineItem(models.Model):
 
-    transaction = models.ForeignKey('FieldYearTransaction', on_delete=models.CASCADE, related_name='line_items')
+    transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE, related_name='line_items')
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
-    field_year_crop = models.ForeignKey('FieldYearCrop', on_delete=models.CASCADE, blank=True, null=True)
+    field_year_crop = models.ForeignKey('AnnualCrop', on_delete=models.CASCADE, blank=True, null=True)
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
@@ -269,8 +254,7 @@ class TransactionLineItem(models.Model):
         managed = True
         db_table = 'farms_transactionlineitem'
 
-
-class FieldYearTransaction(models.Model):
+class Transaction(models.Model):
     debit = 'debit'
     credit = 'credit'
     tx_choices = [
@@ -278,7 +262,7 @@ class FieldYearTransaction(models.Model):
         (credit, 'credit'),
     ]
     field = models.ForeignKey('Field', models.DO_NOTHING, db_column = 'field', blank=True, null=True)
-    #field_year_crop = models.ForeignKey('FieldYearCrop', models.DO_NOTHING, db_column = 'field_year_crop', blank=True, null=True)
+    #field_year_crop = models.ForeignKey('AnnualCrop', models.DO_NOTHING, db_column = 'field_year_crop', blank=True, null=True)
     year_key = models.IntegerField(blank=True, null=True)
     trans_type = models.CharField(max_length=10, blank=True, null=True, choices = tx_choices)
     transaction_object = models.ForeignKey('TransactionObject', models.DO_NOTHING, blank=True, null=True)
@@ -293,10 +277,9 @@ class FieldYearTransaction(models.Model):
     # Use DateTimeField to accept full ISO datetime strings from the frontend.
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
-    field_year_crop = models.ManyToManyField('FieldYearCrop', through='FieldYearTransactionCrop')
+    annual_crops = models.ManyToManyField('AnnualCrop', through='TransactionAnnualCrop')
     # Make the document upload optional so transactions can be created without a file.
     doc_file = models.FileField(blank=True, null=True)
-
 
 
     def __str__(self):
@@ -305,19 +288,19 @@ class FieldYearTransaction(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'field_year_transaction'
+        db_table = 'transaction'
 
 # New model to support multiple file attachments per transaction.
-# Each attachment is linked to a FieldYearTransaction via a foreign key.
+# Each attachment is linked to a Transaction via a foreign key.
 class TransactionAttachment(models.Model):
     """Stores individual document files related to a transaction.
 
     Using a separate model enables a one‑to‑many relationship, allowing any
     number of documents (e.g., insurance bill, receipt) to be attached to a
-    single ``FieldYearTransaction`` instance.
+    single ``Transaction`` instance.
     """
     transaction = models.ForeignKey(
-        'FieldYearTransaction',
+        'Transaction',
         related_name='attachments',
         on_delete=models.CASCADE,
     )
@@ -328,9 +311,9 @@ class TransactionAttachment(models.Model):
         return f"Attachment for {self.transaction.id}: {self.doc_file.name}"
 
 
-class FieldYearTransactionCrop(models.Model):
-    field_year_transaction = models.ForeignKey('FieldYearTransaction', on_delete=models.CASCADE)
-    field_year_crop = models.ForeignKey('FieldYearCrop', on_delete=models.CASCADE)
+class TransactionAnnualCrop(models.Model):
+    transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE)
+    annual_crop = models.ForeignKey('AnnualCrop', on_delete=models.CASCADE)
     class Meta:
         managed = False
         db_table = 'field_year_transaction_crop'

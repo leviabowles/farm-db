@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FieldYearTransaction, Field, FieldYearCrop, Crop
+from .models import Transaction, Field, AnnualCrop, Crop
 from .models import Farm
 
 class SafeDateField(serializers.DateField):
@@ -17,7 +17,7 @@ class TxSerializer(serializers.ModelSerializer):
     invoice_date = SafeDateField(required=False, allow_null=True)
 
     class Meta:
-        model = FieldYearTransaction
+        model = Transaction
         fields = '__all__'
 
 # Serializer for the Field model – exposes all columns.
@@ -32,9 +32,9 @@ class CropSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 # Serializer for linking a field to a specific year and crop.
-class FieldYearCropSerializer(serializers.ModelSerializer):
+class AnnualCropSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FieldYearCrop
+        model = AnnualCrop
         fields = '__all__'
 
     def to_representation(self, instance):

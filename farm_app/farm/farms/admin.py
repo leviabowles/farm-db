@@ -1,18 +1,17 @@
 from django.contrib import admin
 from django.apps import apps
 from farms.models import LoanPayment
-from farms.models import FieldYearTransaction
-from farms.models import FieldYearCrop
+from farms.models import Transaction
+from farms.models import AnnualCrop
 from farms.models import Crop
 from farms.models import Loan
 from farms.models import Field
 from farms.models import TransactionObject
 from farms.models import Vendor
-from farms.models import FarmYear
+from farms.models import Year
 from farms.models import LedgerEntry
 from farms.models import CapitalPayment
-from farms.models import FieldYearTransactionCrop
-from farms.models import Account, TransactionLineItem
+from farms.models import Account, TransactionLineItem, TransactionAnnualCrop
 
 ## ADMIN CLASSES CUSTOM
 
@@ -22,7 +21,7 @@ class LoanPaymentAdmin(admin.ModelAdmin):
     list_display = ('loan_key','year_key')
     list_filter = ('loan_key','year_key')
 
-class FieldYearCropAdmin(admin.ModelAdmin):
+class AnnualCropAdmin(admin.ModelAdmin):
     list_display = ('field', 'year_key', 'crop','acres_planted','total_bushels')
     list_filter = ('field', 'year_key', 'crop')
 
@@ -41,9 +40,6 @@ class TransactionObjectAdmin(admin.ModelAdmin):
 class VendorAdmin(admin.ModelAdmin):
     list_display = ('vendor_name','create_date')
 
-class FarmYearAdmin(admin.ModelAdmin):
-    list_display = ('year_key','create_date')
-
 class LedgerEntryAdmin(admin.ModelAdmin):
     list_display = ('transaction', 'account', 'debit', 'credit', 'create_date')
     list_filter = ('account', 'create_date')
@@ -53,8 +49,8 @@ class LedgerEntryAdmin(admin.ModelAdmin):
 class CapitalPaymentAdmin(admin.ModelAdmin):
     list_display = ('create_date', 'payment_type_id', 'total_payment')
 
-class FieldYearTransactionCropAdmin(admin.TabularInline):
-    model = FieldYearTransactionCrop
+class AnnualCropInlineAdmin(admin.TabularInline):
+    model = TransactionAnnualCrop
     extra = 1
 
 class TransactionLineItemAdmin(admin.TabularInline):
@@ -71,8 +67,8 @@ class AccountAdmin(admin.ModelAdmin):
     search_fields = ('name', 'account_type')
     ordering = ('account_type', 'name')
 
-class FieldYearTransactionAdmin(admin.ModelAdmin):
-    inlines = [FieldYearTransactionCropAdmin, TransactionLineItemAdmin, LedgerEntryInlineAdmin]
+class TransactionAdmin(admin.ModelAdmin):
+    inlines = [AnnualCropInlineAdmin, TransactionLineItemAdmin, LedgerEntryInlineAdmin]
     list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor')
     list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
 
@@ -80,17 +76,17 @@ class FieldYearTransactionAdmin(admin.ModelAdmin):
 ## REGISTER SOME SHIT
 admin.site.register(Account, AccountAdmin)
 admin.site.register(LoanPayment, LoanPaymentAdmin)
-admin.site.register(FieldYearTransaction, FieldYearTransactionAdmin)
-admin.site.register(FieldYearCrop, FieldYearCropAdmin)
+admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(AnnualCrop, AnnualCropAdmin)
 admin.site.register(Crop, CropAdmin)
 admin.site.register(Loan, LoanAdmin)
 admin.site.register(Field, FieldAdmin)
 admin.site.register(TransactionObject, TransactionObjectAdmin)
 admin.site.register(Vendor, VendorAdmin)
-admin.site.register(FarmYear, FarmYearAdmin)
+# admin.site.register(Year, FarmYearAdmin)
 admin.site.register(LedgerEntry, LedgerEntryAdmin)
 admin.site.register(CapitalPayment, CapitalPaymentAdmin)
-#admin.site.register(FieldYearTransactionCrop, FieldYearTransactionCropAdmin)
+#admin.site.register(TransactionAnnualCrop, AnnualCropInlineAdmin)
 
 
 
