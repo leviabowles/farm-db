@@ -5,7 +5,7 @@ import Login from './components/Login';
 import FarmList from './components/FarmList';
 import FarmForm from './components/FarmForm';
 import TransactionList from './components/TransactionList';
-import TransactionForm from './components/TransactionForm';
+import SimpleTransactionForm from './components/SimpleTransactionForm';
 import Header from './components/Header';
 import FieldList from './components/FieldList';
 import FieldYearCropList from './components/FieldYearCropList';
@@ -28,8 +28,8 @@ function App() {
               <Route path="/farms/new" element={<FarmForm />} />
               <Route path="/farms/:id/edit" element={<FarmForm />} />
               <Route path="/transactions" element={<TransactionList />} />
-              <Route path="/transactions/new" element={<TransactionForm />} />
-              <Route path="/transactions/:id/edit" element={<TransactionForm />} />
+              <Route path="/transactions/new" element={<SimpleTransactionForm />} />
+              <Route path="/transactions/:id/edit" element={<SimpleTransactionForm />} />
               {/* New route for Fields */}
               <Route path="/fields" element={<FieldList />} />
               <Route path="/fieldyearcrops" element={<FieldYearCropList />} />

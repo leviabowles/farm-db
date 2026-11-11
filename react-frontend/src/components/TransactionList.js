@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Link } from 'react-router-dom';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -14,6 +14,7 @@ import Tooltip from '@mui/material/Tooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
@@ -24,6 +25,11 @@ const TransactionList = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [fields, setFields] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [loadingOptions, setLoadingOptions] = useState(true);
+
+  const navigate = useNavigate();
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
@@ -31,7 +37,7 @@ const TransactionList = () => {
       console.log('Fetching transactions from API...');
       const response = await api.get('/api/transactions/');
       const txList = Array.isArray(response.data) ? response.data : (response.data.results || []);
-      
+
       const enhancedTransactions = txList.map(tx => ({
         ...tx,
         field_name: tx.field?.field_name || tx.field || 'Unknown Field',
@@ -40,7 +46,7 @@ const TransactionList = () => {
         paid_amount_display: tx.paid_amount ? `$${tx.paid_amount.toLocaleString()}` : '$0',
         received_amount_display: tx.received_amount ? `$${tx.received_amount.toLocaleString()}` : '$0'
       }));
-      
+
       setTransactions(enhancedTransactions);
       setError(null);
     } catch (err) {
@@ -52,17 +58,39 @@ const TransactionList = () => {
     }
   }, []);
 
+  // Fetch fields and vendors for dropdowns
+  const fetchOptions = useCallback(async () => {
+    setLoadingOptions(true);
+    try {
+      const [fieldsRes, vendorsRes] = await Promise.all([
+        api.get('/api/fields/'),
+        api.get('/api/vendors/')
+      ]);
+      setFields(fieldsRes.data.results || []);
+      setVendors(vendorsRes.data.results || []);
+    } catch (err) {
+      console.error('Error fetching fields/vendors:', err);
+    } finally {
+      setLoadingOptions(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchTransactions();
-  }, [fetchTransactions]);
+    fetchOptions();
+  }, [fetchTransactions, fetchOptions]);
+
+  const handleEdit = (transactionId) => {
+    navigate(`/transactions/${transactionId}/edit`);
+  };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this transaction?')) {
+    if (window.confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
       try {
         await api.delete(`/api/transactions/${id}/`);
         setTransactions(transactions.filter(tx => tx.id !== id));
       } catch (err) {
-        setError('Failed to delete transaction');
+        setError('Failed to delete transaction. Please try again.');
       }
     }
   };
@@ -83,74 +111,92 @@ const TransactionList = () => {
         <Typography variant="h5">
           Transaction Management
         </Typography>
-        <Button 
-          variant="outlined" 
-          startIcon={<RefreshIcon />} 
-          onClick={fetchTransactions}
-          disabled={loading}
-        >
-          {loading ? 'Refreshing...' : 'Refresh Data'}
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={fetchTransactions}
+            disabled={loading}
+          >
+            {loading ? 'Refreshing...' : 'Refresh Data'}
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/transactions/new')}
+          >
+            Add New Transaction
+          </Button>
+        </Box>
       </Box>
       <TableContainer component={Paper}>
         <Table aria-label="transaction table">
           <TableHead>
             <TableRow>
               <TableCell>Field</TableCell>
+              <TableCell>Type</TableCell>
               <TableCell>Memo</TableCell>
-              <TableCell>Paid</TableCell>
-              <TableCell>Received</TableCell>
-              <TableCell>Create Date</TableCell>
-              <TableCell>Update Date</TableCell>
+              <TableCell>Vendor</TableCell>
+              <TableCell>Amount Paid</TableCell>
+              <TableCell>Amount Received</TableCell>
+              <TableCell>Payment Date</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {transactions.map((transaction) => (
-              <TableRow key={transaction.id} hover>
-                <TableCell>{transaction.field_name}</TableCell>
-                <TableCell>{transaction.memo}</TableCell>
-                <TableCell>{transaction.paid_amount_display}</TableCell>
-                <TableCell>{transaction.received_amount_display}</TableCell>
-                <TableCell>{transaction.create_date_formatted}</TableCell>
-                <TableCell>{transaction.update_date_formatted}</TableCell>
-                <TableCell align="right">
-                  <Tooltip title="Edit">
-                    <IconButton
-                      component="a"
-                      href={`${process.env.REACT_APP_API_URL.replace(/\/farms\/?$/, '')}/admin/farms/fieldyeartransaction/${transaction.id}/change/`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      color="primary"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <IconButton
-                      onClick={() => handleDelete(transaction.id)}
-                      color="error"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
+            {transactions.map((transaction) => {
+              // Determine if this is income or expense
+              const isIncome = transaction.transaction_type === 'income';
+              const paidClass = isIncome ? 'amount-received' : 'amount-paid';
+              const paidLabel = isIncome ? 'Received' : 'Paid';
+
+              return (
+                <TableRow key={transaction.id} hover>
+                  <TableCell>{transaction.field_name}</TableCell>
+                  <TableCell>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
+                      backgroundColor: isIncome ? '#e8f5e9' : '#ffebee',
+                      color: isIncome ? '#2e7d32' : '#c62828'
+                    }}>
+                      {isIncome ? '💰 Income' : '💸 Expense'}
+                    </span>
+                  </TableCell>
+                  <TableCell>{transaction.memo || '-'}</TableCell>
+                  <TableCell>{transaction.vendor || '-'}</TableCell>
+                  <TableCell className={paidClass}>
+                    {transaction.paid_amount !== null && transaction.paid_amount !== undefined
+                      ? `$${transaction.paid_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {transaction.received_amount !== null && transaction.received_amount !== undefined
+                      ? `$${transaction.received_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : '-'}
+                  </TableCell>
+                  <TableCell>{new Date(transaction.paid_date).toLocaleDateString()}</TableCell>
+                  <TableCell align="right">
+                    <Tooltip title="Edit Transaction">
+                      <IconButton onClick={() => handleEdit(transaction.id)} color="primary">
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Transaction">
+                      <IconButton onClick={() => handleDelete(transaction.id)} color="error">
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
-      <Button
-        component="a"
-        href={`${process.env.REACT_APP_API_URL.replace(/\/farms\/?$/, '')}/admin/farms/fieldyeartransaction/add/`}
-        target="_blank"
-        rel="noopener noreferrer"
-        variant="contained"
-        color="primary"
-        sx={{ mt: 2 }}
-      >
-        Add New Transaction
-      </Button>
+      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
     </Paper>
   );
 };
