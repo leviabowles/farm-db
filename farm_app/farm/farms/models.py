@@ -197,7 +197,11 @@ class AnnualCrop(models.Model):
     def __str__(self):
         field_name = getattr(self.field, 'field_name', f'ID {self.field_id}') if self.field else 'Unknown Field'
         crop_name = getattr(self.crop, 'crop_name', f'ID {self.crop_id}') if self.crop else 'Unknown Crop'
-        year_str = str(self.year_key.year_key) if self.year_key else 'Unknown Year'
+        try:
+            year_key_val = self.year_key.year_key if self.year_key else None
+            year_str = str(year_key_val) if year_key_val else 'Unknown Year'
+        except Year.DoesNotExist:
+            year_str = 'Unknown Year'
         return f"{field_name} - {crop_name} ({year_str})"
 
     class Meta:
