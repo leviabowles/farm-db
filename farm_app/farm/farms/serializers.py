@@ -13,12 +13,18 @@ class TxSerializer(serializers.ModelSerializer):
     # Make the document upload optional; front‑end can omit it.
     doc_file = serializers.FileField(required=False, allow_null=True)
     transaction_object_name = serializers.CharField(source='transaction_object.object_name', read_only=True)
+    field_name = serializers.CharField(source='field.field_name', read_only=True)
     paid_date = SafeDateField(required=False, allow_null=True)
     invoice_date = SafeDateField(required=False, allow_null=True)
 
     class Meta:
         model = Transaction
-        fields = '__all__'
+        fields = [
+            'id', 'field', 'year_key', 'trans_type',
+            'transaction_object', 'account', 'vendor', 'invoice_date', 'paid_date',
+            'memo', 'create_date', 'update_date',
+            'annual_crops', 'doc_file', 'transaction_object_name', 'field_name'
+        ]
 
 # Serializer for the Field model – exposes all columns.
 class FieldSerializer(serializers.ModelSerializer):
