@@ -172,6 +172,9 @@ class Year(models.Model):
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
+    def __str__(self):
+        return f"{str(self.year_key)}"
+
     class Meta:
         managed = False
         db_table = 'field_year'
@@ -192,7 +195,7 @@ class AnnualCrop(models.Model):
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
     def __str__(self):
-        return f"{self.field.field_name} - {self.crop.crop_name} ({self.year_key.year_key})"
+        return f"{self.field.field_name} - {self.crop.crop_name} ({self.year_key})"
 
     class Meta:
         managed = False
