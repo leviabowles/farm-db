@@ -183,16 +183,17 @@ class Year(models.Model):
 
 
 class AnnualCrop(models.Model):
-    field = models.ForeignKey('Field', on_delete=models.CASCADE, db_column='field')
-    year_key = models.ForeignKey('Year', on_delete=models.CASCADE, db_column='year_key')
-    crop = models.ForeignKey('Crop', on_delete=models.CASCADE, db_column='crop')
+    field = models.IntegerField(blank=True, null=True, db_column='field')  # Database column is INT, not FK
+    year_key = models.IntegerField(blank=True, null=True, db_column='year_key')  # Database column is INT, not FK
+    crop = models.IntegerField(blank=True, null=True, db_column='crop')  # Database column is INT, not FK
     acres_planted = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_bushels = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
     def __str__(self):
-        return f"{self.field.field_name} - {self.crop.crop_name} ({self.year_key.year_key})"
+        # Database column is 'field' but this is just an integer ID, not a Field object
+        return f"{self.field_id} - {self.crop_id} ({self.year_key})"
 
     class Meta:
         managed = False
@@ -261,13 +262,13 @@ class Transaction(models.Model):
         (debit, 'debit'),
         (credit, 'credit'),
     ]
-    field = models.ForeignKey('Field', models.DO_NOTHING, db_column = 'field', blank=True, null=True)
+    field = models.IntegerField(blank=True, null=True, db_column='field')  # Database column is INT, not FK
     #field_year_crop = models.ForeignKey('AnnualCrop', models.DO_NOTHING, db_column = 'field_year_crop', blank=True, null=True)
     year_key = models.IntegerField(blank=True, null=True)
     trans_type = models.CharField(max_length=10, blank=True, null=True, choices = tx_choices)
     transaction_object = models.ForeignKey('TransactionObject', models.DO_NOTHING, blank=True, null=True)
     account = models.ForeignKey('Account', models.SET_NULL, blank=True, null=True, db_column='account_id')
-    vendor = models.ForeignKey('Vendor', models.DO_NOTHING, db_column='vendor', blank=True, null=True)
+    vendor = models.IntegerField(blank=True, null=True)  # Database column is INT, not FK
     invoice_date = models.DateField(blank=True, null=True)
     paid_date = models.DateField(blank=True, null=True)
     memo = models.CharField(max_length=255, blank=True, null=True)
@@ -283,7 +284,7 @@ class Transaction(models.Model):
 
 
     def __str__(self):
-        return f"{self.field}, {str(self.year_key)}"
+        return f"{self.field_id}, {str(self.year_key)}"
 
 
     class Meta:
