@@ -17,7 +17,40 @@ class TransactionLineItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransactionLineItem
         fields = ['id', 'transaction', 'account', 'field_year_crop', 'amount']
-        read_only_fields = ['id', 'transaction']
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        """
+        Create a TransactionLineItem with a valid transaction reference.
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        # Handle foreign key relationship
+        transaction = validated_data.get('transaction')
+
+        if transaction:
+            # If transaction is an object, extract the ID
+            if hasattr(transaction, 'id'):
+                transaction_id = transaction.id
+            # If transaction is an int/ID, use it directly
+            elif isinstance(transaction, int):
+                transaction_id = transaction
+            # If transaction is None or not an ID/object, validate
+            else:
+                raise serializers.ValidationError({
+                    'transaction': f'Invalid transaction value: {transaction}'
+                })
+        else:
+            raise serializers.ValidationError({
+                'transaction': 'This field is required'
+            })
+
+        # Create the line item with the transaction ID
+        validated_data['transaction_id'] = transaction_id
+        logger.debug(f"TransactionLineItemSerializer.create: Creating line item for transaction {transaction_id}")
+
+        return super().create(validated_data)
 
 class SafeDateField(serializers.DateField):
     """A DateField that gracefully handles datetime objects by coercing them to dates."""

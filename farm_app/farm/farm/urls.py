@@ -19,6 +19,12 @@ from django.urls import path, include
 # Import the Farm API view to expose it at the root level without the "farms/" prefix.
 from farms.views import FarmListCreateAPIView
 from farms.views import FieldListCreateAPIView
+from farms.views import (
+    TransactionLineItemListCreateAPIView,
+    TransactionLineItemDetailAPIView,
+    ListTxAPIView,
+    TransactionDetailAPIView,
+)
 # Token authentication view provided by DRF
 from rest_framework.authtoken.views import obtain_auth_token
 
@@ -36,6 +42,14 @@ urlpatterns += [
     # Expose the Field list/create view directly at ``/api/fields/`` for
     # external callers that do not need the ``farms/`` namespace.
     path('api/fields/', FieldListCreateAPIView.as_view(), name='api_fields_root'),
+    # Expose Transaction endpoints directly at ``/api/transactions/`` for
+    # external callers that do not need the ``farms/`` namespace.
+    path('api/transactions/', ListTxAPIView.as_view(), name='api_transactions_root'),
+    path('api/transactions/<int:pk>/', TransactionDetailAPIView.as_view(), name='api_transaction_detail_root'),
+    # Expose TransactionLineItem endpoints directly at ``/api/transactionlineitems/`` for
+    # external callers that do not need the ``farms/`` namespace.
+    path('api/transactionlineitems/', TransactionLineItemListCreateAPIView.as_view(), name='api_transactionlineitems_root'),
+    path('api/transactionlineitems/<int:pk>/', TransactionLineItemDetailAPIView.as_view(), name='api_transactionlineitem_detail_root'),
     # Endpoint for obtaining a token (POST username/password)
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]
