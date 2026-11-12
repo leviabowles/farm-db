@@ -40,11 +40,7 @@ const TransactionList = () => {
 
       const enhancedTransactions = txList.map(tx => ({
         ...tx,
-        field_name: tx.field?.field_name || tx.field || 'Unknown Field',
-        create_date_formatted: new Date(tx.create_date).toLocaleDateString(),
-        update_date_formatted: new Date(tx.update_date).toLocaleDateString(),
-        paid_amount_display: tx.paid_amount ? `$${tx.paid_amount.toLocaleString()}` : '$0',
-        received_amount_display: tx.received_amount ? `$${tx.received_amount.toLocaleString()}` : '$0'
+        field_name: tx.field?.field_name || tx.field || 'Unknown Field'
       }));
 
       setTransactions(enhancedTransactions);
@@ -137,18 +133,14 @@ const TransactionList = () => {
               <TableCell>Type</TableCell>
               <TableCell>Memo</TableCell>
               <TableCell>Vendor</TableCell>
-              <TableCell>Amount Paid</TableCell>
-              <TableCell>Amount Received</TableCell>
               <TableCell>Payment Date</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {transactions.map((transaction) => {
-              // Determine if this is income or expense
-              const isIncome = transaction.transaction_type === 'income';
-              const paidClass = isIncome ? 'amount-received' : 'amount-paid';
-              const paidLabel = isIncome ? 'Received' : 'Paid';
+              // Determine if this is debit (money out) or credit (money in)
+              const isDebit = transaction.transaction_type === 'debit';
 
               return (
                 <TableRow key={transaction.id} hover>
@@ -159,24 +151,14 @@ const TransactionList = () => {
                       borderRadius: '12px',
                       fontSize: '0.85rem',
                       fontWeight: 500,
-                      backgroundColor: isIncome ? '#e8f5e9' : '#ffebee',
-                      color: isIncome ? '#2e7d32' : '#c62828'
+                      backgroundColor: isDebit ? '#ffebee' : '#e8f5e9',
+                      color: isDebit ? '#c62828' : '#2e7d32'
                     }}>
-                      {isIncome ? '💰 Income' : '💸 Expense'}
+                      {isDebit ? '💸 Debit' : '💰 Credit'}
                     </span>
                   </TableCell>
                   <TableCell>{transaction.memo || '-'}</TableCell>
-                  <TableCell>{transaction.vendor || '-'}</TableCell>
-                  <TableCell className={paidClass}>
-                    {transaction.paid_amount !== null && transaction.paid_amount !== undefined
-                      ? `$${transaction.paid_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                      : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {transaction.received_amount !== null && transaction.received_amount !== undefined
-                      ? `$${transaction.received_amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                      : '-'}
-                  </TableCell>
+                  <TableCell>{transaction.vendor?.vendor_name || '-'}</TableCell>
                   <TableCell>{new Date(transaction.paid_date).toLocaleDateString()}</TableCell>
                   <TableCell align="right">
                     <Tooltip title="Edit Transaction">

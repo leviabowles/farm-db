@@ -10,12 +10,10 @@ const SimpleTransactionForm = () => {
     memo: '',
     field: '',
     year_key: new Date().getFullYear(), // Default to current year
-    transaction_type: 'income', // Default to income (money coming in)
+    transaction_type: 'debit', // Default to debit (money out)
     vendor: '',
     invoice_date: '',
     paid_date: new Date().toISOString().split('T')[0], // Default to today
-    paid_amount: '',
-    received_amount: '',
     doc_file: null
   });
 
@@ -97,12 +95,16 @@ const SimpleTransactionForm = () => {
     setError(null);
 
     try {
-      // Prepare data
-      const payload = { ...formData };
-
-      // Convert amounts to numbers
-      if (payload.paid_amount) payload.paid_amount = parseFloat(payload.paid_amount);
-      if (payload.received_amount) payload.received_amount = parseFloat(payload.received_amount);
+      // Prepare data - exclude amounts since they're not in the model
+      const payload = {
+        memo: formData.memo,
+        field: formData.field,
+        year_key: formData.year_key,
+        transaction_type: formData.transaction_type,
+        vendor: formData.vendor,
+        invoice_date: formData.invoice_date,
+        paid_date: formData.paid_date
+      };
 
       // Use multipart/form-data if file is present
       let requestData;
@@ -204,20 +206,21 @@ const SimpleTransactionForm = () => {
           <h3>Transaction Type</h3>
 
           <div className="form-group">
-            <label htmlFor="transaction_type">What happened?</label>
+            <label htmlFor="transaction_type">What happened? <span className="required">*</span></label>
             <select
               id="transaction_type"
               name="transaction_type"
               value={formData.transaction_type}
               onChange={handleChange}
+              required
             >
-              <option value="income">💰 Income (Money Coming In)</option>
-              <option value="expense">💸 Expense (Money Going Out)</option>
+              <option value="debit">💸 Debit (Money Going Out)</option>
+              <option value="credit">💰 Credit (Money Coming In)</option>
             </select>
             <small className="field-hint">
-              {formData.transaction_type === 'income'
-                ? 'Payment received from a vendor (e.g., crop sale, loan repayment)'
-                : 'Payment made to a vendor (e.g., seed purchase, equipment rental)'}
+              {formData.transaction_type === 'debit'
+                ? 'Payment made to a vendor (e.g., seed purchase, equipment rental, supplies)'
+                : 'Payment received from a vendor (e.g., crop sales, loan repayments, payments)'}
             </small>
           </div>
 
@@ -244,43 +247,7 @@ const SimpleTransactionForm = () => {
 
         {/* Financial Details Section */}
         <div className="form-section">
-          <h3>Financial Details</h3>
-
-          <div className="form-group">
-            <label htmlFor="paid_amount">Amount Paid</label>
-            <input
-              type="number"
-              step="0.01"
-              id="paid_amount"
-              name="paid_amount"
-              value={formData.paid_amount}
-              onChange={handleChange}
-              placeholder="0.00"
-            />
-            <small className="field-hint">
-              {formData.transaction_type === 'expense'
-                ? 'Amount you paid (negative effect on income)'
-                : 'Amount received (positive effect on income)'}
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="received_amount">Amount Received</label>
-            <input
-              type="number"
-              step="0.01"
-              id="received_amount"
-              name="received_amount"
-              value={formData.received_amount}
-              onChange={handleChange}
-              placeholder="0.00"
-            />
-            <small className="field-hint">
-              {formData.transaction_type === 'income'
-                ? 'Additional funds received (e.g., from other sources)'
-                : 'Other amounts involved (if any)'}
-            </small>
-          </div>
+          <h3>Transaction Details</h3>
 
           <div className="form-group">
             <label htmlFor="memo">Notes / Description</label>
@@ -290,7 +257,7 @@ const SimpleTransactionForm = () => {
               value={formData.memo}
               onChange={handleChange}
               rows={3}
-              placeholder="Describe what this transaction is for... e.g., 'Corn harvest sale', 'Seed purchase from XYZ Co.'"
+              placeholder="Describe what this transaction is for... e.g., 'Corn harvest sale', 'Seed purchase from XYZ Co.', 'Equipment rental payment'"
             />
           </div>
         </div>

@@ -35,10 +35,10 @@ const Dashboard = () => {
     const fetchCropData = async () => {
       try {
         console.log('Fetching crop data for dashboard...');
-        const response = await api.get('/api/fieldyearcrops/');
-        
+        const response = await api.get('/api/annualcrops/');
+
         let allCrops = Array.isArray(response.data) ? response.data : (response.data.results || []);
-        
+
         const now = new Date();
         const oneAndHalfYearsAgo = new Date();
         oneAndHalfYearsAgo.setMonth(now.getMonth() - 18);
@@ -64,7 +64,7 @@ const Dashboard = () => {
         });
 
         const sortByYear = (a, b) => (b.year_key || 0) - (a.year_key || 0);
-        
+
         setCurrentCrops(active.sort(sortByYear));
         setHarvestedCrops(harvested.sort(sortByYear));
         setError(null);
@@ -75,7 +75,7 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    
+
     fetchCropData();
   }, []);
 
