@@ -1,6 +1,22 @@
 from rest_framework import serializers
-from .models import Transaction, Field, AnnualCrop, Crop
+from .models import Transaction, Field, AnnualCrop, Crop, TransactionLineItem, Account, LedgerEntry
 from .models import Farm
+
+class AccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = '__all__'
+
+class LedgerEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LedgerEntry
+        fields = '__all__'
+
+class TransactionLineItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionLineItem
+        fields = ['id', 'transaction', 'account', 'field_year_crop', 'amount']
+        read_only_fields = ['id', 'transaction']
 
 class SafeDateField(serializers.DateField):
     """A DateField that gracefully handles datetime objects by coercing them to dates."""
@@ -10,6 +26,8 @@ class SafeDateField(serializers.DateField):
         return super().to_representation(value)
 
 class TxSerializer(serializers.ModelSerializer):
+    # Include TransactionLineItems for double-entry support (writable nested)
+    line_items = TransactionLineItemSerializer(many=True, required=False)
     # Make the document upload optional; front‑end can omit it.
     doc_file = serializers.FileField(required=False, allow_null=True)
     transaction_object_name = serializers.CharField(source='transaction_object.object_name', read_only=True)
@@ -17,13 +35,44 @@ class TxSerializer(serializers.ModelSerializer):
     paid_date = SafeDateField(required=False, allow_null=True)
     invoice_date = SafeDateField(required=False, allow_null=True)
 
+    def create(self, validated_data):
+        """Create transaction with nested line items and automated ledger entries."""
+        line_items_data = validated_data.pop('line_items', [])
+
+        # Explicitly create the transaction
+        account_id = validated_data.get('account')
+        transaction = Transaction.objects.create(**validated_data)
+
+        # Set the account relationship explicitly to ensure it's populated
+        if account_id:
+            transaction.account = Account.objects.get(id=account_id)
+            transaction.save()
+
+        # Create TransactionLineItems
+        for line_item_data in line_items_data:
+            TransactionLineItem.objects.create(
+                transaction=transaction,
+                **line_item_data
+            )
+
+        # Create automated double-entry ledger entries
+        from .views import create_automated_ledger_entries
+        create_automated_ledger_entries(transaction)
+
+        print(f"DEBUG TxSerializer.create - transaction created: {transaction.id}")
+        print(f"DEBUG TxSerializer.create - transaction.account: {transaction.account}")
+        print(f"DEBUG TxSerializer.create - transaction.account_id: {transaction.account_id}")
+
+        return transaction
+
     class Meta:
         model = Transaction
         fields = [
             'id', 'field', 'year_key', 'trans_type',
             'transaction_object', 'account', 'vendor', 'invoice_date', 'paid_date',
             'memo', 'create_date', 'update_date',
-            'annual_crops', 'doc_file', 'transaction_object_name', 'field_name'
+            'annual_crops', 'doc_file', 'transaction_object_name', 'field_name',
+            'line_items'
         ]
 
 # Serializer for the Field model – exposes all columns.

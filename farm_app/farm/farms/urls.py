@@ -11,6 +11,10 @@ from .views import (
     AnnualCropListCreateAPIView,
     AnnualCropDetailAPIView,
     FarmListCreateAPIView,
+    AccountListCreateAPIView,
+    AccountDetailAPIView,
+    TransactionLineItemListCreateAPIView,
+    TransactionLineItemDetailAPIView,
 )
 
 from django.urls import path, include
@@ -30,6 +34,10 @@ urlpatterns = [
     path('api/annualcrops/', AnnualCropListCreateAPIView.as_view(), name='api_annualcrops'),
     path('api/annualcrops/<int:pk>/', AnnualCropDetailAPIView.as_view(), name='api_annualcrop_detail'),
     path('api/farms/', FarmListCreateAPIView.as_view(), name='api_farms'),
+    path('api/accounts/', AccountListCreateAPIView.as_view(), name='api_accounts'),
+    path('api/accounts/<int:pk>/', AccountDetailAPIView.as_view(), name='api_account_detail'),
+    path('api/transactionlineitems/', TransactionLineItemListCreateAPIView.as_view(), name='api_transactionlineitems'),
+    path('api/transactionlineitems/<int:pk>/', TransactionLineItemDetailAPIView.as_view(), name='api_transactionlineitem_detail'),
     path('fieldcrop_update', fieldcrop_update, name='fieldcrop_update'),
     path('update_transactions', tx_update, name='update_transactions'),
 

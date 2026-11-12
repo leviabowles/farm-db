@@ -7,14 +7,83 @@ from django.views import View
 from django.db import models
 from django.utils import timezone
 # Create your views here.
-from .models import Transaction, Field, AnnualCrop, Farm
+from .models import Transaction, Field, AnnualCrop, Farm, TransactionLineItem, LedgerEntry, Account
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.pagination import PageNumberPagination
-from rest_framework import status
-from .serializers import TxSerializer
+from rest_framework import status, response, serializers
+from .serializers import TxSerializer, TransactionLineItemSerializer, AccountSerializer, LedgerEntrySerializer
 from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer
+
+def create_automated_ledger_entries(transaction):
+    """
+    Automatically create double-entry accounting entries when a transaction is saved.
+    Creates one debit and one credit entry for each TransactionLineItem.
+    """
+    try:
+        with open('/tmp/debug_ledger.log', 'a') as f:
+            f.write(f"DEBUG create_automated_ledger_entries - transaction.id={transaction.id}, transaction.account={transaction.account}, transaction.account_id={transaction.account_id}\n")
+            f.flush()
+    except:
+        pass
+
+    # Get the default income/sales account for the offset entry
+    # Try to find a generic income account, default to first account if none exists
+    try:
+        income_account = Account.objects.filter(account_type='income').first()
+    except:
+        income_account = Account.objects.first()
+
+    try:
+        with open('/tmp/debug_ledger.log', 'a') as f:
+            f.write(f"DEBUG create_automated_ledger_entries - income_account={income_account}\n")
+            f.flush()
+    except:
+        pass
+
+    # Can't create ledger entries without either transaction account or income account
+    if not transaction.account and not income_account:
+        try:
+            with open('/tmp/debug_ledger.log', 'a') as f:
+                f.write(f"DEBUG create_automated_ledger_entries - No accounts available, returning\n")
+                f.flush()
+        except:
+            pass
+        return
+
+    for line_item in transaction.line_items.all():
+        amount = line_item.amount
+
+        # Create debit entry
+        if transaction.trans_type == 'debit':
+            # Debit: Transaction account is debited, Income account is credited
+            LedgerEntry.objects.create(
+                transaction=transaction,
+                account=transaction.account or income_account,
+                debit=amount,
+                credit=0
+            )
+            LedgerEntry.objects.create(
+                transaction=transaction,
+                account=income_account,
+                debit=0,
+                credit=amount
+            )
+        else:
+            # Credit: Transaction account is credited, Income account is debited
+            LedgerEntry.objects.create(
+                transaction=transaction,
+                account=transaction.account or income_account,
+                debit=0,
+                credit=amount
+            )
+            LedgerEntry.objects.create(
+                transaction=transaction,
+                account=income_account,
+                debit=amount,
+                credit=0
+            )
 
 def index(request):
     num_tx = Transaction.objects.all().count()
@@ -60,6 +129,19 @@ class ListTxAPIView(ListCreateAPIView):
     # Use DRF's built‑in pagination (page size configurable in settings).
     pagination_class = PageNumberPagination
 
+    def create(self, request, *args, **kwargs):
+        """
+        Create a transaction with line items and automated ledger entries.
+        The serializer handles creating the transaction, line items, and ledger entries atomically.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        # Return the full serialized transaction with all related data
+        headers = self.get_success_headers(serializer.data)
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def get_queryset(self):
         queryset = Transaction.objects.all()
         field_year_crop_id = self.request.query_params.get('field_year_crop')
@@ -96,6 +178,44 @@ class TransactionDetailAPIView(RetrieveUpdateDestroyAPIView):
     """
     queryset = Transaction.objects.all()
     serializer_class = TxSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        # After Transaction is updated, recreate TransactionLineItems and ledger entries
+        transaction = serializer.instance
+
+        if 'line_items' in request.data:
+            # Delete existing line items
+            transaction.line_items.all().delete()
+
+            # Create new line items
+            for line_item_data in request.data['line_items']:
+                line_item_data['transaction'] = transaction.id
+                line_item_serializer = TransactionLineItemSerializer(data=line_item_data)
+                line_item_serializer.is_valid(raise_exception=True)
+                line_item_serializer.save()
+
+            # Recreate automated double-entry ledger entries
+            create_automated_ledger_entries(transaction)
+
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Delete related TransactionLineItems
+        instance.line_items.all().delete()
+
+        # Delete related ledger entries (through related_name='ledger_entries')
+        instance.ledger_entries.all().delete()
+
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 # Import the newly created serializers
 from .serializers import FieldSerializer, AnnualCropSerializer
 
@@ -126,3 +246,29 @@ class FarmListCreateAPIView(ListCreateAPIView):
     """Expose the Farm model via GET (list) and POST (create)."""
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
+
+# API for listing/creating Accounts
+@method_decorator(csrf_exempt, name='dispatch')
+class AccountListCreateAPIView(ListCreateAPIView):
+    """Expose the Account model via GET (list) and POST (create)."""
+    queryset = Account.objects.all()
+    serializer_class = AccountSerializer
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AccountDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete an Account by its primary key."""
+    queryset = Account.objects.all()
+    serializer_class = AccountSerializer
+
+# API for listing/creating TransactionLineItems
+@method_decorator(csrf_exempt, name='dispatch')
+class TransactionLineItemListCreateAPIView(ListCreateAPIView):
+    """Expose the TransactionLineItem model via GET (list) and POST (create)."""
+    queryset = TransactionLineItem.objects.all()
+    serializer_class = TransactionLineItemSerializer
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TransactionLineItemDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete a TransactionLineItem by its primary key."""
+    queryset = TransactionLineItem.objects.all()
+    serializer_class = TransactionLineItemSerializer
