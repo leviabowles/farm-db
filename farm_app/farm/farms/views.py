@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 # Create your views here.
 from .models import Transaction, Field, AnnualCrop, Farm, TransactionLineItem, LedgerEntry, Account
@@ -12,45 +12,42 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.pagination import PageNumberPagination
-from rest_framework import status, response, serializers
+from rest_framework import status, response, serializers, throttling
 from .serializers import TxSerializer, TransactionLineItemSerializer, AccountSerializer, LedgerEntrySerializer
 from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer
+
+
+class TransactionThrottle(throttling.AnonRateThrottle):
+    """
+    Rate limiting for transaction-related API endpoints.
+    Limits to 100 requests per minute for anonymous users.
+    """
+    scope = 'transactions'
+    rate = '100/min'
 
 def create_automated_ledger_entries(transaction):
     """
     Automatically create double-entry accounting entries when a transaction is saved.
     Creates one debit and one credit entry for each TransactionLineItem.
     """
-    try:
-        with open('/tmp/debug_ledger.log', 'a') as f:
-            f.write(f"DEBUG create_automated_ledger_entries - transaction.id={transaction.id}, transaction.account={transaction.account}, transaction.account_id={transaction.account_id}\n")
-            f.flush()
-    except:
-        pass
-
     # Get the default income/sales account for the offset entry
-    # Try to find a generic income account, default to first account if none exists
-    try:
-        income_account = Account.objects.filter(account_type='income').first()
-    except:
-        income_account = Account.objects.first()
-
-    try:
-        with open('/tmp/debug_ledger.log', 'a') as f:
-            f.write(f"DEBUG create_automated_ledger_entries - income_account={income_account}\n")
-            f.flush()
-    except:
-        pass
+    # Try to find a generic income account, but don't fallback silently
+    income_account = Account.objects.filter(account_type='income').first()
 
     # Can't create ledger entries without either transaction account or income account
     if not transaction.account and not income_account:
-        try:
-            with open('/tmp/debug_ledger.log', 'a') as f:
-                f.write(f"DEBUG create_automated_ledger_entries - No accounts available, returning\n")
-                f.flush()
-        except:
-            pass
-        return
+        raise ValueError(
+            f'Cannot create ledger entries: Transaction account not set and no income account found. '
+            f'Transaction ID: {transaction.id}, Account ID: {transaction.account_id}'
+        )
+
+    # Validate amounts are positive
+    for line_item in transaction.line_items.all():
+        if line_item.amount <= 0:
+            raise ValueError(
+                f'Line item amount must be positive. Transaction ID: {transaction.id}, '
+                f'Line Item ID: {line_item.id}, Amount: {line_item.amount}'
+            )
 
     for line_item in transaction.line_items.all():
         amount = line_item.amount
@@ -128,6 +125,8 @@ class ListTxAPIView(ListCreateAPIView):
     serializer_class = TxSerializer
     # Use DRF's built‑in pagination (page size configurable in settings).
     pagination_class = PageNumberPagination
+    # Rate limiting to prevent abuse
+    throttle_classes = [TransactionThrottle]
 
     def create(self, request, *args, **kwargs):
         """
@@ -179,6 +178,7 @@ class TransactionDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Transaction.objects.all()
     serializer_class = TxSerializer
 
+    @method_decorator(transaction.atomic, name='update')
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -190,11 +190,33 @@ class TransactionDetailAPIView(RetrieveUpdateDestroyAPIView):
         transaction = serializer.instance
 
         if 'line_items' in request.data:
-            # Delete existing line items
+            # Pre-validate all line item data before deleting old items
+            line_items_data = []
+            for line_item_data in request.data['line_items']:
+                # Validate account exists
+                account_id = line_item_data.get('account')
+                if account_id:
+                    try:
+                        Account.objects.get(id=account_id)
+                    except Account.DoesNotExist:
+                        raise serializers.ValidationError({
+                            'line_items': f'Line item references invalid account ID: {account_id}'
+                        })
+
+                # Validate amount is positive
+                amount = line_item_data.get('amount')
+                if amount and amount <= 0:
+                    raise serializers.ValidationError({
+                        'line_items': f'Line item amount must be positive, got {amount}'
+                    })
+
+                line_items_data.append(line_item_data)
+
+            # Now delete existing line items
             transaction.line_items.all().delete()
 
-            # Create new line items
-            for line_item_data in request.data['line_items']:
+            # Create new line items with validation
+            for line_item_data in line_items_data:
                 line_item_data['transaction'] = transaction.id
                 line_item_serializer = TransactionLineItemSerializer(data=line_item_data)
                 line_item_serializer.is_valid(raise_exception=True)

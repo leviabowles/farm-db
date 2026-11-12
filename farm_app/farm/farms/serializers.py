@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.core.validators import MinValueValidator
 from .models import Transaction, Field, AnnualCrop, Crop, TransactionLineItem, Account, LedgerEntry
 from .models import Farm
 
@@ -36,34 +37,68 @@ class TxSerializer(serializers.ModelSerializer):
     invoice_date = SafeDateField(required=False, allow_null=True)
 
     def create(self, validated_data):
-        """Create transaction with nested line items and automated ledger entries."""
+        """
+        Create transaction with nested line items and automated ledger entries.
+        All operations are atomic - if any fail, all are rolled back.
+        """
+        from django.db import transaction
+        from .views import create_automated_ledger_entries
+        from .models import TransactionLineItem
+
         line_items_data = validated_data.pop('line_items', [])
 
-        # Explicitly create the transaction
-        account_id = validated_data.get('account')
-        transaction = Transaction.objects.create(**validated_data)
+        # Validate transaction type early
+        trans_type = validated_data.get('trans_type')
+        if trans_type not in (Transaction.debit, Transaction.credit):
+            raise serializers.ValidationError({
+                'trans_type': f'Must be either "debit" or "credit", got {trans_type}'
+            })
 
-        # Set the account relationship explicitly to ensure it's populated
-        if account_id:
-            transaction.account = Account.objects.get(id=account_id)
-            transaction.save()
+        with transaction.atomic():
+            # Validate and extract account information
+            account_id = validated_data.get('account')
 
-        # Create TransactionLineItems
-        for line_item_data in line_items_data:
-            TransactionLineItem.objects.create(
-                transaction=transaction,
-                **line_item_data
-            )
+            # Pre-validate account if provided
+            if account_id:
+                try:
+                    Account.objects.get(id=account_id)
+                except Account.DoesNotExist:
+                    raise serializers.ValidationError({
+                        'account': f'Account ID {account_id} does not exist'
+                    })
 
-        # Create automated double-entry ledger entries
-        from .views import create_automated_ledger_entries
-        create_automated_ledger_entries(transaction)
+            # Create the transaction
+            transaction = Transaction.objects.create(**validated_data)
 
-        print(f"DEBUG TxSerializer.create - transaction created: {transaction.id}")
-        print(f"DEBUG TxSerializer.create - transaction.account: {transaction.account}")
-        print(f"DEBUG TxSerializer.create - transaction.account_id: {transaction.account_id}")
+            # Explicitly set the account relationship and persist it
+            if account_id:
+                transaction.account = Account.objects.get(id=account_id)
+                # Force update the FK column
+                transaction.save(update_fields=['account_id'])
 
-        return transaction
+            # Pre-validate all line item accounts
+            for line_item_data in line_items_data:
+                line_account_id = line_item_data.get('account')
+                if line_account_id:
+                    try:
+                        Account.objects.get(id=line_account_id)
+                    except Account.DoesNotExist:
+                        raise serializers.ValidationError({
+                            'line_items': f'Line item references invalid account ID: {line_account_id}'
+                        })
+
+            # Create TransactionLineItems
+            for line_item_data in line_items_data:
+                TransactionLineItem.objects.create(
+                    transaction=transaction,
+                    **line_item_data
+                )
+
+            # Create automated double-entry ledger entries
+            # This will fail atomically if ledger creation fails
+            create_automated_ledger_entries(transaction)
+
+            return transaction
 
     class Meta:
         model = Transaction
