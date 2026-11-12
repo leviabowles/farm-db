@@ -242,6 +242,35 @@ class LedgerEntry(models.Model):
     class Meta:
         managed = True
         db_table = 'farms_ledgerentry'
+        indexes = [
+            models.Index(fields=['transaction']),
+            models.Index(fields=['account']),
+            models.Index(fields=['-create_date']),  # For date range queries
+            models.Index(fields=['-update_date']),  # For recent updates
+        ]
+
+
+class TransactionLineItem(models.Model):
+
+    transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE, related_name='line_items')
+    account = models.ForeignKey('Account', on_delete=models.CASCADE)
+    field_year_crop = models.ForeignKey('AnnualCrop', on_delete=models.CASCADE, blank=True, null=True)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    create_date = models.DateTimeField(auto_now_add=True)
+    update_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Line item for transaction {self.transaction.id}: account={self.account.name if self.account else 'N/A'}, amount={self.amount}"
+
+    class Meta:
+        managed = True
+        db_table = 'farms_transactionlineitem'
+        indexes = [
+            models.Index(fields=['transaction']),
+            models.Index(fields=['account']),
+            models.Index(fields=['-create_date']),
+            models.Index(fields=['-update_date']),
+        ]
 
 
 class TransactionLineItem(models.Model):
@@ -295,6 +324,11 @@ class Transaction(models.Model):
     class Meta:
         managed = False
         db_table = 'field_year_transaction'
+        indexes = [
+            models.Index(fields=['-create_date']),  # Most transactions accessed by date
+            models.Index(fields=['trans_type']),    # Filter by transaction type
+            models.Index(fields=['account']),       # Join with accounts
+        ]
 
 # New model to support multiple file attachments per transaction.
 # Each attachment is linked to a Transaction via a foreign key.

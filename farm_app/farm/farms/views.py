@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render
 from django.views.generic import ListView
 from django.http import JsonResponse
@@ -16,6 +17,9 @@ from rest_framework import status, response, serializers, throttling
 from .serializers import TxSerializer, TransactionLineItemSerializer, AccountSerializer, LedgerEntrySerializer
 from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer
 
+# Configure logging with Django settings
+logger = logging.getLogger(__name__)
+
 
 class TransactionThrottle(throttling.AnonRateThrottle):
     """
@@ -30,25 +34,31 @@ def create_automated_ledger_entries(transaction):
     Automatically create double-entry accounting entries when a transaction is saved.
     Creates one debit and one credit entry for each TransactionLineItem.
     """
+    logger.debug(f"Creating ledger entries for transaction {transaction.id}, type: {transaction.trans_type}")
+
     # Get the default income/sales account for the offset entry
-    # Try to find a generic income account, but don't fallback silently
     income_account = Account.objects.filter(account_type='income').first()
 
     # Can't create ledger entries without either transaction account or income account
     if not transaction.account and not income_account:
-        raise ValueError(
+        error_msg = (
             f'Cannot create ledger entries: Transaction account not set and no income account found. '
             f'Transaction ID: {transaction.id}, Account ID: {transaction.account_id}'
         )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
 
     # Validate amounts are positive
     for line_item in transaction.line_items.all():
         if line_item.amount <= 0:
-            raise ValueError(
+            error_msg = (
                 f'Line item amount must be positive. Transaction ID: {transaction.id}, '
                 f'Line Item ID: {line_item.id}, Amount: {line_item.amount}'
             )
+            logger.warning(error_msg)
+            raise ValueError(error_msg)
 
+    ledger_count = 0
     for line_item in transaction.line_items.all():
         amount = line_item.amount
 
@@ -67,6 +77,7 @@ def create_automated_ledger_entries(transaction):
                 debit=0,
                 credit=amount
             )
+            ledger_count += 2
         else:
             # Credit: Transaction account is credited, Income account is debited
             LedgerEntry.objects.create(
@@ -81,6 +92,9 @@ def create_automated_ledger_entries(transaction):
                 debit=amount,
                 credit=0
             )
+            ledger_count += 2
+
+    logger.debug(f"Created {ledger_count} ledger entries for transaction {transaction.id}")
 
 def index(request):
     num_tx = Transaction.objects.all().count()

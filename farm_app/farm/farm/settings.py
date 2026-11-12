@@ -207,3 +207,90 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REQUIRED_FOR_CRUD = False
 PERMISSION_REQUIRED_FOR_CRUD = False
 PROJECT_NAME = 'farm'
+
+# Logging configuration with rotation and appropriate levels
+# Prevents disk space exhaustion and provides structured logging for production
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'detailed': {
+            'format': '{asctime} {levelname} {name} - {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'detailed',
+            'level': 'INFO',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/farm/farm.log',
+            'maxBytes': 10485760,  # 10 MB per file
+            'backupCount': 5,  # Keep 5 backup files
+            'formatter': 'detailed',
+            'level': 'INFO',
+        },
+        'error_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/farm/farm_error.log',
+            'maxBytes': 10485760,  # 10 MB per file
+            'backupCount': 5,  # Keep 5 backup files
+            'formatter': 'detailed',
+            'level': 'ERROR',
+        },
+        'debug_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/farm/farm_debug.log',
+            'maxBytes': 5242880,  # 5 MB per file
+            'backupCount': 3,  # Keep 3 backup files
+            'formatter': 'detailed',
+            'level': 'DEBUG',  # Only log debug for farms views
+            'filters': ['farms_debug'],
+        },
+    },
+    'filters': {
+        'farms_debug': {
+            # Only allow farms views to be logged at DEBUG level
+            '()': 'logging.Filter',
+            'name': 'farms.views',
+        },
+    },
+    'loggers': {
+        # Django core logging
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        # Application-specific logging
+        'farms': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Farms views - verbose logging
+        'farms.views': {
+            'handlers': ['console', 'file', 'error_file', 'debug_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # Serializer logging
+        'farms.serializers': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

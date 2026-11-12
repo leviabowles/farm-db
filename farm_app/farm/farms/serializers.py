@@ -41,17 +41,23 @@ class TxSerializer(serializers.ModelSerializer):
         Create transaction with nested line items and automated ledger entries.
         All operations are atomic - if any fail, all are rolled back.
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
         from django.db import transaction
         from .views import create_automated_ledger_entries
         from .models import TransactionLineItem
 
+        logger.debug(f"TxSerializer.create: Starting transaction creation")
         line_items_data = validated_data.pop('line_items', [])
 
         # Validate transaction type early
         trans_type = validated_data.get('trans_type')
         if trans_type not in (Transaction.debit, Transaction.credit):
+            error_msg = f'Must be either "debit" or "credit", got {trans_type}'
+            logger.warning(error_msg)
             raise serializers.ValidationError({
-                'trans_type': f'Must be either "debit" or "credit", got {trans_type}'
+                'trans_type': error_msg
             })
 
         with transaction.atomic():
@@ -63,18 +69,22 @@ class TxSerializer(serializers.ModelSerializer):
                 try:
                     Account.objects.get(id=account_id)
                 except Account.DoesNotExist:
+                    error_msg = f'Account ID {account_id} does not exist'
+                    logger.error(error_msg)
                     raise serializers.ValidationError({
-                        'account': f'Account ID {account_id} does not exist'
+                        'account': error_msg
                     })
 
             # Create the transaction
             transaction = Transaction.objects.create(**validated_data)
+            logger.debug(f"TxSerializer.create: Transaction {transaction.id} created")
 
             # Explicitly set the account relationship and persist it
             if account_id:
                 transaction.account = Account.objects.get(id=account_id)
                 # Force update the FK column
                 transaction.save(update_fields=['account_id'])
+                logger.debug(f"TxSerializer.create: Account {account_id} linked to transaction")
 
             # Pre-validate all line item accounts
             for line_item_data in line_items_data:
@@ -83,21 +93,27 @@ class TxSerializer(serializers.ModelSerializer):
                     try:
                         Account.objects.get(id=line_account_id)
                     except Account.DoesNotExist:
+                        error_msg = f'Line item references invalid account ID: {line_account_id}'
+                        logger.error(error_msg)
                         raise serializers.ValidationError({
-                            'line_items': f'Line item references invalid account ID: {line_account_id}'
+                            'line_items': error_msg
                         })
 
             # Create TransactionLineItems
+            line_items_created = []
             for line_item_data in line_items_data:
-                TransactionLineItem.objects.create(
+                line_item = TransactionLineItem.objects.create(
                     transaction=transaction,
                     **line_item_data
                 )
+                line_items_created.append(line_item.id)
+            logger.debug(f"TxSerializer.create: Created {len(line_items_created)} line items")
 
             # Create automated double-entry ledger entries
             # This will fail atomically if ledger creation fails
             create_automated_ledger_entries(transaction)
 
+            logger.debug(f"TxSerializer.create: Transaction {transaction.id} completed successfully")
             return transaction
 
     class Meta:
