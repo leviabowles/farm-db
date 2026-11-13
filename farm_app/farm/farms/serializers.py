@@ -40,7 +40,7 @@ class TxSerializer(serializers.ModelSerializer):
     # Amount inputs for easier entry (written to line items)
     amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=False, allow_null=True, write_only=True)
     
-    # Crop fields for easier frontend input
+    # Crop fields for easier frontend input - supports both crop_ids and annual_crop_ids
     year_key = serializers.IntegerField(required=False, allow_null=True)
     crop_ids = serializers.PrimaryKeyRelatedField(
         queryset=Crop.objects.all(),
@@ -48,6 +48,13 @@ class TxSerializer(serializers.ModelSerializer):
         required=False,
         write_only=True,
         source='crop_rel'
+    )
+    annual_crop_ids = serializers.PrimaryKeyRelatedField(
+        queryset=AnnualCrop.objects.all(),
+        many=True,
+        required=False,
+        write_only=True,
+        source='annual_crops'
     )
 
     class Meta:
@@ -57,7 +64,7 @@ class TxSerializer(serializers.ModelSerializer):
             'transaction_object', 'account', 'vendor', 'invoice_date', 'paid_date',
             'memo', 'create_date', 'update_date',
             'annual_crops', 'doc_file', 'transaction_object_name', 'field_name',
-            'line_items', 'amount', 'crop_ids'
+            'line_items', 'amount', 'crop_ids', 'annual_crop_ids'
         ]
         read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops']
 
@@ -65,6 +72,11 @@ class TxSerializer(serializers.ModelSerializer):
         """Override create to automate ledger entry creation and handle crops."""
         # Extract amount if provided for ledger automation
         amount = validated_data.pop('amount', None)
+        
+        # Handle annual_crop_ids (preferred - selects from existing AnnualCrop)
+        annual_crops = validated_data.pop('annual_crops', [])
+        
+        # Fallback: handle crop_ids (creates new AnnualCrop from crop + field + year)
         crops = validated_data.pop('crop_rel', [])
         field = validated_data.pop('field', None)
         year_key = validated_data.pop('year_key', None)
@@ -72,8 +84,15 @@ class TxSerializer(serializers.ModelSerializer):
         # Create the transaction
         transaction = Transaction.objects.create(**validated_data)
         
-        # Find or create AnnualCrop for each crop
-        if field and year_key and crops:
+        # Use annual_crop_ids if provided (selected from existing)
+        if annual_crops:
+            for annual_crop in annual_crops:
+                TransactionAnnualCrop.objects.get_or_create(
+                    transaction=transaction,
+                    annual_crop=annual_crop
+                )
+        # Fallback: create AnnualCrop from crop_ids
+        elif field and year_key and crops:
             for crop in crops:
                 annual_crop, created = AnnualCrop.objects.get_or_create(
                     field=field,
@@ -86,20 +105,30 @@ class TxSerializer(serializers.ModelSerializer):
                     annual_crop=annual_crop
                 )
         
-        # If amount is provided, create ledger entry for each crop
+        # If amount is provided, create ledger entry
         if amount and transaction.account:
-            for crop in crops:
-                annual_crop, created = AnnualCrop.objects.get_or_create(
-                    field=field,
-                    year_key=year_key,
-                    crop=crop
-                )
-                TransactionLineItem.objects.create(
-                    transaction=transaction,
-                    account=transaction.account,
-                    field_year_crop=annual_crop,
-                    amount=amount
-                )
+            if annual_crops:
+                # Use the selected annual crops for ledger entries
+                for annual_crop in annual_crops:
+                    TransactionLineItem.objects.create(
+                        transaction=transaction,
+                        account=transaction.account,
+                        field_year_crop=annual_crop,
+                        amount=amount
+                    )
+            elif field and year_key and crops:
+                for crop in crops:
+                    annual_crop, created = AnnualCrop.objects.get_or_create(
+                        field=field,
+                        year_key=year_key,
+                        crop=crop
+                    )
+                    TransactionLineItem.objects.create(
+                        transaction=transaction,
+                        account=transaction.account,
+                        field_year_crop=annual_crop,
+                        amount=amount
+                    )
         
         return transaction
 
@@ -107,6 +136,11 @@ class TxSerializer(serializers.ModelSerializer):
         """Override update to handle ledger entry updates and crop associations."""
         # Extract amount if provided for ledger automation
         amount = validated_data.pop('amount', None)
+        
+        # Handle annual_crop_ids (preferred - selects from existing AnnualCrop)
+        annual_crops = validated_data.pop('annual_crops', [])
+        
+        # Fallback: handle crop_ids (creates new AnnualCrop from crop + field + year)
         crops = validated_data.pop('crop_rel', [])
         field = validated_data.pop('field', None)
         year_key = validated_data.pop('year_key', None)
@@ -121,7 +155,13 @@ class TxSerializer(serializers.ModelSerializer):
         TransactionLineItem.objects.filter(transaction=instance).delete()
         
         # Re-create crop associations
-        if field and year_key and crops:
+        if annual_crops:
+            for annual_crop in annual_crops:
+                TransactionAnnualCrop.objects.get_or_create(
+                    transaction=instance,
+                    annual_crop=annual_crop
+                )
+        elif field and year_key and crops:
             for crop in crops:
                 annual_crop, created = AnnualCrop.objects.get_or_create(
                     field=field,
@@ -135,18 +175,27 @@ class TxSerializer(serializers.ModelSerializer):
         
         # If amount is provided, create new ledger entries
         if amount is not None and instance.account:
-            for crop in crops:
-                annual_crop, created = AnnualCrop.objects.get_or_create(
-                    field=field,
-                    year_key=year_key,
-                    crop=crop
-                )
-                TransactionLineItem.objects.create(
-                    transaction=instance,
-                    account=instance.account,
-                    field_year_crop=annual_crop,
-                    amount=amount
-                )
+            if annual_crops:
+                for annual_crop in annual_crops:
+                    TransactionLineItem.objects.create(
+                        transaction=instance,
+                        account=instance.account,
+                        field_year_crop=annual_crop,
+                        amount=amount
+                    )
+            elif field and year_key and crops:
+                for crop in crops:
+                    annual_crop, created = AnnualCrop.objects.get_or_create(
+                        field=field,
+                        year_key=year_key,
+                        crop=crop
+                    )
+                    TransactionLineItem.objects.create(
+                        transaction=instance,
+                        account=instance.account,
+                        field_year_crop=annual_crop,
+                        amount=amount
+                    )
         
         return instance
 

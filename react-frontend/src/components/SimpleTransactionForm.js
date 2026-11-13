@@ -23,7 +23,7 @@ const SimpleTransactionForm = () => {
   const [fields, setFields] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  const [crops, setCrops] = useState([]);
+  const [annualCrops, setAnnualCrops] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -31,20 +31,20 @@ const SimpleTransactionForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Fetch fields, vendors, accounts, and crops on mount
+  // Fetch fields, vendors, accounts, and annual crops on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [fieldsRes, vendorsRes, accountsRes, cropsRes] = await Promise.all([
+        const [fieldsRes, vendorsRes, accountsRes, annualCropsRes] = await Promise.all([
           api.get('/api/fields/'),
           api.get('/api/vendors/'),
           api.get('/api/accounts/'),
-          api.get('/api/crops/')
+          api.get('/api/annualcrops/')
         ]);
         setFields(fieldsRes.data.results || []);
         setVendors(vendorsRes.data.results || []);
         setAccounts(accountsRes.data.results || []);
-        setCrops(cropsRes.data.results || []);
+        setAnnualCrops(annualCropsRes.data.results || []);
       } catch (err) {
         console.error('Error fetching data:', err);
       }
@@ -79,6 +79,12 @@ const SimpleTransactionForm = () => {
     setFormData(prev => ({ ...prev, year_key: year === '' ? '' : parseInt(year, 10) }));
   };
 
+  // Handle annual crop selection change
+  const handleCropChange = (e) => {
+    const selected = Array.from(e.target.selectedOptions, option => parseInt(option.value, 10));
+    setFormData(prev => ({ ...prev, crops: selected }));
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -107,7 +113,7 @@ const SimpleTransactionForm = () => {
         invoice_date: formData.invoice_date,
         paid_date: formData.paid_date,
         amount: formData.amount,
-        crop_ids: formData.crops || []
+        annual_crop_ids: formData.crops || []
       };
 
       // Use multipart/form-data if file is present
@@ -150,6 +156,15 @@ const SimpleTransactionForm = () => {
     return field ? field.field_name : fieldId || 'Select Field';
   };
 
+  // Get field label for current selection (for year-specific display)
+  const getFieldCropLabel = () => {
+    if (!formData.field) return 'Select a field first';
+    const field = fields.find(f => f.id === formData.field);
+    if (!field) return 'Unknown Field';
+    const year = formData.year_key || 'Unknown Year';
+    return `${field.field_name} (${year})`;
+  };
+
   // Get vendor name for display
   const getVendorLabel = (vendorId) => {
     const vendor = vendors.find(v => v.id === vendorId);
@@ -160,6 +175,26 @@ const SimpleTransactionForm = () => {
   const getAccountLabel = (accountId) => {
     const account = accounts.find(a => a.id === accountId);
     return account ? account.name : accountId || 'Select Account';
+  };
+
+  // Get annual crop label for display (field + crop + year)
+  const getAnnualCropLabel = (annualCropId) => {
+    const crop = annualCrops.find(c => c.id === annualCropId);
+    if (!crop) return annualCropId || 'Select Crop';
+    const field = crop.field?.field_name || 'Unknown Field';
+    const cropName = crop.crop?.crop_name || 'Unknown Crop';
+    const year = crop.year_key || 'Unknown Year';
+    return `${field} - ${cropName} (${year})`;
+  };
+
+  // Get fields' annual crops for the current year
+  const getAnnualCropOptions = () => {
+    if (!formData.field) return annualCrops;
+    // Filter to show crops for the selected field and year
+    return annualCrops.filter(ac => 
+      ac.field?.id === parseInt(formData.field) && 
+      ac.year_key === (formData.year_key || new Date().getFullYear())
+    );
   };
 
   return (
@@ -189,7 +224,7 @@ const SimpleTransactionForm = () => {
               ))}
             </select>
             {formData.field && (
-              <small className="field-hint">Field: {getFieldLabel(formData.field)}</small>
+              <small className="field-hint">Selected: {getFieldLabel(formData.field)}</small>
             )}
           </div>
 
@@ -207,28 +242,40 @@ const SimpleTransactionForm = () => {
               min="2000"
               max="2100"
             />
-            <small className="field-hint">Enter the year this transaction applies to (e.g., 2026)</small>
+            <small className="field-hint">
+              {formData.field && formData.year_key
+                ? `Year for: ${getFieldCropLabel()}`
+                : 'Enter the year this transaction applies to'}
+            </small>
           </div>
           
-          {/* Crop Selection */}
+          {/* Crop Selection - AnnualCrop (field + crop + year) */}
           <div className="form-group">
-            <label htmlFor="crops">Which Crop(s)?</label>
+            <label htmlFor="crops">Which Field+Crop? <span className="required">*</span></label>
             <select
               id="crops"
               name="crops"
               value={formData.crops || []}
-              onChange={(e) => {
-                const selected = Array.from(e.target.selectedOptions, option => parseInt(option.value, 10));
-                setFormData(prev => ({ ...prev, crops: selected }));
-              }}
-              multiple
+              onChange={handleCropChange}
+              required
             >
-              <option value="">-- Select Crop(s) --</option>
-              {crops.map(crop => (
-                <option key={crop.id} value={crop.id}>{crop.crop_name}</option>
-              ))}
+              <option value="">-- Select Field + Crop + Year --</option>
+              {getAnnualCropOptions().map(crop => {
+                const field = crop.field?.field_name || 'Unknown Field';
+                const cropName = crop.crop?.crop_name || 'Unknown Crop';
+                const year = crop.year_key || 'Unknown Year';
+                return (
+                  <option key={crop.id} value={crop.id}>
+                    {field} - {cropName} ({year})
+                  </option>
+                );
+              })}
             </select>
-            <small className="field-hint">Hold Ctrl/Cmd to select multiple crops</small>
+            <small className="field-hint">
+              {formData.crops && formData.crops.length > 0
+                ? formData.crops.map(id => getAnnualCropLabel(id)).join(', ')
+                : 'Select a field, crop, and year combination'}
+            </small>
           </div>
         </div>
 
