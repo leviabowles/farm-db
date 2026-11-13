@@ -10,7 +10,7 @@ const SimpleTransactionForm = () => {
     memo: '',
     field: '',
     year_key: new Date().getFullYear(), // Default to current year (integer)
-    transaction_type: 'debit', // Default to debit (money out)
+    trans_type: 'debit', // Default to debit (money out)
     vendor: '',
     account: '', // New: account for ledger automation
     invoice_date: '',
@@ -23,6 +23,7 @@ const SimpleTransactionForm = () => {
   const [fields, setFields] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [accounts, setAccounts] = useState([]);
+  const [crops, setCrops] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -30,20 +31,22 @@ const SimpleTransactionForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Fetch fields, vendors, and accounts on mount
+  // Fetch fields, vendors, accounts, and crops on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [fieldsRes, vendorsRes, accountsRes] = await Promise.all([
+        const [fieldsRes, vendorsRes, accountsRes, cropsRes] = await Promise.all([
           api.get('/api/fields/'),
           api.get('/api/vendors/'),
-          api.get('/api/accounts/')
+          api.get('/api/accounts/'),
+          api.get('/api/crops/')
         ]);
         setFields(fieldsRes.data.results || []);
         setVendors(vendorsRes.data.results || []);
         setAccounts(accountsRes.data.results || []);
+        setCrops(cropsRes.data.results || []);
       } catch (err) {
-        console.error('Error fetching fields/vendors/accounts:', err);
+        console.error('Error fetching data:', err);
       }
     };
     fetchData();
@@ -98,12 +101,13 @@ const SimpleTransactionForm = () => {
         memo: formData.memo,
         field: formData.field,
         year_key: formData.year_key,
-        transaction_type: formData.transaction_type,
+        trans_type: formData.trans_type,
         vendor: formData.vendor,
         account: formData.account,
         invoice_date: formData.invoice_date,
         paid_date: formData.paid_date,
-        amount: formData.amount
+        amount: formData.amount,
+        crop_ids: formData.crops || []
       };
 
       // Use multipart/form-data if file is present
@@ -204,6 +208,27 @@ const SimpleTransactionForm = () => {
               max="2100"
             />
             <small className="field-hint">Enter the year this transaction applies to (e.g., 2026)</small>
+          </div>
+          
+          {/* Crop Selection */}
+          <div className="form-group">
+            <label htmlFor="crops">Which Crop(s)?</label>
+            <select
+              id="crops"
+              name="crops"
+              value={formData.crops || []}
+              onChange={(e) => {
+                const selected = Array.from(e.target.selectedOptions, option => parseInt(option.value, 10));
+                setFormData(prev => ({ ...prev, crops: selected }));
+              }}
+              multiple
+            >
+              <option value="">-- Select Crop(s) --</option>
+              {crops.map(crop => (
+                <option key={crop.id} value={crop.id}>{crop.crop_name}</option>
+              ))}
+            </select>
+            <small className="field-hint">Hold Ctrl/Cmd to select multiple crops</small>
           </div>
         </div>
 
