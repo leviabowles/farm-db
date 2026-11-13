@@ -1,0 +1,100 @@
+from django.contrib import admin
+from django.apps import apps
+from farms.models import LoanPayment
+from farms.models import Transaction
+from farms.models import AnnualCrop
+from farms.models import Crop
+from farms.models import Loan
+from farms.models import Field
+from farms.models import TransactionObject
+from farms.models import Vendor
+from farms.models import Year
+from farms.models import LedgerEntry
+from farms.models import CapitalPayment
+from farms.models import Account
+
+## ADMIN CLASSES CUSTOM
+
+
+
+class LoanPaymentAdmin(admin.ModelAdmin):
+    list_display = ('loan_key','year_key')
+    list_filter = ('loan_key','year_key')
+
+class YearAdmin(admin.ModelAdmin):
+    list_display = ('year_key', 'field_key', 'create_date', 'update_date')
+    list_filter = ('field_key','year_key')
+    search_fields = ('year_key', 'field_key')
+
+class AnnualCropAdmin(admin.ModelAdmin):
+    list_display = ('field', 'year_key', 'crop','acres_planted','total_bushels')
+    list_filter = ('field', 'year_key', 'crop')
+
+class CropAdmin(admin.ModelAdmin):
+    list_display = ('crop_key', 'crop_name')
+
+class LoanAdmin(admin.ModelAdmin):
+    list_display = ('loan_key','field_key', 'initial_year', 'bank_id','initial_amount')
+
+class FieldAdmin(admin.ModelAdmin):
+    list_display = ('field_name','field_county', 'price_paid', 'crop_acreage')
+
+class TransactionObjectAdmin(admin.ModelAdmin):
+    list_display = ('object_name','create_date')
+
+class VendorAdmin(admin.ModelAdmin):
+    list_display = ('vendor_name','create_date')
+
+class LedgerEntryAdmin(admin.ModelAdmin):
+    list_display = ('transaction', 'account', 'debit', 'credit', 'create_date')
+    list_filter = ('account', 'create_date')
+    search_fields = ('account__name',)
+    ordering = ('create_date',)
+
+class CapitalPaymentAdmin(admin.ModelAdmin):
+    list_display = ('create_date', 'payment_type_id', 'total_payment')
+
+class AnnualCropInlineAdmin(admin.TabularInline):
+    extra = 1
+
+class LedgerEntryInlineAdmin(admin.TabularInline):
+    model = LedgerEntry
+    extra = 1
+
+class AccountAdmin(admin.ModelAdmin):
+    list_display = ('name', 'account_type', 'parent', 'create_date')
+    list_filter = ('account_type', 'create_date')
+    search_fields = ('name', 'account_type')
+    ordering = ('account_type', 'name')
+
+class TransactionAdmin(admin.ModelAdmin):
+    inlines = [AnnualCropInlineAdmin, LedgerEntryInlineAdmin]
+    list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor')
+    list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
+
+
+## REGISTER SOME SHIT
+admin.site.register(Account, AccountAdmin)
+admin.site.register(LoanPayment, LoanPaymentAdmin)
+admin.site.register(Transaction, TransactionAdmin)
+admin.site.register(AnnualCrop, AnnualCropAdmin)
+admin.site.register(Crop, CropAdmin)
+admin.site.register(Loan, LoanAdmin)
+admin.site.register(Field, FieldAdmin)
+admin.site.register(TransactionObject, TransactionObjectAdmin)
+admin.site.register(Vendor, VendorAdmin)
+admin.site.register(Year, YearAdmin)
+admin.site.register(LedgerEntry, LedgerEntryAdmin)
+admin.site.register(CapitalPayment, CapitalPaymentAdmin)
+
+
+
+
+# Faked this up just to pull in all models
+#models = apps.get_models()
+#print(models)
+#for model in models:
+    #try:
+     #   admin.site.register(model)
+    #except admin.sites.AlreadyRegistered:
+     #   pass

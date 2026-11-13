@@ -1,0 +1,201 @@
+Creating test database for alias 'default'...
+Using TEST settings
+System check identified no issues (0 silenced).
+2026-11-12 18:32:08 ERROR django.request - Internal Server Error: /
+Traceback (most recent call last):
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/core/handlers/exception.py", line 47, in inner
+    response = get_response(request)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/core/handlers/base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/levibowles/lbcode/farm-db/farm_app/farm/farms/views.py", line 103, in index
+    return render(request, 'farms/index.html', context=context)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/base.py", line 170, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/utils.py", line 99, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/dispatch/dispatcher.py", line 181, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 222, in store_rendered_templates
+    store['context'].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/copy.py", line 82, in copy
+    return copier(x)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/context.py", line 157, in __copy__
+    duplicate = super().__copy__()
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+E2026-11-12 18:32:08 ERROR django.request - Internal Server Error: /reporting/
+Traceback (most recent call last):
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/core/handlers/exception.py", line 47, in inner
+    response = get_response(request)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/core/handlers/base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/levibowles/lbcode/farm-db/farm_app/farm/farms/views.py", line 107, in reporting
+    return render(request, 'farms/reporting.html', context=context)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/base.py", line 170, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/utils.py", line 99, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/dispatch/dispatcher.py", line 181, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 222, in store_rendered_templates
+    store['context'].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/copy.py", line 82, in copy
+    return copier(x)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/context.py", line 157, in __copy__
+    duplicate = super().__copy__()
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+E
+======================================================================
+ERROR: test_index_page (farms.tests.FarmViewsTest.test_index_page)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/levibowles/lbcode/farm-db/farm_app/farm/farms/tests.py", line 11, in test_index_page
+    response = self.client.get('/')
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 742, in get
+    response = super().get(path, data=data, secure=secure, **extra)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 396, in get
+    return self.generic('GET', path, secure=secure, **{
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'QUERY_STRING': urlencode(data, doseq=True),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        **extra,
+        ^^^^^^^^
+    })
+    ^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 473, in generic
+    return self.request(**r)
+           ~~~~~~~~~~~~^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 719, in request
+    self.check_exception(response)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 580, in check_exception
+    raise exc_value
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/core/handlers/exception.py", line 47, in inner
+    response = get_response(request)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/core/handlers/base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/levibowles/lbcode/farm-db/farm_app/farm/farms/views.py", line 103, in index
+    return render(request, 'farms/index.html', context=context)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/base.py", line 170, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/utils.py", line 99, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/dispatch/dispatcher.py", line 181, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 222, in store_rendered_templates
+    store['context'].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/copy.py", line 82, in copy
+    return copier(x)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/context.py", line 157, in __copy__
+    duplicate = super().__copy__()
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+
+======================================================================
+ERROR: test_reporting_page (farms.tests.FarmViewsTest.test_reporting_page)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/levibowles/lbcode/farm-db/farm_app/farm/farms/tests.py", line 15, in test_reporting_page
+    response = self.client.get('/reporting/')
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 742, in get
+    response = super().get(path, data=data, secure=secure, **extra)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 396, in get
+    return self.generic('GET', path, secure=secure, **{
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'QUERY_STRING': urlencode(data, doseq=True),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        **extra,
+        ^^^^^^^^
+    })
+    ^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 473, in generic
+    return self.request(**r)
+           ~~~~~~~~~~~~^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 719, in request
+    self.check_exception(response)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 580, in check_exception
+    raise exc_value
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/core/handlers/exception.py", line 47, in inner
+    response = get_response(request)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/core/handlers/base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/levibowles/lbcode/farm-db/farm_app/farm/farms/views.py", line 107, in reporting
+    return render(request, 'farms/reporting.html', context=context)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/shortcuts.py", line 19, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/base.py", line 170, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/utils.py", line 99, in instrumented_test_render
+    template_rendered.send(sender=self, template=self, context=context)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/dispatch/dispatcher.py", line 181, in send
+    (receiver, receiver(signal=self, sender=sender, **named))
+               ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/test/client.py", line 222, in store_rendered_templates
+    store['context'].append(copy(context))
+                            ~~~~^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/copy.py", line 82, in copy
+    return copier(x)
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/context.py", line 157, in __copy__
+    duplicate = super().__copy__()
+  File "/Users/levibowles/lbcode/farm-db/.venv-new/lib/python3.15/site-packages/django/template/context.py", line 39, in __copy__
+    duplicate.dicts = self.dicts[:]
+    ^^^^^^^^^^^^^^^
+AttributeError: 'super' object has no attribute 'dicts' and no __dict__ for setting new attributes
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.008s
+
+FAILED (errors=2)
+Destroying test database for alias 'default'...
