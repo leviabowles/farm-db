@@ -61,7 +61,7 @@ class TxSerializer(serializers.ModelSerializer):
         read_only_fields = ['create_date', 'update_date', 'line_items']
 
     def create(self, validated_data):
-        \"\"\"Override create to automate ledger entry creation.\"\"\"
+        """Override create to automate ledger entry creation."""
         # Extract amount if provided for ledger automation
         amount = validated_data.pop('amount', None)
         field_year_crop = validated_data.pop('field_year_crop', None)
