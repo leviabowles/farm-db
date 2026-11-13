@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: farmdb
 -- ------------------------------------------------------
--- Server version       8.0.44-0ubuntu0.24.04.2
+-- Server version	8.0.44-0ubuntu0.24.04.2
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -40,10 +40,10 @@ DROP TABLE IF EXISTS `auth_group`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_group` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(150) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,7 +62,7 @@ CREATE TABLE `auth_group_permissions` (
   KEY `auth_group_permissio_permission_id_84c5c92e_fk_auth_perm` (`permission_id`),
   CONSTRAINT `auth_group_permissio_permission_id_84c5c92e_fk_auth_perm` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`),
   CONSTRAINT `auth_group_permissions_group_id_b120cbf9_fk_auth_group_id` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -74,13 +74,13 @@ DROP TABLE IF EXISTS `auth_permission`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_permission` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(255) NOT NULL,
   `content_type_id` int NOT NULL,
-  `codename` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `codename` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
   CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,19 +92,19 @@ DROP TABLE IF EXISTS `auth_user`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_user` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `password` varchar(128) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(128) NOT NULL,
   `last_login` datetime(6) DEFAULT NULL,
   `is_superuser` tinyint(1) NOT NULL,
-  `username` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `first_name` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `last_name` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(254) COLLATE utf8mb4_general_ci NOT NULL,
+  `username` varchar(150) NOT NULL,
+  `first_name` varchar(150) NOT NULL,
+  `last_name` varchar(150) NOT NULL,
+  `email` varchar(254) NOT NULL,
   `is_staff` tinyint(1) NOT NULL,
   `is_active` tinyint(1) NOT NULL,
   `date_joined` datetime(6) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -123,7 +123,7 @@ CREATE TABLE `auth_user_groups` (
   KEY `auth_user_groups_group_id_97559544_fk_auth_group_id` (`group_id`),
   CONSTRAINT `auth_user_groups_group_id_97559544_fk_auth_group_id` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`),
   CONSTRAINT `auth_user_groups_user_id_6a12ed8b_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -142,7 +142,7 @@ CREATE TABLE `auth_user_user_permissions` (
   KEY `auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm` (`permission_id`),
   CONSTRAINT `auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`),
   CONSTRAINT `auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -155,14 +155,14 @@ DROP TABLE IF EXISTS `capital_payment`;
 CREATE TABLE `capital_payment` (
   `id` int NOT NULL AUTO_INCREMENT,
   `year_key` int DEFAULT NULL,
-  `field_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `payment_type_id` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `field_key` varchar(10) DEFAULT NULL,
+  `payment_type_id` varchar(10) DEFAULT NULL,
   `payment_date` datetime DEFAULT NULL,
   `total_payment` decimal(15,2) DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -174,12 +174,12 @@ DROP TABLE IF EXISTS `crop`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `crop` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `crop_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `crop_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `crop_key` varchar(10) DEFAULT NULL,
+  `crop_name` varchar(255) DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -192,10 +192,10 @@ DROP TABLE IF EXISTS `django_admin_log`;
 CREATE TABLE `django_admin_log` (
   `id` int NOT NULL AUTO_INCREMENT,
   `action_time` datetime(6) NOT NULL,
-  `object_id` longtext COLLATE utf8mb4_general_ci,
-  `object_repr` varchar(200) COLLATE utf8mb4_general_ci NOT NULL,
+  `object_id` longtext,
+  `object_repr` varchar(200) NOT NULL,
   `action_flag` smallint unsigned NOT NULL,
-  `change_message` longtext COLLATE utf8mb4_general_ci NOT NULL,
+  `change_message` longtext NOT NULL,
   `content_type_id` int DEFAULT NULL,
   `user_id` int NOT NULL,
   PRIMARY KEY (`id`),
@@ -204,7 +204,7 @@ CREATE TABLE `django_admin_log` (
   CONSTRAINT `django_admin_log_content_type_id_c4bce8eb_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`),
   CONSTRAINT `django_admin_log_user_id_c564eba6_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`),
   CONSTRAINT `django_admin_log_chk_1` CHECK ((`action_flag` >= 0))
-) ENGINE=InnoDB AUTO_INCREMENT=267 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=298 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -216,11 +216,11 @@ DROP TABLE IF EXISTS `django_content_type`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `django_content_type` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `app_label` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `model` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `app_label` varchar(100) NOT NULL,
+  `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -232,11 +232,11 @@ DROP TABLE IF EXISTS `django_migrations`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `django_migrations` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `app` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `app` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -247,12 +247,12 @@ DROP TABLE IF EXISTS `django_session`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `django_session` (
-  `session_key` varchar(40) COLLATE utf8mb4_general_ci NOT NULL,
-  `session_data` longtext COLLATE utf8mb4_general_ci NOT NULL,
+  `session_key` varchar(40) NOT NULL,
+  `session_data` longtext NOT NULL,
   `expire_date` datetime(6) NOT NULL,
   PRIMARY KEY (`session_key`),
   KEY `django_session_expire_date_a5c62663` (`expire_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -264,11 +264,80 @@ DROP TABLE IF EXISTS `farm_year`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `farm_year` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `year_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `year_key` varchar(10) DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `farms_account`
+--
+
+DROP TABLE IF EXISTS `farms_account`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `farms_account` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `account_type` varchar(20) NOT NULL,
+  `parent_id` int DEFAULT NULL,
+  `create_date` datetime NOT NULL,
+  `update_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `fk_account_parent` (`parent_id`),
+  CONSTRAINT `fk_account_parent` FOREIGN KEY (`parent_id`) REFERENCES `farms_account` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `farms_ledgerentry`
+--
+
+DROP TABLE IF EXISTS `farms_ledgerentry`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `farms_ledgerentry` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `transaction_id` int NOT NULL,
+  `account_id` int NOT NULL,
+  `debit` decimal(15,2) DEFAULT '0.00',
+  `credit` decimal(15,2) DEFAULT '0.00',
+  `create_date` datetime NOT NULL,
+  `update_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_ledger_tx` (`transaction_id`),
+  KEY `fk_ledger_acc` (`account_id`),
+  CONSTRAINT `fk_ledger_acc` FOREIGN KEY (`account_id`) REFERENCES `farms_account` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ledger_tx` FOREIGN KEY (`transaction_id`) REFERENCES `field_year_transaction` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=255 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `farms_transactionlineitem`
+--
+
+DROP TABLE IF EXISTS `farms_transactionlineitem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `farms_transactionlineitem` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `transaction_id` int NOT NULL,
+  `account_id` int NOT NULL,
+  `field_year_crop_id` int DEFAULT NULL,
+  `amount` decimal(15,2) NOT NULL,
+  `create_date` datetime NOT NULL,
+  `update_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_line_tx` (`transaction_id`),
+  KEY `fk_line_acc` (`account_id`),
+  KEY `fk_line_crop` (`field_year_crop_id`),
+  CONSTRAINT `fk_line_acc` FOREIGN KEY (`account_id`) REFERENCES `farms_account` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_line_crop` FOREIGN KEY (`field_year_crop_id`) REFERENCES `field_year_crop` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_line_tx` FOREIGN KEY (`transaction_id`) REFERENCES `field_year_transaction` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=206 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -280,10 +349,10 @@ DROP TABLE IF EXISTS `field`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `field` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `field_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `field_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `field_state` varchar(2) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `field_county` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `field_key` varchar(10) DEFAULT NULL,
+  `field_name` varchar(255) DEFAULT NULL,
+  `field_state` varchar(2) DEFAULT NULL,
+  `field_county` varchar(255) DEFAULT NULL,
   `date_purchased` datetime DEFAULT NULL,
   `price_paid` decimal(15,2) DEFAULT NULL,
   `crop_acreage` decimal(15,2) DEFAULT NULL,
@@ -292,7 +361,7 @@ CREATE TABLE `field` (
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -304,12 +373,12 @@ DROP TABLE IF EXISTS `field_year`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `field_year` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `field_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `field_key` varchar(10) DEFAULT NULL,
   `year_key` int DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -321,17 +390,19 @@ DROP TABLE IF EXISTS `field_year_crop`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `field_year_crop` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `field_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `field_key` varchar(10) DEFAULT NULL,
   `year_key` int DEFAULT NULL,
-  `crop_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `crop_key` varchar(10) DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `acres_planted` int DEFAULT NULL,
   `total_bushels` decimal(15,2) DEFAULT NULL,
   `field` int DEFAULT NULL,
   `crop` int DEFAULT NULL,
+  `planting_date` date DEFAULT NULL,
+  `harvest_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -344,11 +415,11 @@ DROP TABLE IF EXISTS `field_year_transaction`;
 CREATE TABLE `field_year_transaction` (
   `id` int NOT NULL AUTO_INCREMENT,
   `year_key` int DEFAULT NULL,
-  `trans_type` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `trans_type` varchar(10) DEFAULT NULL,
   `invoice_date` datetime DEFAULT NULL,
   `paid_date` datetime DEFAULT NULL,
-  `vendor_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `memo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `vendor_name` varchar(255) DEFAULT NULL,
+  `memo` varchar(255) DEFAULT NULL,
   `paid_amount` decimal(15,2) DEFAULT NULL,
   `received_amount` decimal(15,2) DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -356,13 +427,16 @@ CREATE TABLE `field_year_transaction` (
   `transaction_object_id` int DEFAULT NULL,
   `vendor` int DEFAULT NULL,
   `field` int DEFAULT NULL,
-  `doc_file` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `doc_file` varchar(100) NOT NULL,
+  `account_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `transaction_object_id_idx` (`transaction_object_id`),
   KEY `vendor_id_idx` (`vendor`),
+  KEY `fk_tx_account` (`account_id`),
+  CONSTRAINT `fk_tx_account` FOREIGN KEY (`account_id`) REFERENCES `farms_account` (`id`) ON DELETE SET NULL,
   CONSTRAINT `transaction_object_id` FOREIGN KEY (`transaction_object_id`) REFERENCES `transaction_object` (`id`),
   CONSTRAINT `vendor_id` FOREIGN KEY (`vendor`) REFERENCES `vendor` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=185 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -377,7 +451,7 @@ CREATE TABLE `field_year_transaction_crop` (
   `field_year_transaction_id` int DEFAULT NULL,
   `field_year_crop_id` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -390,14 +464,14 @@ DROP TABLE IF EXISTS `ledger_entries`;
 CREATE TABLE `ledger_entries` (
   `id` int NOT NULL AUTO_INCREMENT,
   `year_key` int DEFAULT NULL,
-  `trans_type` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `memo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `trans_type` varchar(10) DEFAULT NULL,
+  `memo` varchar(255) DEFAULT NULL,
   `paid_amount` decimal(15,2) DEFAULT NULL,
   `received_amount` decimal(15,2) DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -409,21 +483,21 @@ DROP TABLE IF EXISTS `loan`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `loan` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `loan_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `field_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `loan_key` varchar(10) DEFAULT NULL,
+  `field_key` varchar(10) DEFAULT NULL,
   `initial_year` int DEFAULT NULL,
-  `bank_id` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `loan_type_id` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `bank_id` varchar(10) DEFAULT NULL,
+  `loan_type_id` varchar(10) DEFAULT NULL,
   `initial_amount` decimal(15,2) DEFAULT NULL,
   `interest_terms` float DEFAULT NULL,
-  `payment_terms` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `payment_terms` varchar(255) DEFAULT NULL,
   `amort_years` int DEFAULT NULL,
   `term_years` int DEFAULT NULL,
   `date_of_initiation` datetime DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -435,7 +509,7 @@ DROP TABLE IF EXISTS `loan_payment`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `loan_payment` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `loan_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `loan_key` varchar(10) DEFAULT NULL,
   `year_key` int DEFAULT NULL,
   `payment_date` datetime DEFAULT NULL,
   `total_payment` decimal(15,2) DEFAULT NULL,
@@ -444,7 +518,7 @@ CREATE TABLE `loan_payment` (
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -456,14 +530,14 @@ DROP TABLE IF EXISTS `staging_field_year_crop`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `staging_field_year_crop` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `field_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `field_key` varchar(10) DEFAULT NULL,
   `year_key` int DEFAULT NULL,
-  `crop_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `crop_key` varchar(10) DEFAULT NULL,
   `pushed` int DEFAULT '0',
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -475,21 +549,21 @@ DROP TABLE IF EXISTS `staging_field_year_transaction`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `staging_field_year_transaction` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `field_key` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `field_key` varchar(10) DEFAULT NULL,
   `year_key` int DEFAULT NULL,
-  `trans_type` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `object_type` varchar(25) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `trans_type` varchar(10) DEFAULT NULL,
+  `object_type` varchar(25) DEFAULT NULL,
   `invoice_date` datetime DEFAULT NULL,
   `paid_date` datetime DEFAULT NULL,
-  `vendor` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `expense_category` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `vendor` varchar(255) DEFAULT NULL,
+  `expense_category` varchar(255) DEFAULT NULL,
   `paid_amount` decimal(15,2) DEFAULT NULL,
   `received_amount` decimal(15,2) DEFAULT NULL,
   `pushed` int DEFAULT '0',
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -501,10 +575,10 @@ DROP TABLE IF EXISTS `staging_legit_transaction_objects`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `staging_legit_transaction_objects` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `object_type` varchar(25) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `object_type` varchar(25) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `object_type` (`object_type`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -535,11 +609,11 @@ DROP TABLE IF EXISTS `transaction_object`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `transaction_object` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `object_name` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `object_name` varchar(10) DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -551,11 +625,11 @@ DROP TABLE IF EXISTS `vendor`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vendor` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `vendor_name` varchar(10) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `vendor_name` varchar(10) DEFAULT NULL,
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_date` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -602,3 +676,5 @@ CREATE TABLE `vendor` (
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-11-12 17:34:27
