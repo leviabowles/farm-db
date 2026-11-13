@@ -9,7 +9,7 @@ const SimpleTransactionForm = () => {
   const [formData, setFormData] = useState({
     memo: '',
     field: '',
-    year_key: new Date().getFullYear(), // Default to current year
+    year_key: new Date().getFullYear(), // Default to current year (integer)
     transaction_type: 'debit', // Default to debit (money out)
     vendor: '',
     account: '', // New: account for ledger automation
@@ -23,25 +23,12 @@ const SimpleTransactionForm = () => {
   const [fields, setFields] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-
-  // Derived years for year_key dropdown (last 5 years + current)
-  const [availableYears, setAvailableYears] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
   const { id } = useParams();
-
-  // Generate years dropdown (current year and next 5 years back)
-  useEffect(() => {
-    const years = [];
-    for (let i = currentYear; i >= currentYear - 5; i--) {
-      years.push(i);
-    }
-    setAvailableYears(years);
-  }, [currentYear]);
 
   // Fetch fields, vendors, and accounts on mount
   useEffect(() => {
@@ -71,7 +58,6 @@ const SimpleTransactionForm = () => {
     try {
       const response = await api.get(`/api/transactions/${id}/`);
       setFormData(response.data);
-      setCurrentYear(response.data.year_key);
     } catch (err) {
       setError('Failed to load transaction data');
     }
@@ -81,6 +67,13 @@ const SimpleTransactionForm = () => {
   const handleFieldChange = (e) => {
     const fieldId = e.target.value;
     setFormData(prev => ({ ...prev, field: fieldId }));
+  };
+
+  // Handle year_key input change
+  const handleYearChange = (e) => {
+    const year = e.target.value;
+    // Allow empty or numeric values
+    setFormData(prev => ({ ...prev, year_key: year === '' ? '' : parseInt(year, 10) }));
   };
 
   const handleChange = (e) => {
@@ -196,21 +189,21 @@ const SimpleTransactionForm = () => {
             )}
           </div>
 
-          {/* Year Selection */}
+          {/* Year Input */}
           <div className="form-group">
             <label htmlFor="year_key">Which Year? <span className="required">*</span></label>
-            <select
+            <input
+              type="number"
               id="year_key"
               name="year_key"
               value={formData.year_key}
-              onChange={handleChange}
+              onChange={handleYearChange}
               required
-            >
-              {availableYears.map(year => (
-                <option key={year} value={year}>FY {year}</option>
-              ))}
-            </select>
-            <small className="field-hint">Select the year this transaction applies to</small>
+              placeholder="e.g., 2026"
+              min="2000"
+              max="2100"
+            />
+            <small className="field-hint">Enter the year this transaction applies to (e.g., 2026)</small>
           </div>
         </div>
 
