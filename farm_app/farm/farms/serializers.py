@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction, Field, AnnualCrop, Crop, Account, TransactionLineItem
+from .models import Transaction, Field, AnnualCrop, Crop, Account, TransactionLineItem, TransactionAnnualCrop
 from .models import Farm, Vendor, TransactionObject
 
 class SafeDateField(serializers.DateField):
@@ -28,81 +28,125 @@ class TxSerializer(serializers.ModelSerializer):
     doc_file = serializers.FileField(required=False, allow_null=True, write_only=True)
     transaction_object_name = serializers.CharField(source='transaction_object.object_name', read_only=True)
     field_name = serializers.CharField(source='field.field_name', read_only=True)
-    field = serializers.PrimaryKeyRelatedField(queryset=Field.objects.all(), required=False, allow_null=True)
     vendor = serializers.PrimaryKeyRelatedField(queryset=Vendor.objects.all(), required=False, allow_null=True)
     account = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all(), required=False, allow_null=True)
     transaction_object = serializers.PrimaryKeyRelatedField(queryset=TransactionObject.objects.all(), required=False, allow_null=True)
     paid_date = SafeDateField(required=False, allow_null=True)
     invoice_date = SafeDateField(required=False, allow_null=True)
     
-    # Field Year Crop (AnnualCrop) selector for easier frontend input
-    field_year_crop = serializers.PrimaryKeyRelatedField(
-        queryset=AnnualCrop.objects.all(), 
-        required=False, 
-        allow_null=True,
-        write_only=True
-    )
-    
     # Line items for reading (read-only representation)
     line_items = TransactionLineItemSerializer(many=True, read_only=True)
     
     # Amount inputs for easier entry (written to line items)
     amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=False, allow_null=True, write_only=True)
+    
+    # Crop fields for easier frontend input
+    year_key = serializers.IntegerField(required=False, allow_null=True)
+    crop_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Crop.objects.all(),
+        many=True,
+        required=False,
+        write_only=True,
+        source='crop_rel'
+    )
 
     class Meta:
         model = Transaction
         fields = [
-            'id', 'field', 'year_key', 'trans_type', 'field_year_crop',
+            'id', 'field', 'year_key', 'trans_type',
             'transaction_object', 'account', 'vendor', 'invoice_date', 'paid_date',
             'memo', 'create_date', 'update_date',
             'annual_crops', 'doc_file', 'transaction_object_name', 'field_name',
-            'line_items', 'amount', 'trans_type'
+            'line_items', 'amount', 'crop_ids'
         ]
-        read_only_fields = ['create_date', 'update_date', 'line_items']
+        read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops']
 
     def create(self, validated_data):
-        """Override create to automate ledger entry creation."""
+        """Override create to automate ledger entry creation and handle crops."""
         # Extract amount if provided for ledger automation
         amount = validated_data.pop('amount', None)
-        field_year_crop = validated_data.pop('field_year_crop', None)
+        crops = validated_data.pop('crop_rel', [])
+        field = validated_data.pop('field', None)
+        year_key = validated_data.pop('year_key', None)
         
         # Create the transaction
         transaction = Transaction.objects.create(**validated_data)
         
-        # If amount is provided, create ledger entry
+        # Find or create AnnualCrop for each crop
+        if field and year_key and crops:
+            for crop in crops:
+                annual_crop, created = AnnualCrop.objects.get_or_create(
+                    field=field,
+                    year_key=year_key,
+                    crop=crop
+                )
+                # Add to transaction's many-to-many
+                TransactionAnnualCrop.objects.get_or_create(
+                    transaction=transaction,
+                    annual_crop=annual_crop
+                )
+        
+        # If amount is provided, create ledger entry for each crop
         if amount and transaction.account:
-            TransactionLineItem.objects.create(
-                transaction=transaction,
-                account=transaction.account,
-                field_year_crop=field_year_crop,
-                amount=amount
-            )
+            for crop in crops:
+                annual_crop, created = AnnualCrop.objects.get_or_create(
+                    field=field,
+                    year_key=year_key,
+                    crop=crop
+                )
+                TransactionLineItem.objects.create(
+                    transaction=transaction,
+                    account=transaction.account,
+                    field_year_crop=annual_crop,
+                    amount=amount
+                )
         
         return transaction
 
     def update(self, instance, validated_data):
-        """Override update to handle ledger entry updates."""
+        """Override update to handle ledger entry updates and crop associations."""
         # Extract amount if provided for ledger automation
         amount = validated_data.pop('amount', None)
-        field_year_crop = validated_data.pop('field_year_crop', None)
+        crops = validated_data.pop('crop_rel', [])
+        field = validated_data.pop('field', None)
+        year_key = validated_data.pop('year_key', None)
         
         # Update the transaction fields
-        for field, value in validated_data.items():
-            setattr(instance, field, value)
+        for field_name, value in validated_data.items():
+            setattr(instance, field_name, value)
         instance.save()
         
-        # If amount is provided, update/create ledger entries
+        # Clear existing crop associations and line items
+        TransactionAnnualCrop.objects.filter(transaction=instance).delete()
+        TransactionLineItem.objects.filter(transaction=instance).delete()
+        
+        # Re-create crop associations
+        if field and year_key and crops:
+            for crop in crops:
+                annual_crop, created = AnnualCrop.objects.get_or_create(
+                    field=field,
+                    year_key=year_key,
+                    crop=crop
+                )
+                TransactionAnnualCrop.objects.get_or_create(
+                    transaction=instance,
+                    annual_crop=annual_crop
+                )
+        
+        # If amount is provided, create new ledger entries
         if amount is not None and instance.account:
-            # Clear existing line items for this transaction
-            TransactionLineItem.objects.filter(transaction=instance).delete()
-            
-            # Create new ledger entry
-            TransactionLineItem.objects.create(
-                transaction=instance,
-                account=instance.account,
-                field_year_crop=field_year_crop,
-                amount=amount
-            )
+            for crop in crops:
+                annual_crop, created = AnnualCrop.objects.get_or_create(
+                    field=field,
+                    year_key=year_key,
+                    crop=crop
+                )
+                TransactionLineItem.objects.create(
+                    transaction=instance,
+                    account=instance.account,
+                    field_year_crop=annual_crop,
+                    amount=amount
+                )
         
         return instance
 
