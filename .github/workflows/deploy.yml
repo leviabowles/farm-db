@@ -25,6 +25,9 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
           echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env
+          
+          # Show .env file was created (for debugging)
+          cat .env
 
           # Log in to GHCR on the home server
           # We use a token from secrets since GITHUB_TOKEN might not have pull access for private packages on self-hosted runners
