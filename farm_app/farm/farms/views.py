@@ -7,14 +7,14 @@ from django.views import View
 from django.db import models
 from django.utils import timezone
 # Create your views here.
-from .models import Transaction, Field, AnnualCrop, Farm
+from .models import Transaction, Field, AnnualCrop, Farm, Account, Vendor, TransactionObject
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .serializers import TxSerializer
-from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer
+from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer, AccountSerializer, VendorSerializer, TransactionObjectSerializer
 
 def index(request):
     num_tx = Transaction.objects.all().count()
@@ -97,7 +97,7 @@ class TransactionDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Transaction.objects.all()
     serializer_class = TxSerializer
 # Import the newly created serializers
-from .serializers import FieldSerializer, AnnualCropSerializer
+from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer, VendorSerializer, TransactionObjectSerializer
 
 # API for listing/creating Fields
 @method_decorator(csrf_exempt, name='dispatch')
@@ -126,3 +126,27 @@ class FarmListCreateAPIView(ListCreateAPIView):
     """Expose the Farm model via GET (list) and POST (create)."""
     queryset = Farm.objects.all()
     serializer_class = FarmSerializer
+
+
+# API for listing/creating Accounts
+@method_decorator(csrf_exempt, name='dispatch')
+class AccountListCreateAPIView(ListCreateAPIView):
+    """Expose the Account model via GET (list) and POST (create)."""
+    queryset = Account.objects.all()
+    serializer_class = AccountSerializer
+
+
+# API for listing/creating Vendors
+@method_decorator(csrf_exempt, name='dispatch')
+class VendorListCreateAPIView(ListCreateAPIView):
+    """Expose the Vendor model via GET (list) and POST (create)."""
+    queryset = Vendor.objects.all()
+    serializer_class = VendorSerializer
+
+
+# API for listing/creating TransactionObjects
+@method_decorator(csrf_exempt, name='dispatch')
+class TransactionObjectListCreateAPIView(ListCreateAPIView):
+    """Expose the TransactionObject model via GET (list) and POST (create)."""
+    queryset = TransactionObject.objects.all()
+    serializer_class = TransactionObjectSerializer

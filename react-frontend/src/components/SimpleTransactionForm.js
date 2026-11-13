@@ -12,14 +12,17 @@ const SimpleTransactionForm = () => {
     year_key: new Date().getFullYear(), // Default to current year
     transaction_type: 'debit', // Default to debit (money out)
     vendor: '',
+    account: '', // New: account for ledger automation
     invoice_date: '',
     paid_date: new Date().toISOString().split('T')[0], // Default to today
-    doc_file: null
+    doc_file: null,
+    amount: '' // New: amount for ledger automation
   });
 
   // Dropdown options
   const [fields, setFields] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
   // Derived years for year_key dropdown (last 5 years + current)
@@ -40,18 +43,20 @@ const SimpleTransactionForm = () => {
     setAvailableYears(years);
   }, [currentYear]);
 
-  // Fetch fields and vendors on mount
+  // Fetch fields, vendors, and accounts on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [fieldsRes, vendorsRes] = await Promise.all([
+        const [fieldsRes, vendorsRes, accountsRes] = await Promise.all([
           api.get('/api/fields/'),
-          api.get('/api/vendors/')
+          api.get('/api/vendors/'),
+          api.get('/api/accounts/')
         ]);
         setFields(fieldsRes.data.results || []);
         setVendors(vendorsRes.data.results || []);
+        setAccounts(accountsRes.data.results || []);
       } catch (err) {
-        console.error('Error fetching fields/vendors:', err);
+        console.error('Error fetching fields/vendors/accounts:', err);
       }
     };
     fetchData();
@@ -95,15 +100,17 @@ const SimpleTransactionForm = () => {
     setError(null);
 
     try {
-      // Prepare data - exclude amounts since they're not in the model
+      // Prepare data with all required fields including amount and account
       const payload = {
         memo: formData.memo,
         field: formData.field,
         year_key: formData.year_key,
         transaction_type: formData.transaction_type,
         vendor: formData.vendor,
+        account: formData.account,
         invoice_date: formData.invoice_date,
-        paid_date: formData.paid_date
+        paid_date: formData.paid_date,
+        amount: formData.amount
       };
 
       // Use multipart/form-data if file is present
@@ -150,6 +157,12 @@ const SimpleTransactionForm = () => {
   const getVendorLabel = (vendorId) => {
     const vendor = vendors.find(v => v.id === vendorId);
     return vendor ? vendor.vendor_name : vendorId || 'Select Vendor';
+  };
+
+  // Get account name for display
+  const getAccountLabel = (accountId) => {
+    const account = accounts.find(a => a.id === accountId);
+    return account ? account.name : accountId || 'Select Account';
   };
 
   return (
@@ -242,6 +255,52 @@ const SimpleTransactionForm = () => {
             {formData.vendor && (
               <small className="field-hint">Vendor: {getVendorLabel(formData.vendor)}</small>
             )}
+          </div>
+        </div>
+
+        {/* Ledger Automation Section */}
+        <div className="form-section">
+          <h3>Accounting (Auto-Ledger)</h3>
+          
+          <p className="form-hint">
+            Enter the amount and select the account to automatically create ledger entries.
+          </p>
+
+          {/* Account Selection */}
+          <div className="form-group">
+            <label htmlFor="account">Which Account? <span className="required">*</span></label>
+            <select
+              id="account"
+              name="account"
+              value={formData.account}
+              onChange={handleChange}
+              required
+            >
+              <option value="">-- Select an Account --</option>
+              {accounts.map(account => (
+                <option key={account.id} value={account.id}>
+                  {account.name} ({account.account_type})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Amount Input */}
+          <div className="form-group">
+            <label htmlFor="amount">Amount <span className="required">*</span></label>
+            <input
+              type="number"
+              step="0.01"
+              id="amount"
+              name="amount"
+              value={formData.amount}
+              onChange={handleChange}
+              required
+              placeholder="Enter the transaction amount"
+            />
+            <small className="field-hint">
+              This amount will be automatically recorded in the ledger based on the transaction type
+            </small>
           </div>
         </div>
 

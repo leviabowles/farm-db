@@ -27,6 +27,7 @@ const TransactionList = () => {
   const [error, setError] = useState(null);
   const [fields, setFields] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
 
   const navigate = useNavigate();
@@ -38,9 +39,14 @@ const TransactionList = () => {
       const response = await api.get('/api/transactions/');
       const txList = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
+      // Get account names for display
+      const accountMap = {};
+      accounts.forEach(acc => { accountMap[acc.id] = acc.name; });
+
       const enhancedTransactions = txList.map(tx => ({
         ...tx,
-        field_name: tx.field?.field_name || tx.field || 'Unknown Field'
+        field_name: tx.field?.field_name || tx.field || 'Unknown Field',
+        account_name: accountMap[tx.account] || tx.account || '-'
       }));
 
       setTransactions(enhancedTransactions);
@@ -52,20 +58,22 @@ const TransactionList = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [accounts]);
 
-  // Fetch fields and vendors for dropdowns
+  // Fetch fields, vendors, and accounts for dropdowns
   const fetchOptions = useCallback(async () => {
     setLoadingOptions(true);
     try {
-      const [fieldsRes, vendorsRes] = await Promise.all([
+      const [fieldsRes, vendorsRes, accountsRes] = await Promise.all([
         api.get('/api/fields/'),
-        api.get('/api/vendors/')
+        api.get('/api/vendors/'),
+        api.get('/api/accounts/')
       ]);
       setFields(fieldsRes.data.results || []);
       setVendors(vendorsRes.data.results || []);
+      setAccounts(accountsRes.data.results || []);
     } catch (err) {
-      console.error('Error fetching fields/vendors:', err);
+      console.error('Error fetching fields/vendors/accounts:', err);
     } finally {
       setLoadingOptions(false);
     }
@@ -131,6 +139,7 @@ const TransactionList = () => {
             <TableRow>
               <TableCell>Field</TableCell>
               <TableCell>Type</TableCell>
+              <TableCell>Account</TableCell>
               <TableCell>Memo</TableCell>
               <TableCell>Vendor</TableCell>
               <TableCell>Payment Date</TableCell>
@@ -157,6 +166,7 @@ const TransactionList = () => {
                       {isDebit ? '💸 Debit' : '💰 Credit'}
                     </span>
                   </TableCell>
+                  <TableCell>{transaction.account_name}</TableCell>
                   <TableCell>{transaction.memo || '-'}</TableCell>
                   <TableCell>{transaction.vendor?.vendor_name || '-'}</TableCell>
                   <TableCell>{new Date(transaction.paid_date).toLocaleDateString()}</TableCell>
