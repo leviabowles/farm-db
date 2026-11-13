@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 # Import the Farm API view to expose it at the root level without the "farms/" prefix.
 from farms.views import FarmListCreateAPIView
@@ -64,6 +66,13 @@ urlpatterns += [
     path('', index, name='root_index'),
     path('reporting/', reporting, name='root_reporting'),
 ]
+
+# ---------------------------------------------------------------------
+# Media files (User uploaded files) - Only for development!
+# In production with Docker volumes, Nginx should serve these files.
+# ---------------------------------------------------------------------
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 admin.site.site_header = 'Farm DB Accounting'

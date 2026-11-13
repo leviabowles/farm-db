@@ -8,6 +8,9 @@ RUN apt-get update && \
 # Set working directory inside the container where the Django project will live
 WORKDIR /app
 
+# Create media directory with proper permissions
+RUN mkdir -p /app/media && chmod -R 755 /app/media
+
 # Copy the Django application source code and requirements into the image
 # The build context will be set to the repository root, so we copy from there.
 COPY farm_app/farm/ ./
