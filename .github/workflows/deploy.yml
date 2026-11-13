@@ -26,9 +26,6 @@ jobs:
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
           echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env
           
-          # Show .env file was created (for debugging)
-          cat .env
-
           # Log in to GHCR on the home server
           # We use a token from secrets since GITHUB_TOKEN might not have pull access for private packages on self-hosted runners
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -40,8 +37,7 @@ jobs:
           docker compose -f docker-compose.prod.yml pull
 
           # Restart services using the fresh images (force recreate to ensure clean state)
-          # Use --pull to ensure Docker always fetches the latest image layers
-          docker compose -f docker-compose.prod.yml up -d --force-recreate --pull
+          docker compose -f docker-compose.prod.yml up -d --force-recreate
           
           # Cleanup old images
           docker image prune -f
