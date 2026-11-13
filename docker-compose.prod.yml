@@ -14,7 +14,7 @@ services:
       - MEDIA_ROOT=/app/media
       - MEDIA_URL=/media/
     volumes:
-      - /farm-db-data/media:/app/media
+      - /var/www/farm-db/media:/app/media
     restart: unless-stopped
 
   frontend:
