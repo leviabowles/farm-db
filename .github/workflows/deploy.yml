@@ -36,11 +36,10 @@ jobs:
           # Stop existing containers first
           docker compose -f docker-compose.prod.yml down || true
           
-          # Pull latest images from registry (with --parallel for speed)
-          docker compose -f docker-compose.prod.yml pull --parallel
+          # Pull latest images from registry
+          docker compose -f docker-compose.prod.yml pull
 
           # Restart services using the fresh images (force recreate to ensure clean state)
-          # Use --pull to ensure Docker always fetches the latest image layers
           docker compose -f docker-compose.prod.yml up -d --force-recreate --pull
           
           # Cleanup old images
