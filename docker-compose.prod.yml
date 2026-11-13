@@ -11,6 +11,10 @@ services:
       - DBUSER=${DB_USER}
       - DBPW=${DB_PASSWORD}
       - DBHOST=172.17.0.1
+      - MEDIA_ROOT=/app/media
+      - MEDIA_URL=/media/
+    volumes:
+      - /var/www/farm-db/media:/app/media
     restart: unless-stopped
 
   frontend:
@@ -21,6 +25,7 @@ services:
       - "8888:80"
     environment:
       - REACT_APP_API_URL=http://172.17.0.1:8800/farms
+      - REACT_APP_MEDIA_URL=http://172.17.0.1:8800/media/
     depends_on:
       - web
     restart: unless-stopped
