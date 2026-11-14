@@ -13,7 +13,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import RefreshIcon from '@mui/icons-material/Refresh';
+
 import AddIcon from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
@@ -25,9 +25,6 @@ const TransactionList = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [fields, setFields] = useState([]);
-  const [vendors, setVendors] = useState([]);
-  const [accounts, setAccounts] = useState([]);
 
   const navigate = useNavigate();
 
@@ -37,15 +34,11 @@ const TransactionList = () => {
       const response = await api.get('/api/transactions/');
       const txList = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
-      // Get account names for display from accounts state
-      const accountMap = {};
-      accounts.forEach(acc => { accountMap[acc.id] = acc.name; });
-
-      // Map through transactions
+      // Map through transactions - use empty map since accounts not available here
       const enhancedTransactions = txList.map(tx => ({
         ...tx,
         field_name: tx.field?.field_name || tx.field || 'Unknown Field',
-        account_name: accounts.length > 0 ? (accountMap[tx.account] || tx.account || '-') : tx.account
+        account_name: tx.account || '-'
       }));
 
       setTransactions(enhancedTransactions);
@@ -57,7 +50,7 @@ const TransactionList = () => {
     } finally {
       setLoading(false);
     }
-  }, [accounts]);
+  }, []);
 
   useEffect(() => {
     fetchTransactions();
@@ -95,14 +88,6 @@ const TransactionList = () => {
           Transaction Management
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={fetchTransactions}
-            disabled={loading}
-          >
-            {loading ? 'Refreshing...' : 'Refresh Data'}
-          </Button>
           <Button
             variant="contained"
             startIcon={<AddIcon />}

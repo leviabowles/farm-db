@@ -3,7 +3,7 @@ import {
   Box, Typography, Grid, Paper, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, CircularProgress, 
   Divider, Breadcrumbs, Link as MuiLink, Chip, Button } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
+
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import api from '../services/api';
 
@@ -80,14 +80,6 @@ const FieldYearCropDetail = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
           {crop.field?.field_name || 'Unknown Field'} — {crop.year_key}
         </Typography>
-        <Button 
-          variant="outlined" 
-          startIcon={<RefreshIcon />} 
-          onClick={fetchData}
-          disabled={loading}
-        >
-          {loading ? 'Refreshing...' : 'Refresh Data'}
-        </Button>
       </Box>
 
       <Grid container spacing={4}>
