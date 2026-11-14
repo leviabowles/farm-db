@@ -111,9 +111,6 @@ const SimpleTransactionForm = () => {
       };
 
       // Use multipart/form-data if file is present
-      let requestData;
-      let config = {};
-
       if (formData.doc_file) {
         const fd = new FormData();
         Object.entries(payload).forEach(([key, val]) => {
@@ -122,16 +119,18 @@ const SimpleTransactionForm = () => {
           }
         });
         fd.append('doc_file', formData.doc_file);
-        requestData = fd;
-        config.headers = { 'Content-Type': 'multipart/form-data' };
+        
+        if (id) {
+          await api.put(`/api/transactions/${id}/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        } else {
+          await api.post('/api/transactions/', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        }
       } else {
-        requestData = payload;
-      }
-
-      if (id) {
-        await axios.put(`${process.env.REACT_APP_API_URL || 'http://localhost:8000/farms'}/api/transactions/${id}/`, requestData, config);
-      } else {
-        await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8000/farms'}/api/transactions/`, requestData, config);
+        if (id) {
+          await api.put(`/api/transactions/${id}/`, payload);
+        } else {
+          await api.post('/api/transactions/', payload);
+        }
       }
 
       navigate('/transactions');
