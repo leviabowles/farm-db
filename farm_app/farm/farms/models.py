@@ -429,3 +429,17 @@ class Vendor(models.Model):
     class Meta:
         managed = False
         db_table = 'vendor'
+
+
+class FarmNote(models.Model):
+    note = models.TextField()
+    dismissed = models.BooleanField(default=False)
+    create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+    update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
+
+    def __str__(self):
+        return f"Note {self.id} ({'dismissed' if self.dismissed else 'active'})"
+
+    class Meta:
+        managed = True
+        db_table = 'farm_note'

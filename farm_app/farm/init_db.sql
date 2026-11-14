@@ -677,4 +677,18 @@ CREATE TABLE `vendor` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+-- Farm Notes table - for free text notes that can be dismissed
+DROP TABLE IF EXISTS `farm_note`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `farm_note` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `note` longtext NOT NULL,
+  `dismissed` tinyint(1) NOT NULL DEFAULT '0',
+  `create_date` datetime DEFAULT NULL,
+  `update_date` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 -- Dump completed on 2026-11-12 17:34:27
