@@ -70,7 +70,7 @@ class TxSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = [
-            'id', 'field', 'year_key', 'trans_type',
+            'id', 'field', 'year_key', 'trans_type', 'transaction_type',
             'transaction_object', 'account', 'vendor', 'invoice_date', 'paid_date',
             'memo', 'create_date', 'update_date',
             'annual_crops', 'doc_file', 'transaction_object_name', 'field_name',
