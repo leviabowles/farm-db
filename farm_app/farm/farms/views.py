@@ -55,7 +55,9 @@ class ListTxAPIView(ListCreateAPIView):
     value if needed. CSRF exemption allows POST requests from the frontend
     without requiring a token.
     """
-    queryset = Transaction.objects.all()
+    queryset = Transaction.objects.all().select_related(
+        'field', 'transaction_object', 'account'
+    ).prefetch_related('line_items', 'vendor')
     serializer_class = TxSerializer
     # Use DRF's built‑in pagination (page size configurable in settings).
     pagination_class = PageNumberPagination
