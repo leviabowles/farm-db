@@ -28,25 +28,24 @@ const TransactionList = () => {
   const [fields, setFields] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  const [loadingOptions, setLoadingOptions] = useState(true);
 
   const navigate = useNavigate();
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('Fetching transactions from API...');
       const response = await api.get('/api/transactions/');
       const txList = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
-      // Get account names for display
+      // Get account names for display from accounts state
       const accountMap = {};
       accounts.forEach(acc => { accountMap[acc.id] = acc.name; });
 
+      // Map through transactions
       const enhancedTransactions = txList.map(tx => ({
         ...tx,
         field_name: tx.field?.field_name || tx.field || 'Unknown Field',
-        account_name: accountMap[tx.account] || tx.account || '-'
+        account_name: accounts.length > 0 ? (accountMap[tx.account] || tx.account || '-') : tx.account
       }));
 
       setTransactions(enhancedTransactions);
@@ -60,29 +59,9 @@ const TransactionList = () => {
     }
   }, [accounts]);
 
-  // Fetch fields, vendors, and accounts for dropdowns
-  const fetchOptions = useCallback(async () => {
-    setLoadingOptions(true);
-    try {
-      const [fieldsRes, vendorsRes, accountsRes] = await Promise.all([
-        api.get('/api/fields/'),
-        api.get('/api/vendors/'),
-        api.get('/api/accounts/')
-      ]);
-      setFields(fieldsRes.data.results || []);
-      setVendors(vendorsRes.data.results || []);
-      setAccounts(accountsRes.data.results || []);
-    } catch (err) {
-      console.error('Error fetching fields/vendors/accounts:', err);
-    } finally {
-      setLoadingOptions(false);
-    }
-  }, []);
-
   useEffect(() => {
     fetchTransactions();
-    fetchOptions();
-  }, [fetchTransactions, fetchOptions]);
+  }, [fetchTransactions]);
 
   const handleEdit = (transactionId) => {
     navigate(`/transactions/${transactionId}/edit`);
