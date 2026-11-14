@@ -40,7 +40,7 @@ const Header = () => {
         {/* Center navigation links */}
         <Box sx={{ display: 'flex', gap: 2, mx: 2 }}>
           <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>Dashboard</Link>
-          <Link to="/farms" style={{ color: 'inherit', textDecoration: 'none' }}>Farms</Link>
+          <Link to="/notes" style={{ color: 'inherit', textDecoration: 'none' }}>Notes</Link>
           <Link to="/transactions" style={{ color: 'inherit', textDecoration: 'none' }}>Transactions</Link>
           <Link to="/fields" style={{ color: 'inherit', textDecoration: 'none' }}>Fields</Link>
         </Box>

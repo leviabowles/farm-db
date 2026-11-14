@@ -10,6 +10,7 @@ import Header from './components/Header';
 import FieldList from './components/FieldList';
 import FieldYearCropList from './components/FieldYearCropList';
 import FieldYearCropDetail from './components/FieldYearCropDetail';
+import Notes from './components/Notes';
 import './App.css';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import theme from './theme';
@@ -24,9 +25,7 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/farms" element={<FarmList />} />
-              <Route path="/farms/new" element={<FarmForm />} />
-              <Route path="/farms/:id/edit" element={<FarmForm />} />
+              <Route path="/notes" element={<Notes />} />
               <Route path="/transactions" element={<TransactionList />} />
               <Route path="/transactions/new" element={<SimpleTransactionForm />} />
               <Route path="/transactions/:id/edit" element={<SimpleTransactionForm />} />
