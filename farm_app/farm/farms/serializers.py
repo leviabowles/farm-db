@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction, Field, AnnualCrop, Crop, Account, TransactionLineItem, TransactionAnnualCrop
+from .models import Transaction, Field, AnnualCrop, Crop, Account, TransactionLineItem, TransactionAnnualCrop, LedgerEntry
 from .models import Farm, Vendor, TransactionObject, FarmNote
 
 class SafeDateField(serializers.DateField):
@@ -112,17 +112,36 @@ class TxSerializer(serializers.ModelSerializer):
                     annual_crop=annual_crop
                 )
         
-        # If amount is provided, create ledger entry
+        # If amount is provided, create ledger entries (both LineItem and LedgerEntry)
         if amount and transaction.account:
+            from decimal import Decimal
+            amount_decimal = Decimal(str(amount))
+            
             if annual_crops:
                 # Use the selected annual crops for ledger entries
                 for annual_crop in annual_crops:
+                    # Create TransactionLineItem
                     TransactionLineItem.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         field_year_crop=annual_crop,
-                        amount=amount
+                        amount=amount_decimal
                     )
+                    # Create LedgerEntry
+                    if transaction.trans_type == 'debit':
+                        LedgerEntry.objects.create(
+                            transaction=transaction,
+                            account=transaction.account,
+                            debit=amount_decimal,
+                            credit=Decimal('0.00')
+                        )
+                    else:
+                        LedgerEntry.objects.create(
+                            transaction=transaction,
+                            account=transaction.account,
+                            debit=Decimal('0.00'),
+                            credit=amount_decimal
+                        )
             elif field and year_key and crops:
                 for crop in crops:
                     annual_crop, created = AnnualCrop.objects.get_or_create(
@@ -130,11 +149,51 @@ class TxSerializer(serializers.ModelSerializer):
                         year_key=year_key,
                         crop=crop
                     )
+                    # Create TransactionLineItem
                     TransactionLineItem.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         field_year_crop=annual_crop,
-                        amount=amount
+                        amount=amount_decimal
+                    )
+                    # Create LedgerEntry
+                    if transaction.trans_type == 'debit':
+                        LedgerEntry.objects.create(
+                            transaction=transaction,
+                            account=transaction.account,
+                            debit=amount_decimal,
+                            credit=Decimal('0.00')
+                        )
+                    else:
+                        LedgerEntry.objects.create(
+                            transaction=transaction,
+                            account=transaction.account,
+                            debit=Decimal('0.00'),
+                            credit=amount_decimal
+                        )
+            else:
+                # No crop association - create ledger entry without field_year_crop
+                # Create TransactionLineItem
+                TransactionLineItem.objects.create(
+                    transaction=transaction,
+                    account=transaction.account,
+                    field_year_crop=None,
+                    amount=amount_decimal
+                )
+                # Create LedgerEntry
+                if transaction.trans_type == 'debit':
+                    LedgerEntry.objects.create(
+                        transaction=transaction,
+                        account=transaction.account,
+                        debit=amount_decimal,
+                        credit=Decimal('0.00')
+                    )
+                else:
+                    LedgerEntry.objects.create(
+                        transaction=transaction,
+                        account=transaction.account,
+                        debit=Decimal('0.00'),
+                        credit=amount_decimal
                     )
         
         return transaction
@@ -160,6 +219,7 @@ class TxSerializer(serializers.ModelSerializer):
         # Clear existing crop associations and line items
         TransactionAnnualCrop.objects.filter(transaction=instance).delete()
         TransactionLineItem.objects.filter(transaction=instance).delete()
+        LedgerEntry.objects.filter(transaction=instance).delete()
         
         # Re-create crop associations
         if annual_crops:
@@ -180,16 +240,35 @@ class TxSerializer(serializers.ModelSerializer):
                     annual_crop=annual_crop
                 )
         
-        # If amount is provided, create new ledger entries
+        # If amount is provided, create new ledger entries (both LineItem and LedgerEntry)
         if amount is not None and instance.account:
+            from decimal import Decimal
+            amount_decimal = Decimal(str(amount))
+            
             if annual_crops:
                 for annual_crop in annual_crops:
+                    # Create TransactionLineItem
                     TransactionLineItem.objects.create(
                         transaction=instance,
                         account=instance.account,
                         field_year_crop=annual_crop,
-                        amount=amount
+                        amount=amount_decimal
                     )
+                    # Create LedgerEntry
+                    if instance.trans_type == 'debit':
+                        LedgerEntry.objects.create(
+                            transaction=instance,
+                            account=instance.account,
+                            debit=amount_decimal,
+                            credit=Decimal('0.00')
+                        )
+                    else:
+                        LedgerEntry.objects.create(
+                            transaction=instance,
+                            account=instance.account,
+                            debit=Decimal('0.00'),
+                            credit=amount_decimal
+                        )
             elif field and year_key and crops:
                 for crop in crops:
                     annual_crop, created = AnnualCrop.objects.get_or_create(
@@ -197,11 +276,51 @@ class TxSerializer(serializers.ModelSerializer):
                         year_key=year_key,
                         crop=crop
                     )
+                    # Create TransactionLineItem
                     TransactionLineItem.objects.create(
                         transaction=instance,
                         account=instance.account,
                         field_year_crop=annual_crop,
-                        amount=amount
+                        amount=amount_decimal
+                    )
+                    # Create LedgerEntry
+                    if instance.trans_type == 'debit':
+                        LedgerEntry.objects.create(
+                            transaction=instance,
+                            account=instance.account,
+                            debit=amount_decimal,
+                            credit=Decimal('0.00')
+                        )
+                    else:
+                        LedgerEntry.objects.create(
+                            transaction=instance,
+                            account=instance.account,
+                            debit=Decimal('0.00'),
+                            credit=amount_decimal
+                        )
+            else:
+                # No crop association - create ledger entry without field_year_crop
+                # Create TransactionLineItem
+                TransactionLineItem.objects.create(
+                    transaction=instance,
+                    account=instance.account,
+                    field_year_crop=None,
+                    amount=amount_decimal
+                )
+                # Create LedgerEntry
+                if instance.trans_type == 'debit':
+                    LedgerEntry.objects.create(
+                        transaction=instance,
+                        account=instance.account,
+                        debit=amount_decimal,
+                        credit=Decimal('0.00')
+                    )
+                else:
+                    LedgerEntry.objects.create(
+                        transaction=instance,
+                        account=instance.account,
+                        debit=Decimal('0.00'),
+                        credit=amount_decimal
                     )
         
         return instance
