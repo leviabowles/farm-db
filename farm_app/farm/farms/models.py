@@ -191,6 +191,8 @@ class AnnualCrop(models.Model):
     crop = models.ForeignKey('Crop', on_delete=models.CASCADE, db_column='crop')
     acres_planted = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     total_bushels = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    planting_date = models.DateField(blank=True, null=True)
+    harvest_date = models.DateField(blank=True, null=True)
     create_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
     update_date = models.DateTimeField(blank=True, null=True, default=datetime.datetime.now)
 
