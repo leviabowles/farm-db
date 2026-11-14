@@ -7,14 +7,14 @@ from django.views import View
 from django.db import models
 from django.utils import timezone
 # Create your views here.
-from .models import Transaction, Field, AnnualCrop, Farm, Account, Vendor, TransactionObject, Crop
+from .models import Transaction, Field, AnnualCrop, Farm, Account, Vendor, TransactionObject, Crop, FarmNote
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .serializers import TxSerializer
-from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer, AccountSerializer, VendorSerializer, TransactionObjectSerializer, CropSerializer
+from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer, AccountSerializer, VendorSerializer, TransactionObjectSerializer, CropSerializer, FarmNoteSerializer
 
 def index(request):
     num_tx = Transaction.objects.all().count()
@@ -157,3 +157,17 @@ class CropListCreateAPIView(ListCreateAPIView):
     """Expose the Crop model via GET (list) and POST (create)."""
     queryset = Crop.objects.all()
     serializer_class = CropSerializer
+
+
+# API for listing/creating FarmNotes
+@method_decorator(csrf_exempt, name='dispatch')
+class FarmNoteListCreateAPIView(ListCreateAPIView):
+    """Expose the FarmNote model via GET (list) and POST (create)."""
+    queryset = FarmNote.objects.all().order_by('-create_date')
+    serializer_class = FarmNoteSerializer
+
+@method_decorator(csrf_exempt, name='dispatch')
+class FarmNoteDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete a FarmNote by its primary key."""
+    queryset = FarmNote.objects.all()
+    serializer_class = FarmNoteSerializer

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Transaction, Field, AnnualCrop, Crop, Account, TransactionLineItem, TransactionAnnualCrop
-from .models import Farm, Vendor, TransactionObject
+from .models import Farm, Vendor, TransactionObject, FarmNote
 
 class SafeDateField(serializers.DateField):
     """A DateField that gracefully handles datetime objects by coercing them to dates."""
@@ -8,6 +8,13 @@ class SafeDateField(serializers.DateField):
         if value is not None and hasattr(value, 'date'):
             value = value.date()
         return super().to_representation(value)
+
+class FarmNoteSerializer(serializers.ModelSerializer):
+    """Serializer for FarmNote model."""
+    class Meta:
+        model = FarmNote
+        fields = ['id', 'note', 'dismissed', 'create_date', 'update_date']
+        read_only_fields = ['id', 'create_date', 'update_date']
 
 class AccountSerializer(serializers.ModelSerializer):
     """Serializer for Account model."""
