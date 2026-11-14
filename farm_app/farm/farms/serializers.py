@@ -41,6 +41,9 @@ class TxSerializer(serializers.ModelSerializer):
     paid_date = SafeDateField(required=False, allow_null=True)
     invoice_date = SafeDateField(required=False, allow_null=True)
     
+    # Handle frontend's transaction_type field (mapped to trans_type)
+    transaction_type = serializers.CharField(required=False, write_only=True)
+    
     # Line items for reading (read-only representation)
     line_items = TransactionLineItemSerializer(many=True, read_only=True)
     
@@ -79,6 +82,11 @@ class TxSerializer(serializers.ModelSerializer):
         """Override create to automate ledger entry creation and handle crops."""
         # Extract amount if provided for ledger automation
         amount = validated_data.pop('amount', None)
+        
+        # Handle transaction_type -> trans_type mapping
+        transaction_type = validated_data.pop('transaction_type', None)
+        if transaction_type:
+            validated_data['trans_type'] = transaction_type
         
         # Handle annual_crop_ids (preferred - selects from existing AnnualCrop)
         annual_crops = validated_data.pop('annual_crops', [])
@@ -202,6 +210,11 @@ class TxSerializer(serializers.ModelSerializer):
         """Override update to handle ledger entry updates and crop associations."""
         # Extract amount if provided for ledger automation
         amount = validated_data.pop('amount', None)
+        
+        # Handle transaction_type -> trans_type mapping
+        transaction_type = validated_data.pop('transaction_type', None)
+        if transaction_type:
+            validated_data['trans_type'] = transaction_type
         
         # Handle annual_crop_ids (preferred - selects from existing AnnualCrop)
         annual_crops = validated_data.pop('annual_crops', [])

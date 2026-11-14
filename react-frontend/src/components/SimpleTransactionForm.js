@@ -10,7 +10,8 @@ const SimpleTransactionForm = () => {
     memo: '',
     field: '',
     year_key: new Date().getFullYear(), // Default to current year (integer)
-    trans_type: 'debit', // Default to debit (money out)
+    trans_type: 'debit', // Default to debit (money out) - must match backend enum
+    transaction_type: 'debit', // Synced with trans_type
     vendor: '',
     account: '', // New: account for ledger automation
     invoice_date: '',
@@ -88,6 +89,10 @@ const SimpleTransactionForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Keep trans_type and transaction_type in sync
+    if (name === 'trans_type' || name === 'transaction_type') {
+      setFormData(prev => ({ ...prev, trans_type: value, transaction_type: value }));
+    }
   };
 
   const handleFileChange = (e) => {
