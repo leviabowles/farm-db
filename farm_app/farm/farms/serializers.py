@@ -109,16 +109,9 @@ class TxSerializer(serializers.ModelSerializer):
         # Create the transaction
         transaction = Transaction.objects.create(**validated_data)
         
-        # Debug logging - show what was in validated_data before creating transaction
+        # Debug logging
         import logging
         logger = logging.getLogger(__name__)
-        logger.debug(f"Before transaction creation, validated_data keys: {list(validated_data.keys())}")
-        logger.debug(f"account in validated_data: {'account' in validated_data}, value: {validated_data.get('account')}")
-        
-        # Create the transaction
-        transaction = Transaction.objects.create(**validated_data)
-        
-        # Debug logging after transaction creation
         logger.debug(f"Transaction created: id={transaction.id}, account_id={transaction.account_id}, trans_type={transaction.trans_type}")
         logger.debug(f"Ledger entry condition check: amount={amount}, transaction.account={transaction.account}")
         
@@ -166,90 +159,95 @@ class TxSerializer(serializers.ModelSerializer):
                 logger.debug(f"Branch: annual_crops=True, creating entries for {len(annual_crops)} crops")
                 for annual_crop in annual_crops:
                     # Create TransactionLineItem - ONE per crop for the user-selected account
-                    # (TransactionLineItems are NOT dual entry - they just show which account/crop has the amount)
+                    # (TransactionLineItems show which account/crop has the amount)
                     TransactionLineItem.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         field_year_crop=annual_crop,
                         amount=amount_decimal
                     )
-                    # Create BOTH LedgerEntry records for dual-entry bookkeeping
-                    if transaction.trans_type == 'debit':
-                        # Debit the user-selected account, credit the offset account
+                # Create LedgerEntry records for the ENTIRE transaction (NOT per crop)
+                # For dual-entry: total debits = total credits
+                if transaction.trans_type == 'debit':
+                    # Debit the user-selected account for the total amount
+                    LedgerEntry.objects.create(
+                        transaction=transaction,
+                        account=transaction.account,
+                        debit=amount_decimal,
+                        credit=Decimal('0.00')
+                    )
+                    if offset_account:
+                        # Credit the offset account for the same total amount
                         LedgerEntry.objects.create(
                             transaction=transaction,
-                            account=transaction.account,
-                            debit=amount_decimal,
-                            credit=Decimal('0.00')
-                        )
-                        if offset_account:
-                            LedgerEntry.objects.create(
-                                transaction=transaction,
-                                account=offset_account,
-                                debit=Decimal('0.00'),
-                                credit=amount_decimal
-                            )
-                    else:
-                        # Credit the user-selected account, debit the offset account
-                        LedgerEntry.objects.create(
-                            transaction=transaction,
-                            account=transaction.account,
+                            account=offset_account,
                             debit=Decimal('0.00'),
                             credit=amount_decimal
                         )
-                        if offset_account:
-                            LedgerEntry.objects.create(
-                                transaction=transaction,
-                                account=offset_account,
-                                debit=amount_decimal,
-                                credit=Decimal('0.00')
-                            )
+                else:
+                    # Credit the user-selected account for the total amount
+                    LedgerEntry.objects.create(
+                        transaction=transaction,
+                        account=transaction.account,
+                        debit=Decimal('0.00'),
+                        credit=amount_decimal
+                    )
+                    if offset_account:
+                        # Debit the offset account for the same total amount
+                        LedgerEntry.objects.create(
+                            transaction=transaction,
+                            account=offset_account,
+                            debit=amount_decimal,
+                            credit=Decimal('0.00')
+                        )
             elif field and year_key and crops:
                 logger.debug(f"Branch: field+year_key+crops=True, creating entries for {len(crops)} crops")
+                # Create TransactionLineItem - ONE per crop for the user-selected account
                 for crop in crops:
                     annual_crop, created = AnnualCrop.objects.get_or_create(
                         field=field,
                         year_key=year_key,
                         crop=crop
                     )
-                    # Create TransactionLineItem - ONE per crop for the user-selected account
                     TransactionLineItem.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         field_year_crop=annual_crop,
                         amount=amount_decimal
                     )
-                    # Create BOTH LedgerEntry records for dual-entry bookkeeping
-                    if transaction.trans_type == 'debit':
-                        # Debit the user-selected account, credit the offset account
+                # Create LedgerEntry records for the ENTIRE transaction (NOT per crop)
+                if transaction.trans_type == 'debit':
+                    # Debit the user-selected account for the total amount
+                    LedgerEntry.objects.create(
+                        transaction=transaction,
+                        account=transaction.account,
+                        debit=amount_decimal,
+                        credit=Decimal('0.00')
+                    )
+                    if offset_account:
+                        # Credit the offset account for the same total amount
                         LedgerEntry.objects.create(
                             transaction=transaction,
-                            account=transaction.account,
-                            debit=amount_decimal,
-                            credit=Decimal('0.00')
-                        )
-                        if offset_account:
-                            LedgerEntry.objects.create(
-                                transaction=transaction,
-                                account=offset_account,
-                                debit=Decimal('0.00'),
-                                credit=amount_decimal
-                            )
-                    else:
-                        # Credit the user-selected account, debit the offset account
-                        LedgerEntry.objects.create(
-                            transaction=transaction,
-                            account=transaction.account,
+                            account=offset_account,
                             debit=Decimal('0.00'),
                             credit=amount_decimal
                         )
-                        if offset_account:
-                            LedgerEntry.objects.create(
-                                transaction=transaction,
-                                account=offset_account,
-                                debit=amount_decimal,
-                                credit=Decimal('0.00')
-                            )
+                else:
+                    # Credit the user-selected account for the total amount
+                    LedgerEntry.objects.create(
+                        transaction=transaction,
+                        account=transaction.account,
+                        debit=Decimal('0.00'),
+                        credit=amount_decimal
+                    )
+                    if offset_account:
+                        # Debit the offset account for the same total amount
+                        LedgerEntry.objects.create(
+                            transaction=transaction,
+                            account=offset_account,
+                            debit=amount_decimal,
+                            credit=Decimal('0.00')
+                        )
             else:
                 logger.debug("Branch: No crop association - creating entries without field_year_crop")
                 # No crop association - create ledger entry without field_year_crop

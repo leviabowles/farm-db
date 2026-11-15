@@ -103,6 +103,13 @@ const SimpleTransactionForm = () => {
   // Submit transaction
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (loading) {
+      console.log('Already submitting, ignoring duplicate submission');
+      return;
+    }
+    
     setLoading(true);
     setError(null);
 
