@@ -164,24 +164,15 @@ class TxSerializer(serializers.ModelSerializer):
             
             if annual_crops:
                 logger.debug(f"Branch: annual_crops=True, creating entries for {len(annual_crops)} crops")
-                # For dual-entry bookkeeping, create entries for both accounts
-                # Use the selected annual crops for ledger entries
                 for annual_crop in annual_crops:
-                    # Create TransactionLineItem for the user-selected account
+                    # Create TransactionLineItem - ONE per crop for the user-selected account
+                    # (TransactionLineItems are NOT dual entry - they just show which account/crop has the amount)
                     TransactionLineItem.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         field_year_crop=annual_crop,
                         amount=amount_decimal
                     )
-                    # Create TransactionLineItem for the offset account
-                    if offset_account:
-                        TransactionLineItem.objects.create(
-                            transaction=transaction,
-                            account=offset_account,
-                            field_year_crop=annual_crop,
-                            amount=amount_decimal
-                        )
                     # Create BOTH LedgerEntry records for dual-entry bookkeeping
                     if transaction.trans_type == 'debit':
                         # Debit the user-selected account, credit the offset account
@@ -221,21 +212,13 @@ class TxSerializer(serializers.ModelSerializer):
                         year_key=year_key,
                         crop=crop
                     )
-                    # Create TransactionLineItem for the user-selected account
+                    # Create TransactionLineItem - ONE per crop for the user-selected account
                     TransactionLineItem.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         field_year_crop=annual_crop,
                         amount=amount_decimal
                     )
-                    # Create TransactionLineItem for the offset account
-                    if offset_account:
-                        TransactionLineItem.objects.create(
-                            transaction=transaction,
-                            account=offset_account,
-                            field_year_crop=annual_crop,
-                            amount=amount_decimal
-                        )
                     # Create BOTH LedgerEntry records for dual-entry bookkeeping
                     if transaction.trans_type == 'debit':
                         # Debit the user-selected account, credit the offset account
@@ -270,21 +253,14 @@ class TxSerializer(serializers.ModelSerializer):
             else:
                 logger.debug("Branch: No crop association - creating entries without field_year_crop")
                 # No crop association - create ledger entry without field_year_crop
-                # Create TransactionLineItem for the user-selected account
+                # Create TransactionLineItem - ONE for the user-selected account
+                # (TransactionLineItems are NOT dual entry - they just show which account has the amount)
                 TransactionLineItem.objects.create(
                     transaction=transaction,
                     account=transaction.account,
                     field_year_crop=None,
                     amount=amount_decimal
                 )
-                # Create TransactionLineItem for the offset account
-                if offset_account:
-                    TransactionLineItem.objects.create(
-                        transaction=transaction,
-                        account=offset_account,
-                        field_year_crop=None,
-                        amount=amount_decimal
-                    )
                 # Create BOTH LedgerEntry records for dual-entry bookkeeping
                 if transaction.trans_type == 'debit':
                     # Debit the user-selected account, credit the offset account
