@@ -97,6 +97,11 @@ class ListTxAPIView(ListCreateAPIView):
         if paid_date_gte:
             queryset = queryset.filter(paid_date__gte=paid_date_gte)
 
+        # Debug: log min_amount query param
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.debug(f"min_amount query param: {min_amount}")
+
         # Filter out transactions with absolute value under min_amount (default $10, configurable via query param)
         if min_amount:
             try:
