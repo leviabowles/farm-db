@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.db import models
 from django.utils import timezone
+import logging
 # Create your views here.
 from .models import Transaction, Field, AnnualCrop, Farm, Account, Vendor, TransactionObject, Crop, FarmNote
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -15,6 +16,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .serializers import TxSerializer
 from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer, AccountSerializer, VendorSerializer, TransactionObjectSerializer, CropSerializer, FarmNoteSerializer
+
+logger = logging.getLogger(__name__)
 
 def index(request):
     num_tx = Transaction.objects.all().count()
@@ -69,6 +72,10 @@ class ListTxAPIView(ListCreateAPIView):
         paid_date_gte = self.request.query_params.get('paid_date__gte')
         min_amount = self.request.query_params.get('min_amount')
 
+        logger.debug(f"=== ListTxAPIView.get_queryset() ===")
+        logger.debug(f"paid_date__gte: {paid_date_gte}")
+        logger.debug(f"min_amount: {min_amount}")
+
         if field_year_crop_id:
             # Use the M2M field 'annual_crops' to filter by AnnualCrop ID
             queryset = queryset.filter(annual_crops__id=field_year_crop_id)
@@ -96,11 +103,6 @@ class ListTxAPIView(ListCreateAPIView):
         # (frontend provides the date filter)
         if paid_date_gte:
             queryset = queryset.filter(paid_date__gte=paid_date_gte)
-
-        # Debug: log min_amount query param
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.debug(f"min_amount query param: {min_amount}")
 
         # Filter out transactions with absolute value under min_amount (default $10, configurable via query param)
         if min_amount:
