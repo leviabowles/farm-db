@@ -35,6 +35,8 @@ class TxSerializer(serializers.ModelSerializer):
     doc_file = serializers.FileField(required=False, allow_null=True, write_only=True)
     transaction_object_name = serializers.CharField(source='transaction_object.object_name', read_only=True)
     field_name = serializers.CharField(source='field.field_name', read_only=True)
+    vendor_name = serializers.CharField(source='vendor.vendor_name', read_only=True)
+    account_name = serializers.CharField(source='account.name', read_only=True)
     vendor = serializers.PrimaryKeyRelatedField(queryset=Vendor.objects.all(), required=False, allow_null=True)
     account = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all(), required=False, allow_null=True)
     transaction_object = serializers.PrimaryKeyRelatedField(queryset=TransactionObject.objects.all(), required=False, allow_null=True)
@@ -78,6 +80,7 @@ class TxSerializer(serializers.ModelSerializer):
             'transaction_object', 'account', 'vendor', 'invoice_date', 'paid_date',
             'memo', 'create_date', 'update_date',
             'annual_crops', 'doc_file', 'transaction_object_name', 'field_name',
+            'vendor_name', 'account_name',
             'line_items', 'amount', 'crop_ids', 'annual_crop_ids'
         ]
         read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops']

@@ -49,9 +49,9 @@ const TransactionList = () => {
         
         return {
           ...tx,
-          field_name: tx.field?.field_name || tx.field || 'Unknown Field',
-          account_name: tx.account?.name || '-',
-          vendor_name: tx.vendor?.vendor_name || '-',
+          field_name: tx.field_name || 'Unknown Field',
+          account_name: tx.account_name || '-',
+          vendor_name: tx.vendor_name || '-',
           amount: totalAmount
         };
       });
