@@ -7,6 +7,7 @@ from django.views import View
 from django.db import models
 from django.utils import timezone
 import logging
+from decimal import Decimal
 # Create your views here.
 from .models import Transaction, Field, AnnualCrop, Farm, Account, Vendor, TransactionObject, Crop, FarmNote
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -109,7 +110,7 @@ class ListTxAPIView(ListCreateAPIView):
             try:
                 min_amount_val = Decimal(min_amount)
                 from django.db.models import Sum, F, Q
-                from farms.models import TransactionLineItem
+                from .models import TransactionLineItem
                 logger.debug(f"min_amount_val: {min_amount_val}")
                 # Get transaction IDs with absolute total line items >= min_amount
                 tx_ids = TransactionLineItem.objects.values('transaction_id').annotate(
