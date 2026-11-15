@@ -68,7 +68,8 @@ class ListTxAPIView(ListCreateAPIView):
         year_key_raw = self.request.query_params.get('year_key')
 
         if field_year_crop_id:
-            queryset = queryset.filter(field_year_crop__id=field_year_crop_id)
+            # Use the M2M field 'annual_crops' to filter by AnnualCrop ID
+            queryset = queryset.filter(annual_crops__id=field_year_crop_id)
 
         if year_key_raw:
             if year_key_raw.lower() == 'current':
@@ -85,8 +86,8 @@ class ListTxAPIView(ListCreateAPIView):
                 models.Q(year_key=year_str) |
                 models.Q(paid_date__year=year_val) |
                 models.Q(invoice_date__year=year_val) |
-                models.Q(field_year_crop__year_key=year_val) |
-                models.Q(field_year_crop__year_key=year_str)
+                models.Q(annual_crops__year_key=year_val) |
+                models.Q(annual_crops__year_key=year_str)
             ).distinct()
 
         return queryset
@@ -98,8 +99,6 @@ class TransactionDetailAPIView(RetrieveUpdateDestroyAPIView):
     """
     queryset = Transaction.objects.all()
     serializer_class = TxSerializer
-# Import the newly created serializers
-from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer, VendorSerializer, TransactionObjectSerializer
 
 # API for listing/creating Fields
 @method_decorator(csrf_exempt, name='dispatch')
