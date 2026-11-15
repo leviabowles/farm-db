@@ -66,6 +66,8 @@ class ListTxAPIView(ListCreateAPIView):
         queryset = Transaction.objects.all()
         field_year_crop_id = self.request.query_params.get('field_year_crop')
         year_key_raw = self.request.query_params.get('year_key')
+        paid_date_gte = self.request.query_params.get('paid_date__gte')
+        min_amount = self.request.query_params.get('min_amount')
 
         if field_year_crop_id:
             # Use the M2M field 'annual_crops' to filter by AnnualCrop ID
@@ -89,6 +91,25 @@ class ListTxAPIView(ListCreateAPIView):
                 models.Q(annual_crops__year_key=year_val) |
                 models.Q(annual_crops__year_key=year_str)
             ).distinct()
+
+        # Filter to transactions in last 2 years if no date filter provided
+        # (frontend provides the date filter)
+        if paid_date_gte:
+            queryset = queryset.filter(paid_date__gte=paid_date_gte)
+
+        # Filter out transactions with absolute value under $1
+        if min_amount:
+            try:
+                min_amount_val = Decimal(min_amount)
+                from django.db.models import Sum
+                from farms.models import TransactionLineItem
+                # Get transaction IDs with total line items >= min_amount
+                tx_ids = TransactionLineItem.objects.values('transaction_id').annotate(
+                    total=Sum('amount')
+                ).filter(total__gte=min_amount_val).values_list('transaction_id', flat=True)
+                queryset = queryset.filter(id__in=list(tx_ids))
+            except Exception:
+                pass  # Return all if min_amount is invalid
 
         return queryset
 

@@ -36,7 +36,8 @@ const TransactionList = () => {
       twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
       const isoDate = twoYearsAgo.toISOString().split('T')[0];
       
-      const response = await api.get(`/api/transactions/?paid_date__gte=${isoDate}&ordering=-paid_date`);
+      // min_amount=1 filters out transactions with absolute value under $1
+      const response = await api.get(`/api/transactions/?paid_date__gte=${isoDate}&min_amount=1&ordering=-paid_date`);
       const txList = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
       // Map through transactions to enhance with related data
