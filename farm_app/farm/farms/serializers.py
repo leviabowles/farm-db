@@ -146,8 +146,6 @@ class TxSerializer(serializers.ModelSerializer):
             from decimal import Decimal
             amount_decimal = Decimal(str(amount))
             logger.debug(f"Creating ledger entries: amount_decimal={amount_decimal}, trans_type={transaction.trans_type}")
-        else:
-            logger.debug(f"SKIPPING ledger entry creation: amount={amount}, transaction.account={transaction.account}")
             
             if annual_crops:
                 logger.debug(f"Branch: annual_crops=True, creating entries for {len(annual_crops)} crops")
@@ -230,6 +228,8 @@ class TxSerializer(serializers.ModelSerializer):
                         debit=Decimal('0.00'),
                         credit=amount_decimal
                     )
+        else:
+            logger.debug(f"SKIPPING ledger entry creation: amount={amount}, transaction.account={transaction.account}")
         
         return transaction
 
