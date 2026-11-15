@@ -41,8 +41,12 @@ class TxSerializer(serializers.ModelSerializer):
     paid_date = SafeDateField(required=False, allow_null=True)
     invoice_date = SafeDateField(required=False, allow_null=True)
     
-    # Handle frontend's transaction_type field (mapped to trans_type)
+    # Handle frontend's transaction_type field (mapped to trans_type during write)
+    # This field is write_only so it won't appear in GET responses
     transaction_type = serializers.CharField(required=False, write_only=True)
+    
+    # Expose trans_type for read operations (the actual model field)
+    trans_type = serializers.CharField(required=False, allow_null=True)
     
     # Line items for reading (read-only representation)
     line_items = TransactionLineItemSerializer(many=True, read_only=True)
