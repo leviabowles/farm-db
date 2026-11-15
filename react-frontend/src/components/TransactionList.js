@@ -31,15 +31,30 @@ const TransactionList = () => {
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/transactions/');
+      // Filter to transactions in last 2 years, sorted by most recent first
+      const twoYearsAgo = new Date();
+      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+      const isoDate = twoYearsAgo.toISOString().split('T')[0];
+      
+      const response = await api.get(`/api/transactions/?paid_date__gte=${isoDate}&ordering=-paid_date`);
       const txList = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
-      // Map through transactions - use empty map since accounts not available here
-      const enhancedTransactions = txList.map(tx => ({
-        ...tx,
-        field_name: tx.field?.field_name || tx.field || 'Unknown Field',
-        account_name: tx.account || '-'
-      }));
+      // Map through transactions to enhance with related data
+      const enhancedTransactions = txList.map(tx => {
+        // Calculate total amount from line_items if not in serializer response
+        let totalAmount = tx.amount;
+        if (!totalAmount && tx.line_items && tx.line_items.length > 0) {
+          totalAmount = tx.line_items.reduce((sum, item) => sum + (item.amount || 0), 0);
+        }
+        
+        return {
+          ...tx,
+          field_name: tx.field?.field_name || tx.field || 'Unknown Field',
+          account_name: tx.account?.name || '-',
+          vendor_name: tx.vendor?.vendor_name || '-',
+          amount: totalAmount
+        };
+      });
 
       setTransactions(enhancedTransactions);
       setError(null);
@@ -101,54 +116,34 @@ const TransactionList = () => {
         <Table aria-label="transaction table">
           <TableHead>
             <TableRow>
-              <TableCell>Field</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Account</TableCell>
-              <TableCell>Memo</TableCell>
               <TableCell>Vendor</TableCell>
-              <TableCell>Payment Date</TableCell>
+              <TableCell>Account</TableCell>
+              <TableCell>Amount</TableCell>
+              <TableCell>Date</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {transactions.map((transaction) => {
-              // Determine if this is debit (money out) or credit (money in)
-              const isDebit = transaction.transaction_type === 'debit';
-
-              return (
-                <TableRow key={transaction.id} hover>
-                  <TableCell>{transaction.field_name}</TableCell>
-                  <TableCell>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      fontSize: '0.85rem',
-                      fontWeight: 500,
-                      backgroundColor: isDebit ? '#ffebee' : '#e8f5e9',
-                      color: isDebit ? '#c62828' : '#2e7d32'
-                    }}>
-                      {isDebit ? '💸 Debit' : '💰 Credit'}
-                    </span>
-                  </TableCell>
-                  <TableCell>{transaction.account_name}</TableCell>
-                  <TableCell>{transaction.memo || '-'}</TableCell>
-                  <TableCell>{transaction.vendor?.vendor_name || '-'}</TableCell>
-                  <TableCell>{new Date(transaction.paid_date).toLocaleDateString()}</TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Edit Transaction">
-                      <IconButton onClick={() => handleEdit(transaction.id)} color="primary">
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete Transaction">
-                      <IconButton onClick={() => handleDelete(transaction.id)} color="error">
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {transactions.map((transaction) => (
+              <TableRow key={transaction.id} hover>
+                <TableCell>{transaction.vendor_name}</TableCell>
+                <TableCell>{transaction.account_name}</TableCell>
+                <TableCell>{typeof transaction.amount === 'number' ? `$${transaction.amount.toFixed(2)}` : transaction.amount}</TableCell>
+                <TableCell>{transaction.paid_date ? new Date(transaction.paid_date).toLocaleDateString() : '-'}</TableCell>
+                <TableCell align="right">
+                  <Tooltip title="Edit Transaction">
+                    <IconButton onClick={() => handleEdit(transaction.id)} color="primary">
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Delete Transaction">
+                    <IconButton onClick={() => handleDelete(transaction.id)} color="error">
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
