@@ -147,32 +147,66 @@ class TxSerializer(serializers.ModelSerializer):
             amount_decimal = Decimal(str(amount))
             logger.debug(f"Creating ledger entries: amount_decimal={amount_decimal}, trans_type={transaction.trans_type}")
             
+            # Get a default offset account (first account by ID)
+            # In real double-entry bookkeeping, this would be a specific account like "Cash" or "Bank"
+            # For now, we'll use the first account available
+            offset_account = Account.objects.first()
+            if not offset_account:
+                logger.warning("No offset account found in database!")
+            else:
+                logger.debug(f"Using offset account: {offset_account.name} (ID: {offset_account.id})")
+            
             if annual_crops:
                 logger.debug(f"Branch: annual_crops=True, creating entries for {len(annual_crops)} crops")
+                # For dual-entry bookkeeping, create entries for both accounts
                 # Use the selected annual crops for ledger entries
                 for annual_crop in annual_crops:
-                    # Create TransactionLineItem
+                    # Create TransactionLineItem for the user-selected account
                     TransactionLineItem.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         field_year_crop=annual_crop,
                         amount=amount_decimal
                     )
-                    # Create LedgerEntry
+                    # Create TransactionLineItem for the offset account
+                    if offset_account:
+                        TransactionLineItem.objects.create(
+                            transaction=transaction,
+                            account=offset_account,
+                            field_year_crop=annual_crop,
+                            amount=amount_decimal
+                        )
+                    # Create BOTH LedgerEntry records for dual-entry bookkeeping
                     if transaction.trans_type == 'debit':
+                        # Debit the user-selected account, credit the offset account
                         LedgerEntry.objects.create(
                             transaction=transaction,
                             account=transaction.account,
                             debit=amount_decimal,
                             credit=Decimal('0.00')
                         )
+                        if offset_account:
+                            LedgerEntry.objects.create(
+                                transaction=transaction,
+                                account=offset_account,
+                                debit=Decimal('0.00'),
+                                credit=amount_decimal
+                            )
                     else:
+                        # Credit the user-selected account, debit the offset account
                         LedgerEntry.objects.create(
                             transaction=transaction,
                             account=transaction.account,
                             debit=Decimal('0.00'),
                             credit=amount_decimal
                         )
+                        if offset_account:
+                            LedgerEntry.objects.create(
+                                transaction=transaction,
+                                account=offset_account,
+                                debit=amount_decimal,
+                                credit=Decimal('0.00')
+                            )
             elif field and year_key and crops:
                 logger.debug(f"Branch: field+year_key+crops=True, creating entries for {len(crops)} crops")
                 for crop in crops:
@@ -181,53 +215,101 @@ class TxSerializer(serializers.ModelSerializer):
                         year_key=year_key,
                         crop=crop
                     )
-                    # Create TransactionLineItem
+                    # Create TransactionLineItem for the user-selected account
                     TransactionLineItem.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         field_year_crop=annual_crop,
                         amount=amount_decimal
                     )
-                    # Create LedgerEntry
+                    # Create TransactionLineItem for the offset account
+                    if offset_account:
+                        TransactionLineItem.objects.create(
+                            transaction=transaction,
+                            account=offset_account,
+                            field_year_crop=annual_crop,
+                            amount=amount_decimal
+                        )
+                    # Create BOTH LedgerEntry records for dual-entry bookkeeping
                     if transaction.trans_type == 'debit':
+                        # Debit the user-selected account, credit the offset account
                         LedgerEntry.objects.create(
                             transaction=transaction,
                             account=transaction.account,
                             debit=amount_decimal,
                             credit=Decimal('0.00')
                         )
+                        if offset_account:
+                            LedgerEntry.objects.create(
+                                transaction=transaction,
+                                account=offset_account,
+                                debit=Decimal('0.00'),
+                                credit=amount_decimal
+                            )
                     else:
+                        # Credit the user-selected account, debit the offset account
                         LedgerEntry.objects.create(
                             transaction=transaction,
                             account=transaction.account,
                             debit=Decimal('0.00'),
                             credit=amount_decimal
                         )
+                        if offset_account:
+                            LedgerEntry.objects.create(
+                                transaction=transaction,
+                                account=offset_account,
+                                debit=amount_decimal,
+                                credit=Decimal('0.00')
+                            )
             else:
                 logger.debug("Branch: No crop association - creating entries without field_year_crop")
                 # No crop association - create ledger entry without field_year_crop
-                # Create TransactionLineItem
+                # Create TransactionLineItem for the user-selected account
                 TransactionLineItem.objects.create(
                     transaction=transaction,
                     account=transaction.account,
                     field_year_crop=None,
                     amount=amount_decimal
                 )
-                # Create LedgerEntry
+                # Create TransactionLineItem for the offset account
+                if offset_account:
+                    TransactionLineItem.objects.create(
+                        transaction=transaction,
+                        account=offset_account,
+                        field_year_crop=None,
+                        amount=amount_decimal
+                    )
+                # Create BOTH LedgerEntry records for dual-entry bookkeeping
                 if transaction.trans_type == 'debit':
+                    # Debit the user-selected account, credit the offset account
                     LedgerEntry.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         debit=amount_decimal,
                         credit=Decimal('0.00')
                     )
+                    if offset_account:
+                        LedgerEntry.objects.create(
+                            transaction=transaction,
+                            account=offset_account,
+                            debit=Decimal('0.00'),
+                            credit=amount_decimal
+                        )
                 else:
+                    # Credit the user-selected account, debit the offset account
                     LedgerEntry.objects.create(
                         transaction=transaction,
                         account=transaction.account,
                         debit=Decimal('0.00'),
                         credit=amount_decimal
                     )
+                    if offset_account:
+                        LedgerEntry.objects.create(
+                            transaction=transaction,
+                            account=offset_account,
+                            debit=amount_decimal,
+                            credit=Decimal('0.00')
+                        )
         else:
             logger.debug(f"SKIPPING ledger entry creation: amount={amount}, transaction.account={transaction.account}")
         
