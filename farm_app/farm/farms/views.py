@@ -111,6 +111,14 @@ class ListTxAPIView(ListCreateAPIView):
             except Exception:
                 pass  # Return all if min_amount is invalid
 
+        # Apply ordering - default to most recent first by paid_date, then by id
+        ordering = self.request.query_params.get('ordering', '-paid_date,-id')
+        if ordering:
+            # Only accept valid ordering fields to prevent injection
+            allowed_fields = ['paid_date', 'invoice_date', 'create_date', 'id', '-paid_date', '-invoice_date', '-create_date', '-id']
+            if ordering in allowed_fields:
+                queryset = queryset.order_by(ordering)
+
         return queryset
 
 @method_decorator(csrf_exempt, name='dispatch')
