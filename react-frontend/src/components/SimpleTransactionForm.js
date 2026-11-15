@@ -108,17 +108,21 @@ const SimpleTransactionForm = () => {
 
     try {
       // Prepare data with all required fields including amount and account
+      // Convert empty strings to null for optional fields
+      // Also convert strings to proper types (integers for IDs, floats for amounts)
       const payload = {
         memo: formData.memo,
-        field: formData.field,
+        field: formData.field ? parseInt(formData.field, 10) : null,
         year_key: formData.year_key,
         trans_type: formData.trans_type,
-        vendor: formData.vendor,
-        account: formData.account,
-        invoice_date: formData.invoice_date,
-        paid_date: formData.paid_date,
-        amount: formData.amount,
-        annual_crop_ids: formData.crops || []
+        vendor: formData.vendor ? parseInt(formData.vendor, 10) : null,
+        account: formData.account ? parseInt(formData.account, 10) : null,
+        invoice_date: formData.invoice_date || null,
+        paid_date: formData.paid_date || null,
+        amount: formData.amount && parseFloat(formData.amount) > 0 ? parseFloat(formData.amount) : null,
+        annual_crop_ids: formData.crops && formData.crops.length > 0 
+          ? formData.crops.map(id => parseInt(id, 10)) 
+          : []
       };
 
       // Use multipart/form-data if file is present

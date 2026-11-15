@@ -103,6 +103,15 @@ class TxSerializer(serializers.ModelSerializer):
         # Create the transaction
         transaction = Transaction.objects.create(**validated_data)
         
+        # Debug logging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.debug(f"Transaction created: id={transaction.id}, account_id={transaction.account_id}, trans_type={transaction.trans_type}")
+        logger.debug(f"Ledger entry creation check: amount={amount}, amount type={type(amount)}, transaction.account={transaction.account}")
+        logger.debug(f"Annual crops: {annual_crops}, field={field}, year_key={year_key}, crops={crops}")
+        logger.debug(f"Validated data keys after pops: {list(validated_data.keys())}")
+        logger.debug(f"trans_type in validated_data: {validated_data.get('trans_type')}")
+        
         # Use annual_crop_ids if provided (selected from existing)
         if annual_crops:
             for annual_crop in annual_crops:
@@ -125,9 +134,12 @@ class TxSerializer(serializers.ModelSerializer):
                 )
         
         # If amount is provided, create ledger entries (both LineItem and LedgerEntry)
-        if amount and transaction.account:
+        logger.debug(f"Checking ledger entry condition: amount={amount}, transaction.account={transaction.account}, transaction.account_id={transaction.account_id}")
+        
+        if amount is not None and transaction.account:
             from decimal import Decimal
             amount_decimal = Decimal(str(amount))
+            logger.debug(f"Creating ledger entries: amount_decimal={amount_decimal}, trans_type={transaction.trans_type}")
             
             if annual_crops:
                 # Use the selected annual crops for ledger entries
