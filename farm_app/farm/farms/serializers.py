@@ -103,14 +103,18 @@ class TxSerializer(serializers.ModelSerializer):
         # Create the transaction
         transaction = Transaction.objects.create(**validated_data)
         
-        # Debug logging
+        # Debug logging - show what was in validated_data before creating transaction
         import logging
         logger = logging.getLogger(__name__)
+        logger.debug(f"Before transaction creation, validated_data keys: {list(validated_data.keys())}")
+        logger.debug(f"account in validated_data: {'account' in validated_data}, value: {validated_data.get('account')}")
+        
+        # Create the transaction
+        transaction = Transaction.objects.create(**validated_data)
+        
+        # Debug logging after transaction creation
         logger.debug(f"Transaction created: id={transaction.id}, account_id={transaction.account_id}, trans_type={transaction.trans_type}")
-        logger.debug(f"Ledger entry creation check: amount={amount}, amount type={type(amount)}, transaction.account={transaction.account}")
-        logger.debug(f"Annual crops: {annual_crops}, field={field}, year_key={year_key}, crops={crops}")
-        logger.debug(f"Validated data keys after pops: {list(validated_data.keys())}")
-        logger.debug(f"trans_type in validated_data: {validated_data.get('trans_type')}")
+        logger.debug(f"Ledger entry condition check: amount={amount}, transaction.account={transaction.account}")
         
         # Use annual_crop_ids if provided (selected from existing)
         if annual_crops:
@@ -133,6 +137,8 @@ class TxSerializer(serializers.ModelSerializer):
                     annual_crop=annual_crop
                 )
         
+        logger.debug(f"Annual crops after processing: {annual_crops}, field={field}, year_key={year_key}, crops={crops}")
+        
         # If amount is provided, create ledger entries (both LineItem and LedgerEntry)
         logger.debug(f"Checking ledger entry condition: amount={amount}, transaction.account={transaction.account}, transaction.account_id={transaction.account_id}")
         
@@ -142,6 +148,7 @@ class TxSerializer(serializers.ModelSerializer):
             logger.debug(f"Creating ledger entries: amount_decimal={amount_decimal}, trans_type={transaction.trans_type}")
             
             if annual_crops:
+                logger.debug(f"Branch: annual_crops=True, creating entries for {len(annual_crops)} crops")
                 # Use the selected annual crops for ledger entries
                 for annual_crop in annual_crops:
                     # Create TransactionLineItem
@@ -167,6 +174,7 @@ class TxSerializer(serializers.ModelSerializer):
                             credit=amount_decimal
                         )
             elif field and year_key and crops:
+                logger.debug(f"Branch: field+year_key+crops=True, creating entries for {len(crops)} crops")
                 for crop in crops:
                     annual_crop, created = AnnualCrop.objects.get_or_create(
                         field=field,
@@ -196,6 +204,7 @@ class TxSerializer(serializers.ModelSerializer):
                             credit=amount_decimal
                         )
             else:
+                logger.debug("Branch: No crop association - creating entries without field_year_crop")
                 # No crop association - create ledger entry without field_year_crop
                 # Create TransactionLineItem
                 TransactionLineItem.objects.create(
@@ -219,6 +228,8 @@ class TxSerializer(serializers.ModelSerializer):
                         debit=Decimal('0.00'),
                         credit=amount_decimal
                     )
+        else:
+            logger.debug(f"SKIPPING ledger entry creation: amount={amount}, transaction.account={transaction.account}")
         
         return transaction
 
