@@ -108,12 +108,16 @@ class ListTxAPIView(ListCreateAPIView):
                 min_amount_val = Decimal(min_amount)
                 from django.db.models import Sum, F, Q
                 from farms.models import TransactionLineItem
+                logger.debug(f"min_amount_val: {min_amount_val}")
                 # Get transaction IDs with absolute total line items >= min_amount
                 tx_ids = TransactionLineItem.objects.values('transaction_id').annotate(
                     total=Sum('amount')
                 ).filter(Q(total__gte=min_amount_val) | Q(total__lte=-min_amount_val)).values_list('transaction_id', flat=True)
+                logger.debug(f"tx_ids with min_amount filter: {list(tx_ids)}")
                 queryset = queryset.filter(id__in=list(tx_ids))
-            except Exception:
+                logger.debug(f"queryset count after min_amount filter: {queryset.count()}")
+            except Exception as e:
+                logger.error(f"Error in min_amount filter: {e}")
                 pass  # Return all if min_amount is invalid
 
         # Apply ordering - default to most recent first by paid_date, then by id
