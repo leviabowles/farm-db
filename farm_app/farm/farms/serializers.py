@@ -51,8 +51,8 @@ class TxSerializer(serializers.ModelSerializer):
     # Line items for reading (read-only representation)
     line_items = TransactionLineItemSerializer(many=True, read_only=True)
     
-    # Amount inputs for easier entry (written to line items)
-    amount = serializers.DecimalField(max_digits=15, decimal_places=2, required=False, allow_null=True, write_only=True)
+    # Get total amount from line_items for display
+    amount = serializers.SerializerMethodField()
     
     # Crop fields for easier frontend input - supports both crop_ids and annual_crop_ids
     year_key = serializers.IntegerField(required=False, allow_null=True)
@@ -81,6 +81,14 @@ class TxSerializer(serializers.ModelSerializer):
             'line_items', 'amount', 'crop_ids', 'annual_crop_ids'
         ]
         read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops']
+
+    def get_amount(self, obj):
+        """Calculate total amount from line items for display."""
+        line_items = getattr(obj, 'line_items', None)
+        if line_items:
+            total = sum(item.amount for item in line_items.all())
+            return float(total) if total else None
+        return None
 
     def create(self, validated_data):
         """Override create to automate ledger entry creation and handle crops."""
