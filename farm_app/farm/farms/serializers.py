@@ -100,6 +100,12 @@ class TxSerializer(serializers.ModelSerializer):
         field = validated_data.pop('field', None)
         year_key = validated_data.pop('year_key', None)
         
+        # Add field and year_key back to validated_data for transaction creation
+        if field is not None:
+            validated_data['field'] = field
+        if year_key is not None:
+            validated_data['year_key'] = year_key
+        
         # Create the transaction
         transaction = Transaction.objects.create(**validated_data)
         
