@@ -97,16 +97,16 @@ class ListTxAPIView(ListCreateAPIView):
         if paid_date_gte:
             queryset = queryset.filter(paid_date__gte=paid_date_gte)
 
-        # Filter out transactions with absolute value under $1
+        # Filter out transactions with absolute value under min_amount (default $10, configurable via query param)
         if min_amount:
             try:
                 min_amount_val = Decimal(min_amount)
-                from django.db.models import Sum
+                from django.db.models import Sum, F, Q
                 from farms.models import TransactionLineItem
-                # Get transaction IDs with total line items >= min_amount
+                # Get transaction IDs with absolute total line items >= min_amount
                 tx_ids = TransactionLineItem.objects.values('transaction_id').annotate(
                     total=Sum('amount')
-                ).filter(total__gte=min_amount_val).values_list('transaction_id', flat=True)
+                ).filter(Q(total__gte=min_amount_val) | Q(total__lte=-min_amount_val)).values_list('transaction_id', flat=True)
                 queryset = queryset.filter(id__in=list(tx_ids))
             except Exception:
                 pass  # Return all if min_amount is invalid
