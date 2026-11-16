@@ -30,7 +30,7 @@ const FieldYearCropList = () => {
     const fetchFieldYearCrops = async () => {
       try {
         console.log('Fetching field year crops from API...');
-        const response = await api.get('/api/fieldyearcrops/');
+        const response = await api.get('/api/annualcrops/');
         
         const fieldYearCropArray = Array.isArray(response.data) ? 
           response.data : (response.data.results || []);

@@ -29,7 +29,7 @@ const FieldYearCropDetail = () => {
     try {
       // Fetch both crop details and associated transactions in parallel
       const [cropRes, txRes] = await Promise.all([
-        api.get(`/api/fieldyearcrops/${id}/`),
+        api.get(`/api/annualcrops/${id}/`),
         api.get(`/api/transactions/?field_year_crop=${id}`)
       ]);
 
