@@ -47,11 +47,6 @@ const ExpenditureWaterfall = () => {
   useEffect(() => {
     const fetchExpenditures = async () => {
       try {
-        // Also wait for vendors to be loaded
-        if (Object.keys(vendors).length === 0) {
-          return;
-        }
-
         // Use 'current' keyword to let the server determine the YTD year
         const response = await api.get(`/api/transactions/?year_key=current`);
         const transactions = Array.isArray(response.data) ? response.data : (response.data.results || []);
@@ -74,6 +69,9 @@ const ExpenditureWaterfall = () => {
 
           // Determine if this is income or expense based on trans_type
           // 'credit' = income (received), 'debit' = expense (paid)
+          // Only process if amount is valid (not null/undefined/NaN)
+          if (isNaN(amount)) return;
+          
           if (tx.trans_type === 'credit' && amount > 0) {
             totalReceived += amount;
           } else if (tx.trans_type === 'debit' && amount > 0) {
