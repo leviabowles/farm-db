@@ -24,10 +24,34 @@ ChartJS.register(
 const ExpenditureWaterfall = () => {
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [vendors, setVendors] = useState({});
+
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const response = await api.get('/api/vendors/');
+        const vendorList = Array.isArray(response.data) ? response.data : (response.data.results || []);
+        const vendorMap = {};
+        vendorList.forEach(v => {
+          vendorMap[v.id] = v.vendor_name || `Vendor ${v.id}`;
+        });
+        setVendors(vendorMap);
+      } catch (err) {
+        console.error('Error fetching vendors:', err);
+      }
+    };
+
+    fetchVendors();
+  }, []);
 
   useEffect(() => {
     const fetchExpenditures = async () => {
       try {
+        // Also wait for vendors to be loaded
+        if (Object.keys(vendors).length === 0) {
+          return;
+        }
+
         // Use 'current' keyword to let the server determine the YTD year
         const response = await api.get(`/api/transactions/?year_key=current`);
         const transactions = Array.isArray(response.data) ? response.data : (response.data.results || []);
@@ -42,11 +66,10 @@ const ExpenditureWaterfall = () => {
           return paidYear === currentYear;
         });
 
-        const categoryTotals = {};
+        const expenseByVendor = {};
         let totalReceived = 0;
 
         currentYearTxs.forEach(tx => {
-          const category = tx.transaction_object_name || 'Other';
           const amount = parseFloat(tx.amount || 0);
 
           // Determine if this is income or expense based on trans_type
@@ -54,7 +77,12 @@ const ExpenditureWaterfall = () => {
           if (tx.trans_type === 'credit' && amount > 0) {
             totalReceived += amount;
           } else if (tx.trans_type === 'debit' && amount > 0) {
-            categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+            // Categorize by vendor if available, otherwise by account
+            const vendorName = tx.vendor && vendors[tx.vendor] ? vendors[tx.vendor] : 'No Vendor';
+            const accountName = tx.account_name || 'Unknown Account';
+            const category = `${vendorName} (${accountName})`;
+            
+            expenseByVendor[category] = (expenseByVendor[category] || 0) + amount;
           }
         });
 
@@ -67,8 +95,8 @@ const ExpenditureWaterfall = () => {
         
         let currentRunningTotal = totalReceived;
 
-        // MIDDLE: Each expense category drops the total
-        Object.entries(categoryTotals).forEach(([category, amount]) => {
+        // MIDDLE: Each expense category (by vendor) drops the total
+        Object.entries(expenseByVendor).forEach(([category, amount]) => {
           labels.push(category);
           const start = currentRunningTotal;
           currentRunningTotal -= amount;
