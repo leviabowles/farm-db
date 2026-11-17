@@ -47,17 +47,14 @@ const ExpenditureWaterfall = () => {
 
         currentYearTxs.forEach(tx => {
           const category = tx.transaction_object_name || 'Other';
-          const paid = parseFloat(tx.paid_amount || 0);
-          const received = parseFloat(tx.received_amount || 0);
+          const amount = parseFloat(tx.amount || 0);
 
-          // Sum up total income (received)
-          if (received > 0) {
-            totalReceived += received;
-          }
-
-          // Sum up expenditures by category
-          if (paid > 0) {
-            categoryTotals[category] = (categoryTotals[category] || 0) + paid;
+          // Determine if this is income or expense based on trans_type
+          // 'credit' = income (received), 'debit' = expense (paid)
+          if (tx.trans_type === 'credit' && amount > 0) {
+            totalReceived += amount;
+          } else if (tx.trans_type === 'debit' && amount > 0) {
+            categoryTotals[category] = (categoryTotals[category] || 0) + amount;
           }
         });
 
