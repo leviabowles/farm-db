@@ -11,7 +11,7 @@ from farms.models import Vendor
 from farms.models import Year
 from farms.models import LedgerEntry
 from farms.models import CapitalPayment
-from farms.models import Account, TransactionLineItem, TransactionAnnualCrop
+from farms.models import Account, TransactionLineItem, TransactionAnnualCrop, TransactionAttachment
 
 ## ADMIN CLASSES CUSTOM
 
@@ -66,6 +66,11 @@ class LedgerEntryInlineAdmin(admin.TabularInline):
     model = LedgerEntry
     extra = 1
 
+class TransactionAttachmentInlineAdmin(admin.TabularInline):
+    model = TransactionAttachment
+    extra = 1
+    readonly_fields = ('doc_file',)
+
 class AccountAdmin(admin.ModelAdmin):
     list_display = ('name', 'account_type', 'parent', 'create_date')
     list_filter = ('account_type', 'create_date')
@@ -73,7 +78,7 @@ class AccountAdmin(admin.ModelAdmin):
     ordering = ('account_type', 'name')
 
 class TransactionAdmin(admin.ModelAdmin):
-    inlines = [AnnualCropInlineAdmin, TransactionLineItemAdmin, LedgerEntryInlineAdmin]
+    inlines = [AnnualCropInlineAdmin, TransactionLineItemAdmin, LedgerEntryInlineAdmin, TransactionAttachmentInlineAdmin]
     list_display = ('field', 'create_date', 'year_key', 'trans_type', 'transaction_object', 'vendor')
     list_filter = ('field', 'year_key', 'transaction_object', 'vendor')
 

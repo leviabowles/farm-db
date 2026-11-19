@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction, Field, AnnualCrop, Crop, Account, TransactionLineItem, TransactionAnnualCrop, LedgerEntry
+from .models import Transaction, Field, AnnualCrop, Crop, Account, TransactionLineItem, TransactionAnnualCrop, LedgerEntry, TransactionAttachment
 from .models import Farm, Vendor, TransactionObject, FarmNote
 
 class SafeDateField(serializers.DateField):
@@ -72,6 +72,13 @@ class TxSerializer(serializers.ModelSerializer):
         write_only=True,
         source='annual_crops'
     )
+    
+    # Handle multiple file attachments
+    attachments = serializers.ListField(
+        child=serializers.FileField(),
+        required=False,
+        write_only=True
+    )
 
     class Meta:
         model = Transaction
@@ -81,9 +88,9 @@ class TxSerializer(serializers.ModelSerializer):
             'memo', 'create_date', 'update_date',
             'annual_crops', 'doc_file', 'transaction_object_name', 'field_name',
             'vendor_name', 'account_name',
-            'line_items', 'amount', 'crop_ids', 'annual_crop_ids'
+            'line_items', 'amount', 'crop_ids', 'annual_crop_ids', 'attachments'
         ]
-        read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops']
+        read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops', 'attachments']
 
     def get_amount(self, obj):
         """Calculate total amount from line items for display."""
@@ -94,7 +101,7 @@ class TxSerializer(serializers.ModelSerializer):
         return None
 
     def create(self, validated_data):
-        """Override create to automate ledger entry creation and handle crops."""
+        """Override create to automate ledger entry creation and handle crops and attachments."""
         # Extract amount if provided for ledger automation
         amount = validated_data.pop('amount', None)
         
@@ -105,6 +112,9 @@ class TxSerializer(serializers.ModelSerializer):
         
         # Handle annual_crop_ids (preferred - selects from existing AnnualCrop)
         annual_crops = validated_data.pop('annual_crops', [])
+        
+        # Handle attachments (multiple file uploads)
+        attachments = validated_data.pop('attachments', [])
         
         # Fallback: handle crop_ids (creates new AnnualCrop from crop + field + year)
         crops = validated_data.pop('crop_rel', [])
@@ -125,6 +135,16 @@ class TxSerializer(serializers.ModelSerializer):
         logger = logging.getLogger(__name__)
         logger.debug(f"Transaction created: id={transaction.id}, account_id={transaction.account_id}, trans_type={transaction.trans_type}")
         logger.debug(f"Ledger entry condition check: amount={amount}, transaction.account={transaction.account}")
+        
+        # Process attachments and create TransactionAttachment records
+        if attachments:
+            logger.debug(f"Processing {len(attachments)} attachment(s) for transaction {transaction.id}")
+            for attachment_file in attachments:
+                TransactionAttachment.objects.create(
+                    transaction=transaction,
+                    doc_file=attachment_file
+                )
+            logger.debug(f"Created {len(attachments)} attachment(s)")
         
         # Use annual_crop_ids if provided (selected from existing)
         if annual_crops:
