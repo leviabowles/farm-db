@@ -1,9 +1,12 @@
 FROM python:3.9-slim
 
 # Install system dependencies
+# Set DEBIAN_FRONTEND=noninteractive to prevent interactive prompts during tzdata installation
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     default-libmysqlclient-dev \
     build-essential \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
