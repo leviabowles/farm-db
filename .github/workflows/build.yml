@@ -28,6 +28,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+# Extract version from package.json
+      - name: Get version
+        id: version
+        working-directory: ./react-frontend
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Build and push Web image
         run: |
           docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:latest -f Dockerfile.web .
@@ -35,7 +43,7 @@ jobs:
 
       - name: Build and push Frontend image
         run: |
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest -f react-frontend/Dockerfile ./react-frontend
+          docker build --build-arg REACT_APP_VERSION=${{ steps.version.outputs.version }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest -f react-frontend/Dockerfile ./react-frontend
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:latest
 
       - name: Trigger deploy workflow
