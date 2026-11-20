@@ -75,7 +75,7 @@ const ExpenditureWaterfall = ({ fieldYearCropId }) => {
         let totalReceived = 0;
 
         currentYearTxs.forEach(tx => {
-          const amount = parseFloat(tx.amount || 0);
+          const amount = parseFloat(tx.display_amount || tx.amount || 0);
 
           // Determine if this is income or expense based on trans_type
           // 'credit' = income (received), 'debit' = expense (paid)
