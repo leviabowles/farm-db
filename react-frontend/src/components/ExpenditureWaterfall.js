@@ -50,17 +50,19 @@ const ExpenditureWaterfall = ({ fieldYearCropId }) => {
         // Build query params based on props
         const params = new URLSearchParams();
         if (fieldYearCropId) {
+          // Crop detail page: filter by crop only, no year filter
           params.append('field_year_crop', fieldYearCropId);
         } else {
-          // Original behavior: YTD for all transactions
+          // Dashboard: filter by current year
           params.append('year_key', 'current');
         }
         
         const response = await api.get(`/api/transactions/?${params.toString()}`);
         const transactions = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
-        // For field_year_crop filter, don't need to filter by year on client side
-        // since the API already handles it
+        // When fieldYearCropId is provided, API filters only by crop (no year filter)
+        // When not provided, API filters by current year (paid_date year)
+        // We double-check year filter on client side for dashboard to be safe
         const currentYearTxs = fieldYearCropId
           ? transactions
           : transactions.filter(tx => {
