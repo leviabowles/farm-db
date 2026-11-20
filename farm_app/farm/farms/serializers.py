@@ -53,8 +53,17 @@ class TxSerializer(serializers.ModelSerializer):
     # Line items for reading (read-only representation)
     line_items = TransactionLineItemSerializer(many=True, read_only=True)
     
-    # Get total amount from line_items for display
-    amount = serializers.SerializerMethodField()
+    # Amount field - write_only for creating transactions (uses account for ledger automation)
+    amount = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        required=False,
+        write_only=True,
+        allow_null=True
+    )
+    
+    # Get total amount from line_items for display (read-only)
+    display_amount = serializers.SerializerMethodField()
     
     # Crop fields for easier frontend input - supports both crop_ids and annual_crop_ids
     year_key = serializers.IntegerField(required=False, allow_null=True)
@@ -88,11 +97,11 @@ class TxSerializer(serializers.ModelSerializer):
             'memo', 'create_date', 'update_date',
             'annual_crops', 'doc_file', 'transaction_object_name', 'field_name',
             'vendor_name', 'account_name',
-            'line_items', 'amount', 'crop_ids', 'annual_crop_ids', 'attachments'
+            'line_items', 'amount', 'display_amount', 'crop_ids', 'annual_crop_ids', 'attachments'
         ]
-        read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops', 'attachments']
+        read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops', 'attachments', 'display_amount']
 
-    def get_amount(self, obj):
+    def get_display_amount(self, obj):
         """Calculate total amount from line items for display."""
         line_items = getattr(obj, 'line_items', None)
         if line_items:
