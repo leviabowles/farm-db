@@ -53,7 +53,9 @@ class TxSerializer(serializers.ModelSerializer):
     # Line items for reading (read-only representation)
     line_items = TransactionLineItemSerializer(many=True, read_only=True)
     
-    # Amount field - write_only for creating transactions (uses account for ledger automation)
+    # Amount field - write_only for creating transactions with ledger automation
+    # The actual amounts are stored in TransactionLineItem, but this field accepts
+    # a single amount value for simpler transaction creation with ledger automation
     amount = serializers.DecimalField(
         max_digits=10,
         decimal_places=2,
