@@ -6,6 +6,7 @@ import {
 
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import api from '../services/api';
+import ExpenditureWaterfall from './ExpenditureWaterfall';
 
 const DetailSection = ({ title, children }) => (
   <Box sx={{ mb: 4 }}>
@@ -182,6 +183,10 @@ const FieldYearCropDetail = () => {
           </DetailSection>
         </Grid>
       </Grid>
+
+      <Box sx={{ mt: 6 }}>
+        <ExpenditureWaterfall fieldYearCropId={id} />
+      </Box>
     </Box>
   );
 };

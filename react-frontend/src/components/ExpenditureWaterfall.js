@@ -21,7 +21,7 @@ ChartJS.register(
   Legend
 );
 
-const ExpenditureWaterfall = () => {
+const ExpenditureWaterfall = ({ fieldYearCropId }) => {
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [vendors, setVendors] = useState({});
@@ -47,19 +47,29 @@ const ExpenditureWaterfall = () => {
   useEffect(() => {
     const fetchExpenditures = async () => {
       try {
-        // Use 'current' keyword to let the server determine the YTD year
-        const response = await api.get(`/api/transactions/?year_key=current`);
+        // Build query params based on props
+        const params = new URLSearchParams();
+        if (fieldYearCropId) {
+          // Crop detail page: filter by crop only, no year filter
+          params.append('field_year_crop', fieldYearCropId);
+        } else {
+          // Dashboard: filter by current year
+          params.append('year_key', 'current');
+        }
+        
+        const response = await api.get(`/api/transactions/?${params.toString()}`);
         const transactions = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
-        const currentYear = new Date().getFullYear();
-        
-        // 1. Filter strictly by PAID DATE of current year on the client side
-        // (since the API might be broader)
-        const currentYearTxs = transactions.filter(tx => {
-          if (!tx.paid_date) return false;
-          const paidYear = new Date(tx.paid_date).getFullYear();
-          return paidYear === currentYear;
-        });
+        // When fieldYearCropId is provided, API filters only by crop (no year filter)
+        // When not provided, API filters by current year (paid_date year)
+        // We double-check year filter on client side for dashboard to be safe
+        const currentYearTxs = fieldYearCropId
+          ? transactions
+          : transactions.filter(tx => {
+              if (!tx.paid_date) return false;
+              const paidYear = new Date(tx.paid_date).getFullYear();
+              return paidYear === new Date().getFullYear();
+            });
 
         const expenseByVendor = {};
         let totalReceived = 0;
@@ -178,7 +188,9 @@ const ExpenditureWaterfall = () => {
           Net Balance: ${chartData.datasets[0].data[chartData.datasets[0].data.length - 1][1].toFixed(2)}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          Aggregated from all transactions for {new Date().getFullYear()}
+          {fieldYearCropId 
+            ? `Transactions for this crop` 
+            : `Aggregated from all transactions for ${new Date().getFullYear()}`}
         </Typography>
       </Box>
     </Paper>
