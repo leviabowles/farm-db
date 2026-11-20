@@ -4,6 +4,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# Extract version from package.json
+ARG REACT_APP_VERSION="0.1.0"
+ENV REACT_APP_VERSION=${REACT_APP_VERSION}
+
 # Build the React app for production
 RUN npm run build
 

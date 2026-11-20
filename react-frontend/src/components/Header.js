@@ -9,6 +9,8 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
+const VERSION = process.env.REACT_APP_VERSION || '0.1.0';
+
 /**
  * Header component styled with Material‑UI.
  * Keeps the original dark‑mode toggle logic but now uses an icon button
@@ -45,8 +47,11 @@ const Header = () => {
           <Link to="/fields" style={{ color: 'inherit', textDecoration: 'none' }}>Fields</Link>
         </Box>
 
-          {/* Right side – theme toggle and login */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {/* Right side – version, theme toggle and login */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="caption" sx={{ color: 'inherit', fontWeight: 'bold' }}>
+            v{VERSION}
+          </Typography>
           <IconButton edge="end" color="inherit" onClick={toggleTheme} aria-label="toggle theme">
             {dark ? <LightModeIcon /> : <DarkModeIcon />}
           </IconButton>
