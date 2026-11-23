@@ -1,9 +1,9 @@
 FROM python:3.10-slim
 
-# Install system dependencies including tzdata for timezone support
-# Set DEBIAN_FRONTEND=noninteractive to prevent interactive prompts during tzdata installation
+# Install system dependencies including tzdata and MariaDB client development libraries
+# Set DEBIAN_FRONTEND=noninteractive to prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y tzdata && echo "TZDATA INSTALLED SUCCESSFULLY"
+RUN apt-get update && apt-get install -y tzdata libmariadb-dev-compat libmariadb-dev python3-dev gcc && echo "SYSTEM DEPS INSTALLED SUCCESSFULLY"
 RUN ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
 # Set working directory
