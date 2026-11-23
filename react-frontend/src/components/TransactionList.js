@@ -129,7 +129,7 @@ const TransactionList = () => {
               <TableRow key={transaction.id} hover>
                 <TableCell>{transaction.vendor_name}</TableCell>
                 <TableCell>{transaction.account_name}</TableCell>
-                <TableCell>{typeof transaction.amount === 'number' ? `$${transaction.amount.toFixed(2)}` : transaction.amount}</TableCell>
+                <TableCell>{typeof transaction.amount === 'number' ? `$${transaction.amount.toFixed(2).replace(/\.?0+$/, '')}` : transaction.amount}</TableCell>
                 <TableCell>{transaction.paid_date ? new Date(transaction.paid_date).toLocaleDateString() : '-'}</TableCell>
                 <TableCell align="right">
                   <Tooltip title="Edit Transaction">
