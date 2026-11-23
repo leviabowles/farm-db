@@ -1,8 +1,10 @@
 FROM ubuntu:22.04
 
 # Install system dependencies required for Python and MySQL client libraries
+# Set DEBIAN_FRONTEND=noninteractive to prevent interactive prompts during tzdata installation
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-	apt-get install -y python3 python3-pip vim mysql-client libmysqlclient-dev pkg-config && \
+	apt-get install -y python3 python3-pip vim mysql-client libmysqlclient-dev pkg-config tzdata && \
 	rm -rf /var/lib/apt/lists/*
 
 # Set working directory inside the container where the Django project will live

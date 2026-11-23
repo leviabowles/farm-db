@@ -20,6 +20,18 @@ import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
+// Helper functions for amount formatting/parsing
+export const formatAmount = (amount) => {
+  if (typeof amount !== 'number' || isNaN(amount)) return amount;
+  return `$${amount.toFixed(2)}`;
+};
+
+export const parseAmount = (amount) => {
+  if (amount === null || amount === undefined || amount === '') return 0;
+  const parsed = parseFloat(amount);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
 const TransactionList = () => {
   console.log('TransactionList render start');
   const [transactions, setTransactions] = useState([]);

@@ -17,6 +17,8 @@ from .views import (
     CropListCreateAPIView,
     FarmNoteListCreateAPIView,
     FarmNoteDetailAPIView,
+    TransactionLineItemListCreateAPIView,
+    TransactionLineItemDetailAPIView,
 )
 
 from django.urls import path, include
@@ -42,6 +44,8 @@ urlpatterns = [
     path('api/crops/', CropListCreateAPIView.as_view(), name='api_crops'),
     path('api/farmnotes/', FarmNoteListCreateAPIView.as_view(), name='api_farmnotes'),
     path('api/farmnotes/<int:pk>/', FarmNoteDetailAPIView.as_view(), name='api_farmnote_detail'),
+    path('api/transactions/line-items/', TransactionLineItemListCreateAPIView.as_view(), name='api_transaction_line_items'),
+    path('api/transactions/line-items/<int:pk>/', TransactionLineItemDetailAPIView.as_view(), name='api_transaction_line_item_detail'),
     path('fieldcrop_update', fieldcrop_update, name='fieldcrop_update'),
     path('update_transactions', tx_update, name='update_transactions'),
 
