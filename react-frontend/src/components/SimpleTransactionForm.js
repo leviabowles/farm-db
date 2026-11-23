@@ -61,7 +61,30 @@ const SimpleTransactionForm = () => {
   const fetchTransaction = async () => {
     try {
       const response = await api.get(`/api/transactions/${id}/`);
-      setFormData(response.data);
+      const data = response.data;
+      
+      // Map display_amount to amount for the form
+      // The serializer returns display_amount (read-only) but form expects amount
+      const amount = data.display_amount !== undefined ? data.display_amount : data.amount;
+      
+      // Map trans_type to transaction_type for the form
+      const transaction_type = data.transaction_type || data.trans_type || 'debit';
+      
+      setFormData({
+        ...data,
+        amount: amount !== null ? String(amount) : '',
+        transaction_type: transaction_type,
+        trans_type: transaction_type,
+        // Remove fields the form doesn't need
+        display_amount: undefined,
+        line_items: undefined,
+        crop_ids: undefined,
+        annual_crop_ids: undefined,
+        transaction_object_name: undefined,
+        field_name: undefined,
+        vendor_name: undefined,
+        account_name: undefined,
+      });
     } catch (err) {
       setError('Failed to load transaction data');
     }

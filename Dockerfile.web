@@ -1,13 +1,10 @@
 FROM python:3.10-slim
 
-# Install system dependencies
+# Install system dependencies including tzdata for timezone support
 # Set DEBIAN_FRONTEND=noninteractive to prevent interactive prompts during tzdata installation
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
-    default-libmysqlclient-dev \
-    build-essential \
-    tzdata \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y tzdata && echo "TZDATA INSTALLED SUCCESSFULLY"
+RUN ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
 # Set working directory
 WORKDIR /app

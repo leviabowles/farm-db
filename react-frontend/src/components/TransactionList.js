@@ -20,6 +20,18 @@ import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
+// Helper functions for amount formatting/parsing
+export const formatAmount = (amount) => {
+  if (typeof amount !== 'number' || isNaN(amount)) return amount;
+  return `$${amount.toFixed(2)}`;
+};
+
+export const parseAmount = (amount) => {
+  if (amount === null || amount === undefined || amount === '') return 0;
+  const parsed = parseFloat(amount);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
 const TransactionList = () => {
   console.log('TransactionList render start');
   const [transactions, setTransactions] = useState([]);
@@ -45,8 +57,14 @@ const TransactionList = () => {
         // Calculate total amount from line_items if not in serializer response
         let totalAmount = tx.amount;
         if (!totalAmount && tx.line_items && tx.line_items.length > 0) {
-          totalAmount = tx.line_items.reduce((sum, item) => sum + (item.amount || 0), 0);
+          totalAmount = tx.line_items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
         }
+        
+        // Ensure amount is a proper number (remove leading zeros from string)
+        if (typeof totalAmount === 'string') {
+          totalAmount = parseFloat(totalAmount);
+        }
+        totalAmount = totalAmount || 0;
         
         return {
           ...tx,

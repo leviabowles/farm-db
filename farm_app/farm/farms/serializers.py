@@ -23,12 +23,37 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class TransactionLineItemSerializer(serializers.ModelSerializer):
-    """Serializer for TransactionLineItem model - used for nested representation."""
+    """Serializer for TransactionLineItem model."""
     account = AccountSerializer(read_only=True)
+    account_id = serializers.PrimaryKeyRelatedField(
+        queryset=Account.objects.all(),
+        source='account',
+        write_only=True,
+        required=False
+    )
+    field_year_crop = serializers.PrimaryKeyRelatedField(
+        queryset=AnnualCrop.objects.all(),
+        required=False,
+        allow_null=True
+    )
+    transaction_id = serializers.PrimaryKeyRelatedField(
+        queryset=Transaction.objects.all(),
+        source='transaction',
+        write_only=True,
+        required=True
+    )
     
     class Meta:
         model = TransactionLineItem
-        fields = ['id', 'account', 'field_year_crop', 'amount']
+        fields = ['id', 'account', 'account_id', 'field_year_crop', 'transaction', 'transaction_id', 'amount']
+        read_only_fields = ['account', 'transaction']
+
+    def validate_amount(self, value):
+        """Ensure amount is positive."""
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be positive.")
+        return value
+
 
 class TxSerializer(serializers.ModelSerializer):
     # Make the document upload optional; front‑end can omit it.
@@ -106,8 +131,8 @@ class TxSerializer(serializers.ModelSerializer):
         line_items = getattr(obj, 'line_items', None)
         if line_items:
             total = sum(item.amount for item in line_items.all())
-            return float(total) if total else None
-        return None
+            return float(total) if total else 0.0
+        return 0.0
 
     def create(self, validated_data):
         """Override create to automate ledger entry creation and handle crops and attachments."""

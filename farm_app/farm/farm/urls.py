@@ -22,6 +22,11 @@ from django.conf.urls.static import static
 from farms.views import FarmListCreateAPIView
 from farms.views import FieldListCreateAPIView
 from farms.views import CropListCreateAPIView
+from farms.views import ListTxAPIView
+from farms.views import TransactionDetailAPIView
+# Transaction line item API views
+from farms.views import TransactionLineItemListCreateAPIView
+from farms.views import TransactionLineItemDetailAPIView
 # Token authentication view provided by DRF
 from rest_framework.authtoken.views import obtain_auth_token
 
@@ -42,6 +47,12 @@ urlpatterns += [
     # Expose the Crop list/create view directly at ``/api/crops/`` for
     # external callers that do not need the ``farms/`` namespace.
     path('api/crops/', CropListCreateAPIView.as_view(), name='api_crops_root'),
+    # Transaction API endpoints (without the farms/ prefix)
+    path('api/transactions/', ListTxAPIView.as_view(), name='api_transactions_root'),
+    path('api/transactions/<int:pk>/', TransactionDetailAPIView.as_view(), name='api_transaction_detail_root'),
+    # Transaction line item API endpoints (without the farms/ prefix)
+    path('api/transactions/line-items/', TransactionLineItemListCreateAPIView.as_view(), name='api_transaction_line_items_root'),
+    path('api/transactions/line-items/<int:pk>/', TransactionLineItemDetailAPIView.as_view(), name='api_transaction_line_item_detail_root'),
     # Endpoint for obtaining a token (POST username/password)
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]

@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework import status
-from farms.models import Field, Year, Account, AnnualCrop, TransactionLineItem, Transaction
+from farms.models import Field, Year, Account, AnnualCrop, TransactionLineItem, Transaction, Crop, Vendor
 from datetime import date
 
 User = get_user_model()
@@ -19,26 +19,35 @@ class TransactionLineItemCRUDTests(TestCase):
         # Create test data
         self.field = Field.objects.create(
             field_name='Test Field',
-            farm_id=1,
-            year_key=2024
+            field_state='MN',
+            field_county='Test County'
         )
 
         self.year = Year.objects.create(
             year_key=2024,
-            start_date=date(2024, 1, 1),
-            end_date=date(2024, 12, 31)
+            field_key='TF001'
         )
 
         self.account = Account.objects.create(
-            account_name='Cash',
-            account_type='Asset',
-            balance=1000.00
+            name='Cash',
+            account_type='Asset'
+        )
+
+        # Create a Crop instance for the AnnualCrop
+        self.crop = Crop.objects.create(
+            crop_key='WHT',
+            crop_name='Wheat'
         )
 
         self.ac = AnnualCrop.objects.create(
             field=self.field,
-            year_key=self.year,
-            crop='Wheat'
+            year_key=self.year.year_key,
+            crop=self.crop
+        )
+
+        # Create a Vendor instance for the Transaction
+        self.vendor = Vendor.objects.create(
+            vendor_name='TestVendor'
         )
 
         # Create a sample transaction (debit)
@@ -47,7 +56,7 @@ class TransactionLineItemCRUDTests(TestCase):
             year_key=2024,
             trans_type='debit',
             account=self.account,
-            vendor_id=1,
+            vendor=self.vendor,
             paid_date=date(2024, 1, 15),
             memo='Test transaction'
         )
@@ -55,8 +64,8 @@ class TransactionLineItemCRUDTests(TestCase):
     def test_create_transaction_line_item(self):
         """Test creating a new TransactionLineItem"""
         data = {
-            'transaction': self.transaction.id,
-            'account': self.account.id,
+            'transaction_id': self.transaction.id,
+            'account_id': self.account.id,
             'field_year_crop': self.ac.id,
             'amount': 500.00
         }
@@ -75,7 +84,7 @@ class TransactionLineItemCRUDTests(TestCase):
 
         # Check the response data
         data = response.data
-        self.assertEqual(data['account'], self.account.id)
+        self.assertEqual(data['account']['id'], self.account.id)
         self.assertEqual(float(data['amount']), 500.00)
         self.assertEqual(data['transaction'], self.transaction.id)
 
@@ -95,7 +104,7 @@ class TransactionLineItemCRUDTests(TestCase):
 
         data = response.data
         self.assertTrue(isinstance(data, list))
-        self.assertEqual(len(data), 1)
+        self.assertEqual(len(data), 1)  # Test creates 1 line item
 
     def test_retrieve_transaction_line_item(self):
         """Test retrieving a specific TransactionLineItem"""
@@ -127,7 +136,7 @@ class TransactionLineItemCRUDTests(TestCase):
             'amount': 850.00
         }
 
-        response = self.api_client.put(
+        response = self.api_client.patch(
             f'/api/transactions/line-items/{line_item.id}/',
             updated_data,
             format='json'
@@ -172,7 +181,7 @@ class TransactionLineItemCRUDTests(TestCase):
         """Test creating a line item with invalid account ID"""
         data = {
             'transaction': self.transaction.id,
-            'account': 99999,  # Non-existent account
+            'account_id': 99999,  # Non-existent account
             'amount': 100.00
         }
 
@@ -183,7 +192,7 @@ class TransactionLineItemCRUDTests(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('account', response.data)
+        self.assertIn('account_id', response.data)
 
     def test_update_line_item_with_invalid_amount(self):
         """Test updating a line item with invalid amount (non-positive)"""
@@ -198,7 +207,7 @@ class TransactionLineItemCRUDTests(TestCase):
             'amount': -50.00  # Negative amount
         }
 
-        response = self.api_client.put(
+        response = self.api_client.patch(
             f'/api/transactions/line-items/{line_item.id}/',
             invalid_data,
             format='json'
@@ -210,7 +219,7 @@ class TransactionLineItemCRUDTests(TestCase):
     def test_create_line_item_without_transaction(self):
         """Test creating a line item without linking to a transaction"""
         data = {
-            'account': self.account.id,
+            'account_id': self.account.id,
             'field_year_crop': self.ac.id,
             'amount': 150.00
             # Missing 'transaction'
@@ -222,9 +231,9 @@ class TransactionLineItemCRUDTests(TestCase):
             format='json'
         )
 
-        # This should either fail validation or create line item as independent
-        # The API allows it (nullable field in serializer)
-        self.assertIn(response.status_code, [status.HTTP_201_CREATED, status.HTTP_400_BAD_REQUEST])
+        # This should fail validation because transaction_id is required
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('transaction_id', response.data)
 
     def test_update_line_item_nonexistent(self):
         """Test updating a non-existent TransactionLineItem"""
@@ -232,7 +241,7 @@ class TransactionLineItemCRUDTests(TestCase):
             'amount': 500.00
         }
 
-        response = self.api_client.put(
+        response = self.api_client.patch(
             '/api/transactions/line-items/99999/',
             data,
             format='json'
@@ -265,7 +274,7 @@ class TransactionLineItemCRUDTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.data
-        self.assertEqual(len(data), 2)
+        self.assertEqual(len(data), 2)  # Test creates 2 line items
 
     def test_cascade_delete(self):
         """Test that TransactionLineItems are deleted when Transaction is deleted"""
@@ -296,3 +305,113 @@ class TransactionLineItemCRUDTests(TestCase):
 
         self.assertEqual(final_transaction_count, initial_transaction_count - 1)
         self.assertEqual(final_line_item_count, initial_line_item_count - 2)
+
+    def test_transaction_serializer_display_amount(self):
+        """Test that the serializer correctly calculates display_amount from line items"""
+        # Create a field (without farm_id and year_key, those fields don't exist on Field model)
+        field = Field.objects.create(
+            field_name='Test Field',
+            field_state='MN',
+            field_county='Test County'
+        )
+
+        # Create a year
+        year = Year.objects.create(
+            year_key=2024,
+            field_key='TF001'
+        )
+
+        # Create a Crop instance
+        crop = Crop.objects.create(
+            crop_key='WHT',
+            crop_name='Wheat'
+        )
+
+        # Create an AnnualCrop linking field and year
+        ac = AnnualCrop.objects.create(
+            field=field,
+            year_key=year.year_key,
+            crop=crop
+        )
+        
+        # Create a Vendor instance for the Transaction
+        vendor = Vendor.objects.create(
+            vendor_name='TestVendor'
+        )
+        
+        # Create a transaction with line items
+        transaction = Transaction.objects.create(
+            field=field,
+            year_key=2024,
+            trans_type='debit',
+            account=self.account,
+            vendor=vendor,
+            paid_date=date(2024, 1, 15),
+            memo='Test for display_amount'
+        )
+        
+        # Create line items with various amounts
+        TransactionLineItem.objects.create(
+            transaction=transaction,
+            account=self.account,
+            field_year_crop=ac,
+            amount=100.00
+        )
+        TransactionLineItem.objects.create(
+            transaction=transaction,
+            account=self.account,
+            field_year_crop=ac,
+            amount=50.50
+        )
+        
+        # Get transaction via API
+        response = self.api_client.get(f'/api/transactions/{transaction.id}/')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(float(response.data['display_amount']), 150.50)
+        
+    def test_transaction_serializer_amount_field(self):
+        """Test that the serializer's amount field is write-only for ledger creation"""
+        field = Field.objects.create(
+            field_name='Test Field',
+            field_state='MN',
+            field_county='Test County'
+        )
+        year = Year.objects.create(
+            year_key=2024,
+            field_key='TF001'
+        )
+        
+        # Create a Crop instance
+        crop = Crop.objects.create(
+            crop_key='WHT',
+            crop_name='Wheat'
+        )
+        
+        ac = AnnualCrop.objects.create(
+            field=field,
+            year_key=year.year_key,
+            crop=crop
+        )
+        
+        # Create a Vendor instance for the Transaction
+        vendor = Vendor.objects.create(
+            vendor_name='TestVendor'
+        )
+        
+        transaction = Transaction.objects.create(
+            field=field,
+            year_key=2024,
+            trans_type='debit',
+            account=self.account,
+            vendor=vendor,
+            paid_date=date(2024, 1, 15),
+            memo='Test for amount field'
+        )
+        
+        response = self.api_client.get(f'/api/transactions/{transaction.id}/')
+        
+        # The amount field should be write_only, so it may or may not be in GET response
+        # but display_amount should always be present
+        self.assertIn('display_amount', response.data)
+        self.assertEqual(float(response.data['display_amount']), 0.00)

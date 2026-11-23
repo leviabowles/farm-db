@@ -9,14 +9,14 @@ from django.utils import timezone
 import logging
 from decimal import Decimal
 # Create your views here.
-from .models import Transaction, Field, AnnualCrop, Farm, Account, Vendor, TransactionObject, Crop, FarmNote
+from .models import Transaction, Field, AnnualCrop, Farm, Account, Vendor, TransactionObject, Crop, FarmNote, TransactionLineItem
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .serializers import TxSerializer
-from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer, AccountSerializer, VendorSerializer, TransactionObjectSerializer, CropSerializer, FarmNoteSerializer
+from .serializers import FieldSerializer, AnnualCropSerializer, FarmSerializer, AccountSerializer, VendorSerializer, TransactionObjectSerializer, CropSerializer, FarmNoteSerializer, TransactionLineItemSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -206,3 +206,24 @@ class FarmNoteDetailAPIView(RetrieveUpdateDestroyAPIView):
     """Retrieve, update or delete a FarmNote by its primary key."""
     queryset = FarmNote.objects.all()
     serializer_class = FarmNoteSerializer
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TransactionLineItemListCreateAPIView(ListCreateAPIView):
+    """List TransactionLineItems (GET) or create a new line item (POST)."""
+    queryset = TransactionLineItem.objects.all().select_related('transaction', 'account', 'field_year_crop')
+    serializer_class = TransactionLineItemSerializer
+    pagination_class = None  # Disable pagination for this view
+    
+    def get_queryset(self):
+        """Filter by transaction ID if provided."""
+        queryset = super().get_queryset()
+        transaction_id = self.request.query_params.get('transaction')
+        if transaction_id:
+            queryset = queryset.filter(transaction_id=transaction_id)
+        return queryset
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TransactionLineItemDetailAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete a TransactionLineItem by its primary key."""
+    queryset = TransactionLineItem.objects.all().select_related('transaction', 'account', 'field_year_crop')
+    serializer_class = TransactionLineItemSerializer
