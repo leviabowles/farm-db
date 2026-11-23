@@ -45,8 +45,14 @@ const TransactionList = () => {
         // Calculate total amount from line_items if not in serializer response
         let totalAmount = tx.amount;
         if (!totalAmount && tx.line_items && tx.line_items.length > 0) {
-          totalAmount = tx.line_items.reduce((sum, item) => sum + (item.amount || 0), 0);
+          totalAmount = tx.line_items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
         }
+        
+        // Ensure amount is a proper number (remove leading zeros from string)
+        if (typeof totalAmount === 'string') {
+          totalAmount = parseFloat(totalAmount);
+        }
+        totalAmount = totalAmount || 0;
         
         return {
           ...tx,
@@ -129,7 +135,7 @@ const TransactionList = () => {
               <TableRow key={transaction.id} hover>
                 <TableCell>{transaction.vendor_name}</TableCell>
                 <TableCell>{transaction.account_name}</TableCell>
-                <TableCell>{typeof transaction.amount === 'number' ? `$${transaction.amount.toFixed(2).replace(/\.?0+$/, '')}` : transaction.amount}</TableCell>
+                <TableCell>{typeof transaction.amount === 'number' ? `$${transaction.amount.toFixed(2)}` : transaction.amount}</TableCell>
                 <TableCell>{transaction.paid_date ? new Date(transaction.paid_date).toLocaleDateString() : '-'}</TableCell>
                 <TableCell align="right">
                   <Tooltip title="Edit Transaction">
