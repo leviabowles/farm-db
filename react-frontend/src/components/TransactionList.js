@@ -13,6 +13,8 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 import AddIcon from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -30,6 +32,44 @@ export const parseAmount = (amount) => {
   if (amount === null || amount === undefined || amount === '') return 0;
   const parsed = parseFloat(amount);
   return isNaN(parsed) ? 0 : parsed;
+};
+
+// Helper to construct the media URL
+const getMediaUrl = (path) => {
+  if (!path) return null;
+  // If path already starts with http, use as-is
+  if (path.startsWith('http')) return path;
+  // If path starts with /, prepend MEDIA_URL
+  if (path.startsWith('/')) {
+    // Remove leading slash to avoid double slashes
+    const mediaUrl = process.env.REACT_APP_MEDIA_URL || '/media/';
+    return mediaUrl.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+  }
+  // Otherwise, prepend MEDIA_URL
+  const mediaUrl = process.env.REACT_APP_MEDIA_URL || '/media/';
+  return mediaUrl.replace(/\/+$/, '') + '/' + path;
+};
+
+// Helper to get all attachment files for a transaction
+const getAllAttachments = (tx) => {
+  const attachments = [];
+  
+  // Add doc_file if present
+  if (tx.doc_file) {
+    attachments.push({
+      id: 'main',
+      file: tx.doc_file,
+      name: tx.doc_file.split('/').pop() || 'Document',
+      fullUrl: getMediaUrl(tx.doc_file)
+    });
+  }
+  
+  // Add transaction attachments
+  if (tx.attachment_files && tx.attachment_files.length > 0) {
+    attachments.push(...tx.attachment_files);
+  }
+  
+  return attachments;
 };
 
 const TransactionList = () => {
@@ -66,12 +106,16 @@ const TransactionList = () => {
         }
         totalAmount = totalAmount || 0;
         
+        // Build all attachment files with URLs
+        const allAttachments = getAllAttachments(tx);
+        
         return {
           ...tx,
           field_name: tx.field_name || 'Unknown Field',
           account_name: tx.account_name || '-',
           vendor_name: tx.vendor_name || '-',
-          amount: totalAmount
+          amount: totalAmount,
+          allAttachments: allAttachments
         };
       });
 
@@ -139,6 +183,7 @@ const TransactionList = () => {
               <TableCell>Account</TableCell>
               <TableCell>Amount</TableCell>
               <TableCell>Date</TableCell>
+              <TableCell>Attachments</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -149,6 +194,40 @@ const TransactionList = () => {
                 <TableCell>{transaction.account_name}</TableCell>
                 <TableCell>{typeof transaction.amount === 'number' ? `$${transaction.amount.toFixed(2)}` : transaction.amount}</TableCell>
                 <TableCell>{transaction.paid_date ? new Date(transaction.paid_date).toLocaleDateString() : '-'}</TableCell>
+                <TableCell>
+                  {transaction.allAttachments && transaction.allAttachments.length > 0 ? (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {transaction.allAttachments.map((att) => (
+                        <Tooltip key={att.id} title={`Open ${att.name}`}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<OpenInNewIcon />}
+                            onClick={() => window.open(att.fullUrl, '_blank')}
+                            sx={{ fontSize: '0.75rem', padding: '2px 6px' }}
+                          >
+                            {att.name}
+                          </Button>
+                        </Tooltip>
+                      ))}
+                      {transaction.attachment_count && transaction.allAttachments.length < transaction.attachment_count && (
+                        <Tooltip title="Additional attachments">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<AttachFileIcon />}
+                            disabled
+                            sx={{ fontSize: '0.75rem', padding: '2px 6px' }}
+                          >
+                            +{transaction.attachment_count - transaction.allAttachments.length}
+                          </Button>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  ) : (
+                    <Box sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>-</Box>
+                  )}
+                </TableCell>
                 <TableCell align="right">
                   <Tooltip title="Edit Transaction">
                     <IconButton onClick={() => handleEdit(transaction.id)} color="primary">

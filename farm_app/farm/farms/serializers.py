@@ -57,7 +57,8 @@ class TransactionLineItemSerializer(serializers.ModelSerializer):
 
 class TxSerializer(serializers.ModelSerializer):
     # Make the document upload optional; front‑end can omit it.
-    doc_file = serializers.FileField(required=False, allow_null=True, write_only=True)
+    # Changed to allow read operations to show existing doc_file
+    doc_file = serializers.FileField(required=False, allow_null=True, write_only=False)
     transaction_object_name = serializers.CharField(source='transaction_object.object_name', read_only=True)
     field_name = serializers.CharField(source='field.field_name', read_only=True)
     vendor_name = serializers.CharField(source='vendor.vendor_name', read_only=True)
@@ -107,12 +108,16 @@ class TxSerializer(serializers.ModelSerializer):
         source='annual_crops'
     )
     
-    # Handle multiple file attachments
+    # Handle multiple file attachments (write-only for uploads)
     attachments = serializers.ListField(
         child=serializers.FileField(),
         required=False,
         write_only=True
     )
+    
+    # Expose attachment info for read operations
+    attachment_count = serializers.SerializerMethodField()
+    attachment_files = serializers.SerializerMethodField()
 
     class Meta:
         model = Transaction
@@ -122,9 +127,11 @@ class TxSerializer(serializers.ModelSerializer):
             'memo', 'create_date', 'update_date',
             'annual_crops', 'doc_file', 'transaction_object_name', 'field_name',
             'vendor_name', 'account_name',
-            'line_items', 'amount', 'display_amount', 'crop_ids', 'annual_crop_ids', 'attachments'
+            'line_items', 'amount', 'display_amount', 'crop_ids', 'annual_crop_ids', 
+            'attachments', 'attachment_count', 'attachment_files'
         ]
-        read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops', 'attachments', 'display_amount']
+        read_only_fields = ['create_date', 'update_date', 'line_items', 'annual_crops', 
+                          'attachments', 'display_amount', 'attachment_count', 'attachment_files']
 
     def get_display_amount(self, obj):
         """Calculate total amount from line items for display."""
@@ -133,6 +140,22 @@ class TxSerializer(serializers.ModelSerializer):
             total = sum(item.amount for item in line_items.all())
             return float(total) if total else 0.0
         return 0.0
+
+    def get_attachment_count(self, obj):
+        """Get the number of attachments for this transaction."""
+        return obj.attachments.count()
+
+    def get_attachment_files(self, obj):
+        """Get file info for all attachments."""
+        attachments = obj.attachments.all()
+        return [
+            {
+                'id': att.id,
+                'file': str(att.doc_file),  # Get the path string
+                'name': str(att.doc_file.name.split('/')[-1]) if att.doc_file else 'Unknown'
+            }
+            for att in attachments
+        ]
 
     def create(self, validated_data):
         """Override create to automate ledger entry creation and handle crops and attachments."""
