@@ -293,6 +293,13 @@ class Transaction(models.Model):
     def __str__(self):
         return f"Transaction {self.id}: field={self.field}, year={self.year_key}"
 
+    @property
+    def total_amount(self):
+        """Calculate total from line items."""
+        from django.db.models import Sum
+        total = self.line_items.aggregate(Sum('amount'))['amount__sum']
+        return total or 0
+
 
     class Meta:
         managed = False
