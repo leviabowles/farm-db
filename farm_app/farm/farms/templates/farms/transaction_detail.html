@@ -46,7 +46,7 @@
                     </div>
                     <div class="col-md-3">
                         <small class="text-muted">Total Amount</small>
-                        <h5 class="text-primary">${{ transaction.amount|default:0|floatformat:2 }}</h5>
+                        <h5 class="text-primary">${{ transaction.total_amount|floatformat:2 }}</h5>
                     </div>
                 </div>
             </div>
@@ -60,7 +60,7 @@
                         <h6 class="mb-0">Field</h6>
                     </div>
                     <div class="card-body">
-                        <p>{{ transaction.field_name|default:'-' }}</p>
+                        <p>{{ transaction.field.field_name|default:'-' }}</p>
                     </div>
                 </div>
             </div>
@@ -70,7 +70,7 @@
                         <h6 class="mb-0">Vendor</h6>
                     </div>
                     <div class="card-body">
-                        <p>{{ transaction.vendor_name|default:'-' }}</p>
+                        <p>{{ transaction.vendor.vendor_name|default:'-' }}</p>
                     </div>
                 </div>
             </div>
@@ -80,7 +80,7 @@
                         <h6 class="mb-0">Account</h6>
                     </div>
                     <div class="card-body">
-                        <p>{{ transaction.account_name|default:'-' }}</p>
+                        <p>{{ transaction.account.name|default:'-' }}</p>
                     </div>
                 </div>
             </div>
@@ -104,7 +104,7 @@
                         <tbody>
                             {% for item in transaction.line_items.all %}
                             <tr>
-                                <td>{{ item.account_name|default:'Account #'|add:item.account }}</td>
+                                <td>{{ item.account.name|default:"Account #" }}</td>
                                 <td>${{ item.amount|floatformat:2 }}</td>
                             </tr>
                             {% empty %}
@@ -117,7 +117,7 @@
                 </div>
             </div>
             <div class="card-footer bg-light text-end">
-                <strong>Total: ${{ transaction.amount|default:0|floatformat:2 }}</strong>
+                <strong>Total: ${{ transaction.total_amount|floatformat:2 }}</strong>
             </div>
         </div>
         {% endif %}
@@ -141,9 +141,9 @@
                         <tbody>
                             {% for crop in transaction.annual_crops.all %}
                             <tr>
-                                <td>{{ crop.field_name|default:'Field #'|add:crop.field }}</td>
-                                <td>{{ crop.crop_name|default:'Crop #'|add:crop.crop }}</td>
-                                <td>{{ crop.year }}</td>
+                                <td>{{ crop.field.field_name|default:'Field #'|add:crop.field_id }}</td>
+                                <td>{{ crop.crop.crop_name|default:'Crop #'|add:crop.crop_id }}</td>
+                                <td>{{ crop.year_key|default:'-' }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -162,8 +162,8 @@
             <div class="card-body">
                 <div class="d-flex flex-wrap gap-2">
                     {% for att in transaction.attachments.all %}
-                    <a href="{{ att.full_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                        <span>&#128193;</span> {{ att.name }}
+                    <a href="{{ att.doc_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <span>&#128193;</span> {{ att.doc_file.name|default:'Attachment' }}
                     </a>
                     {% endfor %}
                 </div>
@@ -191,10 +191,10 @@
                         <tbody>
                             {% for entry in transaction.ledger_entries.all %}
                             <tr>
-                                <td>{{ entry.trans_type|capfirst }}</td>
-                                <td>{{ entry.account_name|default:'Account #'|add:entry.account }}</td>
-                                <td>${{ entry.paid_amount|floatformat:2 }}</td>
-                                <td>{{ entry.memo|default:'-' }}</td>
+                                <td>{% if entry.debit > 0 %}Debit{% else %}Credit{% endif %}</td>
+                                <td>{{ entry.account.name|default:'Account #'|add:entry.account_id }}</td>
+                                <td>${% if entry.debit > 0 %}{{ entry.debit|floatformat:2 }}{% else %}{{ entry.credit|floatformat:2 }}{% endif %}</td>
+                                <td>-</td>
                             </tr>
                             {% endfor %}
                         </tbody>
