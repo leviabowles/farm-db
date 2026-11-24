@@ -14,7 +14,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import EditIcon from '@mui/icons-material/Edit';
@@ -142,19 +142,19 @@ function TransactionDetail() {
         <CardHeader title="Transaction Summary" />
         <CardContent>
           <Grid container spacing={2}>
-            <Grid size={6}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body2" color="text.secondary">Type</Typography>
               <Typography>{transaction.trans_type === 'debit' ? 'Debit' : 'Credit'}</Typography>
             </Grid>
-            <Grid size={6}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body2" color="text.secondary">Date</Typography>
               <Typography>{transaction.paid_date || transaction.invoice_date || '-'}</Typography>
             </Grid>
-            <Grid size={6}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body2" color="text.secondary">Memo</Typography>
               <Typography>{transaction.memo || '-'}</Typography>
             </Grid>
-            <Grid size={6}>
+            <Grid item xs={12} md={6}>
               <Typography variant="body2" color="text.secondary">Total Amount</Typography>
               <Typography variant="h5" color="primary.main">${totalAmount.toFixed(2)}</Typography>
             </Grid>
@@ -164,7 +164,7 @@ function TransactionDetail() {
 
       {/* Related Entities */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid size={4}>
+        <Grid item xs={12} md={4}>
           <Card>
             <CardHeader title="Field" />
             <CardContent>
@@ -172,7 +172,7 @@ function TransactionDetail() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={4}>
+        <Grid item xs={12} md={4}>
           <Card>
             <CardHeader title="Vendor" />
             <CardContent>
@@ -180,7 +180,7 @@ function TransactionDetail() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={4}>
+        <Grid item xs={12} md={4}>
           <Card>
             <CardHeader title="Account" />
             <CardContent>
@@ -214,7 +214,7 @@ function TransactionDetail() {
                   <TableCell colSpan={2}>No line items</TableCell>
                 </TableRow>
               )}
-            </TableHead>
+            </TableBody>
           </Table>
         </TableContainer>
         <Box sx={{ p: 2, textAlign: 'right', backgroundColor: 'grey.100' }}>

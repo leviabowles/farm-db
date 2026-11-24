@@ -28,7 +28,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/notes" element={<Notes />} />
               <Route path="/transactions" element={<TransactionList />} />
-              <Route path="/transactions/:id" element={<TransactionDetail />} />
+              <Route path="/transactions/:id/" element={<TransactionDetail />} />
               <Route path="/transactions/new" element={<SimpleTransactionForm />} />
               <Route path="/transactions/:id/edit" element={<SimpleTransactionForm />} />
               {/* New route for Fields */}
