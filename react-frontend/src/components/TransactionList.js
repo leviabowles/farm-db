@@ -15,6 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import InfoIcon from '@mui/icons-material/Info';
 
 import AddIcon from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -189,7 +190,12 @@ const TransactionList = () => {
           </TableHead>
           <TableBody>
             {transactions.map((transaction) => (
-              <TableRow key={transaction.id} hover>
+              <TableRow 
+                key={transaction.id} 
+                hover
+                onClick={() => navigate(`/transactions/${transaction.id}`)}
+                sx={{ cursor: 'pointer' }}
+              >
                 <TableCell>{transaction.vendor_name}</TableCell>
                 <TableCell>{transaction.account_name}</TableCell>
                 <TableCell>{typeof transaction.amount === 'number' ? `$${transaction.amount.toFixed(2)}` : transaction.amount}</TableCell>
@@ -203,7 +209,7 @@ const TransactionList = () => {
                             variant="outlined"
                             size="small"
                             startIcon={<OpenInNewIcon />}
-                            onClick={() => window.open(att.fullUrl, '_blank')}
+                            onClick={(e) => { e.stopPropagation(); window.open(att.fullUrl, '_blank'); }}
                             sx={{ fontSize: '0.75rem', padding: '2px 6px' }}
                           >
                             {att.name}
@@ -217,6 +223,7 @@ const TransactionList = () => {
                             size="small"
                             startIcon={<AttachFileIcon />}
                             disabled
+                            onClick={(e) => e.stopPropagation()}
                             sx={{ fontSize: '0.75rem', padding: '2px 6px' }}
                           >
                             +{transaction.attachment_count - transaction.allAttachments.length}
@@ -229,13 +236,18 @@ const TransactionList = () => {
                   )}
                 </TableCell>
                 <TableCell align="right">
+                  <Tooltip title="View Details">
+                    <IconButton onClick={(e) => { e.stopPropagation(); navigate(`/transactions/${transaction.id}`); }} color="primary">
+                      <InfoIcon />
+                    </IconButton>
+                  </Tooltip>
                   <Tooltip title="Edit Transaction">
-                    <IconButton onClick={() => handleEdit(transaction.id)} color="primary">
+                    <IconButton onClick={(e) => { e.stopPropagation(); handleEdit(transaction.id); }} color="primary">
                       <EditIcon />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Delete Transaction">
-                    <IconButton onClick={() => handleDelete(transaction.id)} color="error">
+                    <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(transaction.id); }} color="error">
                       <DeleteIcon />
                     </IconButton>
                   </Tooltip>
