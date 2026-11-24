@@ -1,8 +1,9 @@
-  
+   
 from .views import (
     index,
     transactions,
     reporting,
+    transaction_detail,
     fieldcrop_update,
     tx_update,
     ListTxAPIView,
@@ -31,6 +32,8 @@ urlpatterns = [
     path('reporting/', reporting , name='reporting'),
     # HTML view for transaction list page
     path('transactions', transactions.as_view(), name='transactions'),
+    # HTML view for transaction detail page
+    path('transactions/<int:pk>', transaction_detail.as_view(), name='transaction_detail'),
     # API endpoints – note the trailing slash to match React client URLs
     path('api/transactions/', ListTxAPIView.as_view(), name='api_transactions'),
     path('api/transactions/<int:pk>/', TransactionDetailAPIView.as_view(), name='api_transaction_detail'),

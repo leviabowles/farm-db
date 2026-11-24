@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -71,6 +71,7 @@ class transaction_detail(TemplateView):
             context['transaction'] = transaction
         except Transaction.DoesNotExist:
             context['error'] = 'Transaction not found'
+            context['transaction'] = None
         return context
 
 @method_decorator(csrf_exempt, name='dispatch')

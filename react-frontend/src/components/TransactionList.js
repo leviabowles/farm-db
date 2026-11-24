@@ -193,7 +193,7 @@ const TransactionList = () => {
               <TableRow 
                 key={transaction.id} 
                 hover
-                onClick={() => navigate(`/transactions/${transaction.id}`)}
+                onClick={() => navigate(`/transactions/${transaction.id}/`)}
                 sx={{ cursor: 'pointer' }}
               >
                 <TableCell>{transaction.vendor_name}</TableCell>
