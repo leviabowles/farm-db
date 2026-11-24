@@ -104,7 +104,7 @@
                         <tbody>
                             {% for item in transaction.line_items.all %}
                             <tr>
-                                <td>{{ item.account.name|default:'Account #'|add:item.account_id }}</td>
+                                <td>{{ item.account.name|default:"Account #" }}</td>
                                 <td>${{ item.amount|floatformat:2 }}</td>
                             </tr>
                             {% empty %}

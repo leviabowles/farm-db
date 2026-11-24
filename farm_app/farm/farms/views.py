@@ -63,8 +63,8 @@ class transaction_detail(TemplateView):
             transaction = Transaction.objects.select_related(
                 'field', 'transaction_object', 'account', 'vendor'
             ).prefetch_related(
-                'line_items',
-                'ledger_entries',
+                'line_items__account',
+                'ledger_entries__account',
                 'annual_crops',
                 'attachments'
             ).get(id=transaction_id)
