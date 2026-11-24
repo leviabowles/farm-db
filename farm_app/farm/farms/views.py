@@ -51,6 +51,28 @@ class transactions(ListView):
     # Show 100 rows per page – adjust as needed for performance.
     paginate_by = 100
 
+
+class transaction_detail(TemplateView):
+    """HTML view for the transaction detail page with line items, annual crops, documents, and ledger entries."""
+    template_name = 'farms/transaction_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        transaction_id = self.kwargs.get('pk')
+        try:
+            transaction = Transaction.objects.select_related(
+                'field', 'transaction_object', 'account', 'vendor'
+            ).prefetch_related(
+                'line_items',
+                'ledger_entries',
+                'annual_crops',
+                'attachments'
+            ).get(id=transaction_id)
+            context['transaction'] = transaction
+        except Transaction.DoesNotExist:
+            context['error'] = 'Transaction not found'
+        return context
+
 @method_decorator(csrf_exempt, name='dispatch')
 class ListTxAPIView(ListCreateAPIView):
     """List transactions (GET) or create a new transaction (POST).

@@ -558,3 +558,21 @@ class TransactionObjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransactionObject
         fields = '__all__'
+
+
+# Serializer for LedgerEntry model
+class LedgerEntrySerializer(serializers.ModelSerializer):
+    account_name = serializers.CharField(source='account.name', read_only=True)
+    
+    class Meta:
+        model = LedgerEntry
+        fields = ['id', 'transaction', 'year_key', 'trans_type', 'account', 'account_id', 'account_name', 'memo', 'paid_amount', 'create_date', 'update_date']
+        read_only_fields = ['create_date', 'update_date']
+
+
+# Serializer for the Transaction model with all related data
+class TransactionDetailSerializer(TxSerializer):
+    """Extended transaction serializer with all related data for detail view."""
+    line_items = TransactionLineItemSerializer(many=True, read_only=True)
+    ledger_entries = LedgerEntrySerializer(many=True, read_only=True)
+    annual_crops = AnnualCropSerializer(many=True, read_only=True)

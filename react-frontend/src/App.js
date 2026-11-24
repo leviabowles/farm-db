@@ -5,6 +5,7 @@ import Login from './components/Login';
 import FarmList from './components/FarmList';
 import FarmForm from './components/FarmForm';
 import TransactionList from './components/TransactionList';
+import TransactionDetail from './components/TransactionDetail';
 import SimpleTransactionForm from './components/SimpleTransactionForm';
 import Header from './components/Header';
 import FieldList from './components/FieldList';
@@ -27,6 +28,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/notes" element={<Notes />} />
               <Route path="/transactions" element={<TransactionList />} />
+              <Route path="/transactions/:id" element={<TransactionDetail />} />
               <Route path="/transactions/new" element={<SimpleTransactionForm />} />
               <Route path="/transactions/:id/edit" element={<SimpleTransactionForm />} />
               {/* New route for Fields */}

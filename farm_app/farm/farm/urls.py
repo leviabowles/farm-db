@@ -24,6 +24,7 @@ from farms.views import FieldListCreateAPIView
 from farms.views import CropListCreateAPIView
 from farms.views import ListTxAPIView
 from farms.views import TransactionDetailAPIView
+from farms.views import transaction_detail
 # Transaction line item API views
 from farms.views import TransactionLineItemListCreateAPIView
 from farms.views import TransactionLineItemDetailAPIView
@@ -63,9 +64,10 @@ urlpatterns += [
 # ``farms/``. This also ensures the trailing‑slash version works even if
 # APPEND_SLASH is disabled.
 # ---------------------------------------------------------------------
-from farms.views import transactions as TxListView
+from farms.views import transactions as TxListView, transaction_detail as TxDetailView
 urlpatterns += [
     path('transactions/', TxListView.as_view(), name='transactions_root'),
+    path('transactions/<int:pk>/', TxDetailView.as_view(), name='transaction_detail'),
 ]
 
 # ---------------------------------------------------------------------
