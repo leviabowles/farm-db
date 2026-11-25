@@ -141,8 +141,8 @@
                         <tbody>
                             {% for crop in transaction.annual_crops.all %}
                             <tr>
-                                <td>{{ crop.field.field_name|default:'Field #'|add:crop.field_id }}</td>
-                                <td>{{ crop.crop.crop_name|default:'Crop #'|add:crop.crop_id }}</td>
+                                <td>{{ crop.field.field_name|default:'Field' }}</td>
+                                <td>{{ crop.crop.crop_name|default:'Crop' }}</td>
                                 <td>{{ crop.year_key|default:'-' }}</td>
                             </tr>
                             {% endfor %}

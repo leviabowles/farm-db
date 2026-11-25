@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.db import models
 from django.utils import timezone
+from django.db.models import Prefetch
 import logging
 from decimal import Decimal
 # Create your views here.
@@ -65,7 +66,7 @@ class transaction_detail(TemplateView):
             ).prefetch_related(
                 'line_items__account',
                 'ledger_entries__account',
-                'annual_crops',
+                Prefetch('annual_crops', queryset=AnnualCrop.objects.select_related('field', 'crop')),
                 'attachments'
             ).get(id=transaction_id)
             context['transaction'] = transaction
